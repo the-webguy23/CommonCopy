@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Privacy — CommonCopy</title>
+    <meta name="description" content="How CommonCopy stores phrases, uses the clipboard, and protects user privacy.">
+    <meta name="theme-color" content="#071a34">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%23071a34'/%3E%3Cpath d='M15 18h34v7H15zm0 11h25v7H15zm0 11h30v7H15z' fill='%2365d6ff'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">CC</span><span>CommonCopy</span></a>
+        <button class="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" data-menu-toggle>☰</button>
+        <nav class="nav-links" aria-label="Primary navigation" data-navigation data-open="false"><a href="index.html#features">Features</a><a href="index.html#download">Download</a><a href="sponsor.html">Sponsor</a></nav>
+      </div>
+    </header>
+    <main id="main">
+      <header class="page-hero">
+        <div class="container">
+          <p class="eyebrow">Privacy</p>
+          <h1>Local text should remain local.</h1>
+          <p>CommonCopy is designed to complete its core job without an account, a remote server, or hidden collection of the text you type.</p>
+        </div>
+      </header>
+      <div class="container content-shell">
+        <section class="content-card"><h2>Phrase storage</h2><p>Your categories, phrases, settings, favorites, and recent-use information are stored in a readable JSON file under your Windows user profile. CommonCopy does not upload this file.</p></section>
+        <section class="content-card"><h2>Clipboard use</h2><p>When you choose a phrase, CommonCopy temporarily places its text on the Windows clipboard and sends the normal paste shortcut to the application you were using. When you explicitly choose <strong>Save highlighted text…</strong>, it sends the normal copy shortcut once and reads that selected text into the save form. CommonCopy does not continuously inspect the clipboard or application content. It attempts to restore the clipboard’s previous text afterward, and clipboard contents are never transmitted.</p></section>
+        <section class="content-card"><h2>Global input access</h2><p>Windows input hooks are used only to detect the configured Ctrl + Right Click gesture and global keyboard shortcut. CommonCopy does not record typed text, build a keystroke history, or continuously capture application content.</p></section>
+        <section class="content-card"><h2>Website data</h2><p>This initial website includes no cookies, advertising network scripts, tracking pixels, or analytics. If aggregate website analytics are introduced later, this page will be updated before they are enabled.</p></section>
+        <section class="content-card"><h2>Sensitive information</h2><p>CommonCopy is not an encrypted secrets vault. Do not store passwords, access tokens, private keys, recovery codes, or other authentication credentials in it.</p></section>
+        <section class="content-card"><h2>Questions and changes</h2><p>The public repository will provide an issue tracker and security-reporting instructions when the project launches. Material privacy changes will be documented in the project changelog and on this page.</p></section>
+      </div>
+    </main>
+    <footer class="site-footer"><div class="container footer-inner"><a class="brand" href="index.html"><span class="brand-mark">CC</span><span class="footer-brand-text">CommonCopy</span></a><nav class="footer-links"><a href="index.html">Home</a><a href="index.html#download">Download</a><a href="sponsor.html">Sponsor</a></nav></div><div class="container footer-bottom">© <span data-current-year></span> CommonCopy contributors · MIT licensed</div></footer>
+  </body>
+</html>

@@ -1,0 +1,28 @@
+## .NET build output
+bin/
+obj/
+artifacts/
+TestResults/
+
+## Visual Studio / Rider / VS Code
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Packaging output
+installer/output/
+publish/
+.sites-runtime/
+
+## OS files
+.DS_Store
+Thumbs.db
+
+## Local CommonCopy data
+phrases.json
+phrases.backup.json
+*.corrupt-*.json

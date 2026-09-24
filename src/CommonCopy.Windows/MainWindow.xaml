@@ -1,0 +1,117 @@
+<Window x:Class="CommonCopy.Windows.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="CommonCopy"
+        Width="1040"
+        Height="680"
+        MinWidth="820"
+        MinHeight="520"
+        WindowStartupLocation="CenterScreen">
+  <DockPanel>
+    <Menu DockPanel.Dock="Top">
+      <MenuItem Header="_File">
+        <MenuItem Header="_Import library…" Click="ImportLibrary_Click" />
+        <MenuItem Header="_Export library…" Click="ExportLibrary_Click" />
+        <Separator />
+        <MenuItem Header="Create _backup…" Click="CreateBackup_Click" />
+        <MenuItem Header="_Restore backup…" Click="RestoreBackup_Click" />
+        <Separator />
+        <MenuItem Header="Open data _folder" Click="OpenDataFolder_Click" />
+        <Separator />
+        <MenuItem Header="E_xit" Click="Exit_Click" />
+      </MenuItem>
+      <MenuItem Header="_Tools">
+        <MenuItem Header="Show _CommonCopy" Click="ShowPopup_Click" />
+        <MenuItem Header="_Settings…" Click="Settings_Click" />
+      </MenuItem>
+      <MenuItem Header="_Help">
+        <MenuItem Header="_About CommonCopy" Click="About_Click" />
+      </MenuItem>
+    </Menu>
+
+    <StatusBar DockPanel.Dock="Bottom">
+      <StatusBarItem>
+        <TextBlock x:Name="StatusText" Text="Ready" />
+      </StatusBarItem>
+    </StatusBar>
+
+    <Border DockPanel.Dock="Top" Background="#F4F6F8" BorderBrush="#D7DCE1" BorderThickness="0,0,0,1" Padding="8">
+      <DockPanel>
+        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+          <Button Content="Show CommonCopy" Click="ShowPopup_Click" />
+          <Button Content="Settings" Click="Settings_Click" />
+        </StackPanel>
+        <TextBlock DockPanel.Dock="Left" Text="Search:" VerticalAlignment="Center" Margin="4,0,5,0" />
+        <TextBox x:Name="SearchBox"
+                 MinWidth="260"
+                 VerticalContentAlignment="Center"
+                 TextChanged="SearchBox_TextChanged" />
+      </DockPanel>
+    </Border>
+
+    <Grid Margin="10">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="250" />
+        <ColumnDefinition Width="10" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+
+      <Grid Grid.Column="0">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+          <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <TextBlock Text="Categories" FontSize="17" FontWeight="SemiBold" Margin="4,0,4,8" />
+        <ListBox x:Name="CategoryList"
+                 Grid.Row="1"
+                 DisplayMemberPath="DisplayName"
+                 SelectionChanged="CategoryList_SelectionChanged" />
+        <UniformGrid Grid.Row="2" Columns="3" Margin="0,7,0,0">
+          <Button Content="Add" Click="AddCategory_Click" />
+          <Button Content="Edit" Click="EditCategory_Click" />
+          <Button Content="Delete" Click="DeleteCategory_Click" />
+        </UniformGrid>
+      </Grid>
+
+      <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Center" Background="#E2E5E9" />
+
+      <Grid Grid.Column="2">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+          <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <DockPanel Margin="4,0,4,8">
+          <TextBlock Text="Phrases" FontSize="17" FontWeight="SemiBold" />
+          <TextBlock x:Name="PhraseCountText" DockPanel.Dock="Right" Foreground="#5A6470" />
+        </DockPanel>
+        <DataGrid x:Name="PhraseGrid"
+                  Grid.Row="1"
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  IsReadOnly="True"
+                  SelectionMode="Single"
+                  SelectionUnit="FullRow"
+                  MouseDoubleClick="PhraseGrid_MouseDoubleClick">
+          <DataGrid.Columns>
+            <DataGridCheckBoxColumn Header="★" Binding="{Binding IsFavorite}" Width="42" />
+            <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="2*" />
+            <DataGridTextColumn Header="Text preview" Binding="{Binding Text}" Width="4*" />
+            <DataGridCheckBoxColumn Header="Enabled" Binding="{Binding IsEnabled}" Width="75" />
+            <DataGridTextColumn Header="Uses" Binding="{Binding UseCount}" Width="55" />
+          </DataGrid.Columns>
+        </DataGrid>
+        <WrapPanel Grid.Row="2" Margin="0,7,0,0">
+          <Button Content="Add phrase" Click="AddPhrase_Click" />
+          <Button Content="Edit" Click="EditPhrase_Click" />
+          <Button Content="Duplicate" Click="DuplicatePhrase_Click" />
+          <Button Content="Favorite / Unfavorite" Click="ToggleFavorite_Click" />
+          <Button Content="Move up" Click="MovePhraseUp_Click" />
+          <Button Content="Move down" Click="MovePhraseDown_Click" />
+          <Button Content="Delete" Click="DeletePhrase_Click" />
+        </WrapPanel>
+      </Grid>
+    </Grid>
+  </DockPanel>
+</Window>

@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AssemblyName>CommonCopy</AssemblyName>
+    <RootNamespace>CommonCopy.Windows</RootNamespace>
+    <Version>0.2.0</Version>
+    <AssemblyTitle>CommonCopy</AssemblyTitle>
+    <Description>Save it once. Paste it forever. Available on Windows; macOS planned.</Description>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- This is a WPF application that uses WinForms only for NotifyIcon. -->
+    <NoWarn>$(NoWarn);WFO0003</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../CommonCopy.Core/CommonCopy.Core.csproj" />
+  </ItemGroup>
+</Project>
