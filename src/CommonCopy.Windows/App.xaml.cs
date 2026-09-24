@@ -35,6 +35,7 @@ public partial class App : Application
         {
             repository = new JsonPhraseRepository();
             document = await repository.LoadAsync();
+            AppearanceTheme.Apply(document.Settings.Appearance);
             if (e.Args.Contains("--enable-startup", StringComparer.OrdinalIgnoreCase))
             {
                 document.Settings.StartWithWindows = true;
@@ -162,6 +163,7 @@ public partial class App : Application
         }
 
         globalInput?.UpdateSettings(document.Settings);
+        AppearanceTheme.Apply(document.Settings.Appearance);
         StartupRegistrationService.SetEnabled(document.Settings.StartWithWindows);
     }
 

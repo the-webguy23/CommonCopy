@@ -10,6 +10,8 @@ CommonCopy is a privacy-friendly utility for saving reusable text and inserting 
 
 CommonCopy is an early prototype. The Windows edition includes a functional phrase manager, local JSON persistence, a tray application, a system-wide `Ctrl + Right Click` trigger, highlighted-text capture, a configurable global keyboard shortcut, a popup phrase browser, import/export, backup/restore, Favourites, Commonly Used, and Windows startup registration. Commonly Used ranks saved phrases by use count, then most-recent use. New libraries have Prompts, Code, and Day-to-Day categories; Favourites and Commonly Used are dynamic lists.
 
+The interface offers two appearance options in Settings: Light (Warm Editorial) and Dark (Burnished Copper). The selection is stored with the local phrase library and applies to the manager, popup, and editors. Existing libraries default to Light until the user chooses Dark.
+
 On first launch, CommonCopy copies the existing `%LOCALAPPDATA%\PhraseMenu\phrases.json` and backup to `%LOCALAPPDATA%\CommonCopy` if no CommonCopy library exists. It keeps the old files for rollback and replaces the old Windows startup registration. Existing custom categories, phrases, use counts, and settings stay intact.
 
 The Windows build and installer compiled successfully on September 24, 2026. On a Windows desktop, the upgrade preserved existing phrases, insertion into Notepad and highlighted-text capture worked, Commonly Used appeared, and after a restart CommonCopy started automatically without PhraseMenu. The source archive does not contain built binaries. Broader application compatibility and a separate macOS build remain future work.

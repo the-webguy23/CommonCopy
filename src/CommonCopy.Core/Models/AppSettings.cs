@@ -2,6 +2,9 @@ namespace CommonCopy.Core.Models;
 
 public sealed class AppSettings
 {
+    // Persisted with the existing phrase library. Older libraries default to Light.
+    public string Appearance { get; set; } = "Light";
+
     public bool CtrlRightClickEnabled { get; set; } = true;
 
     public string KeyboardShortcut { get; set; } = "Ctrl+Shift+Space";

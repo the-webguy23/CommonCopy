@@ -56,6 +56,9 @@ For each supported target, highlight text, open CommonCopy with `Ctrl + Right Cl
 
 ## Data and management
 
+- [ ] In Settings, select Dark (Burnished Copper), save, and verify the manager, popup, phrase editor, category editor, and Settings use light, legible text and copper accents. Check selected rows, menus, dropdowns, search, and buttons.
+- [ ] Restart and verify Dark persists. Switch to Light (Warm Editorial), verify all windows update, and restart again. Confirm an older library without the Appearance field opens in Light.
+
 - [ ] Create, edit, duplicate, disable, favorite, reorder, and delete a phrase.
 - [ ] Create a category and nested subcategory.
 - [ ] Search by phrase title and body.

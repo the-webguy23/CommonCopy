@@ -8,7 +8,7 @@
         MinHeight="420"
         ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner">
-  <Grid Margin="16">
+  <Grid Margin="22">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
@@ -44,7 +44,7 @@
     </StackPanel>
     <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right">
       <Button Content="Cancel" IsCancel="True" />
-      <Button Content="Save" IsDefault="True" Click="Save_Click" />
+      <Button Content="Save" Style="{StaticResource PrimaryButton}" IsDefault="True" Click="Save_Click" />
     </StackPanel>
   </Grid>
 </Window>

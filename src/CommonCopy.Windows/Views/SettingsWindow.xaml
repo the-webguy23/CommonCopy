@@ -3,12 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="CommonCopy settings"
         Width="540"
-        Height="570"
+        Height="670"
         ResizeMode="NoResize"
         ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner">
-  <Grid Margin="18">
+  <Grid Margin="24">
     <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
@@ -56,7 +57,7 @@
         <RowDefinition Height="Auto" />
         <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
-      <TextBlock Text="Recent phrase count" VerticalAlignment="Center" />
+      <TextBlock Text="Commonly Used limit" VerticalAlignment="Center" />
       <TextBox x:Name="RecentLimitBox" Grid.Column="1" />
       <TextBlock Grid.Row="1" Text="Popup width" VerticalAlignment="Center" />
       <TextBox x:Name="PopupWidthBox" Grid.Row="1" Grid.Column="1" />
@@ -71,15 +72,23 @@
               Content="Close the popup when it loses focus"
               Margin="3,4" />
 
-    <Border Grid.Row="8" Background="#F4F6F8" BorderBrush="#D7DCE1" BorderThickness="1" Padding="10" Margin="0,12,0,8">
+    <StackPanel Grid.Row="8" Margin="0,12,0,0">
+      <TextBlock Text="Appearance" FontSize="17" FontWeight="SemiBold" Margin="0,0,0,8" />
+      <StackPanel Orientation="Horizontal">
+        <RadioButton x:Name="LightThemeBox" GroupName="Appearance" Content="Light · Warm Editorial" Margin="4,4,22,4" />
+        <RadioButton x:Name="DarkThemeBox" GroupName="Appearance" Content="Dark · Burnished Copper" Margin="4" />
+      </StackPanel>
+    </StackPanel>
+
+    <Border Grid.Row="9" Background="{DynamicResource RaisedSurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="10" Margin="0,12,0,8">
       <TextBlock TextWrapping="Wrap"
-                 Foreground="#4C5661"
+                 Foreground="{DynamicResource MutedBrush}"
                  Text="Shortcut format: Ctrl+Shift+Space, Alt+F2, or Win+Shift+P. If another application already owns the shortcut, Ctrl + Right Click will continue to work." />
     </Border>
 
-    <StackPanel Grid.Row="9" Orientation="Horizontal" HorizontalAlignment="Right">
+    <StackPanel Grid.Row="10" Orientation="Horizontal" HorizontalAlignment="Right">
       <Button Content="Cancel" IsCancel="True" />
-      <Button Content="Save" IsDefault="True" Click="Save_Click" />
+      <Button Content="Save" Style="{StaticResource PrimaryButton}" IsDefault="True" Click="Save_Click" />
     </StackPanel>
   </Grid>
 </Window>
