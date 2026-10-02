@@ -71,10 +71,10 @@ public sealed class AppearanceTests
         grid.Columns.Add(new DataGridTextColumn { Header = "Title", Binding = new System.Windows.Data.Binding("Title") });
         grid.Columns.Add(new DataGridCheckBoxColumn
         {
-            Header = "Enabled", Binding = new System.Windows.Data.Binding("Enabled"),
+            Header = "Enabled", Binding = new System.Windows.Data.Binding("IsEnabled"),
             ElementStyle = (Style)root.FindResource("GridCheck"),
         });
-        grid.Items.Add(new { Title = "Saved reply", Enabled = true });
+        grid.Items.Add(new CommonCopy.Core.Models.PhraseEntry { Title = "Saved reply", Text = "Reply text", IsEnabled = true });
         grid.SelectedIndex = 0;
         root.Children.Add(grid);
         Layout(root);
