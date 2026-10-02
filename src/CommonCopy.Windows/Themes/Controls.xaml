@@ -324,22 +324,56 @@
     <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
     <Style.Triggers>
       <Trigger Property="IsMouseOver" Value="True">
-        <Setter Property="Background" Value="{DynamicResource HoverBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource SelectionForegroundBrush}" />
       </Trigger>
       <Trigger Property="IsSelected" Value="True">
-        <Setter Property="Background" Value="{DynamicResource SelectionBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource SelectionForegroundBrush}" />
       </Trigger>
     </Style.Triggers>
   </Style>
+  <Style x:Key="HeaderGripper" TargetType="Thumb">
+    <Setter Property="Width" Value="5" />
+    <Setter Property="Cursor" Value="SizeWE" />
+    <Setter Property="Template">
+      <Setter.Value><ControlTemplate TargetType="Thumb"><Border Background="Transparent" /></ControlTemplate></Setter.Value>
+    </Setter>
+  </Style>
   <Style TargetType="DataGridColumnHeader">
-    <Setter Property="Background" Value="{DynamicResource RaisedSurfaceBrush}" />
-    <Setter Property="Foreground" Value="{DynamicResource MutedBrush}" />
+    <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource AccentForegroundBrush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
     <Setter Property="Padding" Value="10,9" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="DataGridColumnHeader">
+          <Grid>
+            <Border x:Name="Shell" Background="{TemplateBinding Background}" CornerRadius="6"
+                    Padding="{TemplateBinding Padding}" Margin="1">
+              <DockPanel>
+                <Path x:Name="SortArrow" DockPanel.Dock="Right" Data="M 0 5 L 4 0 L 8 5" Stroke="White"
+                      StrokeThickness="1.5" Margin="6,0,0,0" VerticalAlignment="Center" Visibility="Collapsed" />
+                <ContentPresenter RecognizesAccessKey="True" VerticalAlignment="Center" />
+              </DockPanel>
+            </Border>
+            <Thumb x:Name="PART_LeftHeaderGripper" Style="{StaticResource HeaderGripper}" HorizontalAlignment="Left" />
+            <Thumb x:Name="PART_RightHeaderGripper" Style="{StaticResource HeaderGripper}" HorizontalAlignment="Right" />
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Shell" Property="Background" Value="{DynamicResource HoverBrush}" /></Trigger>
+            <Trigger Property="SortDirection" Value="Ascending"><Setter TargetName="SortArrow" Property="Visibility" Value="Visible" /></Trigger>
+            <Trigger Property="SortDirection" Value="Descending">
+              <Setter TargetName="SortArrow" Property="Visibility" Value="Visible" />
+              <Setter TargetName="SortArrow" Property="Data" Value="M 0 0 L 4 5 L 8 0" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
   </Style>
   <Style TargetType="DataGridCell">
+    <Setter Property="Margin" Value="1" />
     <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
     <Setter Property="Template">

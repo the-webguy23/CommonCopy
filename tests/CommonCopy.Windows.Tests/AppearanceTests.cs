@@ -80,6 +80,8 @@ public sealed class AppearanceTests
         Layout(root);
 
         AssertTextWhite(grid, "Saved reply");
+        AssertTextWhite(grid, "Title");
+        AssertTextWhite(grid, "Enabled");
         var check = Assert.Single(Descendants<CheckBox>(grid));
         Assert.True(check.IsChecked);
         Assert.False(check.IsHitTestVisible);
