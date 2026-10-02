@@ -19,17 +19,17 @@
     <HierarchicalDataTemplate DataType="{x:Type local:PopupNode}" ItemsSource="{Binding Children}">
       <TextBlock Text="{Binding DisplayText}" TextTrimming="CharacterEllipsis" />
     </HierarchicalDataTemplate>
-    <Style TargetType="TreeViewItem">
+    <Style TargetType="TreeViewItem" BasedOn="{StaticResource {x:Type TreeViewItem}}">
       <Setter Property="IsExpanded" Value="{Binding IsExpanded}" />
       <Setter Property="Padding" Value="3" />
     </Style>
   </Window.Resources>
 
-  <Border Background="#FAFBFC"
-          BorderBrush="#7A838D"
+  <Border Background="{DynamicResource SurfaceBrush}"
+          BorderBrush="{DynamicResource BorderBrush}"
           BorderThickness="1"
-          CornerRadius="8"
-          Padding="10">
+          CornerRadius="16"
+          Padding="17">
     <Grid>
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto" />
@@ -39,7 +39,7 @@
       <DockPanel Margin="0,0,0,8">
         <TextBlock DockPanel.Dock="Left"
                    Text="CommonCopy"
-                   FontSize="17"
+                   FontSize="19"
                    FontWeight="SemiBold"
                    VerticalAlignment="Center"
                    Margin="4,0,10,0" />
@@ -54,10 +54,10 @@
                 MouseLeftButtonUp="PhraseTree_MouseLeftButtonUp" />
       <DockPanel Grid.Row="2" Margin="0,8,0,0">
         <TextBlock Text="Choose an action or phrase"
-                   Foreground="#69737E"
+                   Foreground="{DynamicResource MutedBrush}"
                    FontSize="11"
                    VerticalAlignment="Center" />
-        <Button DockPanel.Dock="Right" Content="Manage phrases…" Click="Manage_Click" />
+        <Button DockPanel.Dock="Right" Content="Manage phrases…" Style="{StaticResource PrimaryButton}" Click="Manage_Click" />
       </DockPanel>
     </Grid>
   </Border>

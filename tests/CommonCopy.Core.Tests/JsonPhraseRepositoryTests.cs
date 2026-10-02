@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using CommonCopy.Core.Models;
 using CommonCopy.Core.Services;
 
@@ -95,6 +96,24 @@ public sealed class JsonPhraseRepositoryTests
 
         var phrase = Assert.Single(reloaded.Phrases, item => item.Title == "Unicode");
         Assert.Equal("Hello 👋\nΚαλημέρα\nこんにちは", phrase.Text);
+    }
+
+    [Fact]
+    public async Task Appearance_RoundTripsAndDefaultsToLightForOlderLibraries()
+    {
+        using var directory = new TemporaryDirectory();
+        var repository = new JsonPhraseRepository(directory.Path);
+        var document = await repository.LoadAsync();
+        document.Settings.Appearance = "Dark";
+        await repository.SaveAsync(document);
+
+        Assert.Equal("Dark", (await repository.LoadAsync()).Settings.Appearance);
+
+        var oldLibrary = JsonNode.Parse(await File.ReadAllTextAsync(repository.DataPath))!;
+        ((JsonObject)oldLibrary["Settings"]!).Remove("Appearance");
+        await File.WriteAllTextAsync(repository.DataPath, oldLibrary.ToJsonString());
+
+        Assert.Equal("Light", (await repository.LoadAsync()).Settings.Appearance);
     }
 
     [Fact]

@@ -92,6 +92,11 @@ public static class PhraseLibraryValidator
             errors.Add("Recent phrase limit must be between 1 and 100.");
         }
 
+        if (document.Settings.Appearance is not ("Light" or "Dark"))
+        {
+            errors.Add("Appearance must be Light or Dark.");
+        }
+
         if (document.Settings.PopupWidth is < 280 or > 1_200)
         {
             errors.Add("Popup width must be between 280 and 1200.");

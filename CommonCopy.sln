@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonCopy.Windows", "src\C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonCopy.Core.Tests", "tests\CommonCopy.Core.Tests\CommonCopy.Core.Tests.csproj", "{6D92A71B-8C4C-418B-84B9-D1D2E337C782}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonCopy.Windows.Tests", "tests\CommonCopy.Windows.Tests\CommonCopy.Windows.Tests.csproj", "{1B2876A8-5BC8-463A-8F08-CABF4F624762}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,5 +28,9 @@ Global
 		{6D92A71B-8C4C-418B-84B9-D1D2E337C782}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D92A71B-8C4C-418B-84B9-D1D2E337C782}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D92A71B-8C4C-418B-84B9-D1D2E337C782}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B2876A8-5BC8-463A-8F08-CABF4F624762}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B2876A8-5BC8-463A-8F08-CABF4F624762}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B2876A8-5BC8-463A-8F08-CABF4F624762}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B2876A8-5BC8-463A-8F08-CABF4F624762}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

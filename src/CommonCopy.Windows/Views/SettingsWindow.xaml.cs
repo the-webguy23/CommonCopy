@@ -8,6 +8,8 @@ public partial class SettingsWindow : Window
     public SettingsWindow(AppSettings settings)
     {
         InitializeComponent();
+        LightThemeBox.IsChecked = settings.Appearance != "Dark";
+        DarkThemeBox.IsChecked = settings.Appearance == "Dark";
         CtrlRightClickBox.IsChecked = settings.CtrlRightClickEnabled;
         ShortcutBox.Text = settings.KeyboardShortcut;
         StartupBox.IsChecked = settings.StartWithWindows;
@@ -20,6 +22,8 @@ public partial class SettingsWindow : Window
     }
 
     public bool CtrlRightClickEnabled { get; private set; }
+
+    public string Appearance { get; private set; } = "Light";
 
     public string KeyboardShortcut { get; private set; } = string.Empty;
 
@@ -39,6 +43,7 @@ public partial class SettingsWindow : Window
 
     public void ApplyTo(AppSettings settings)
     {
+        settings.Appearance = Appearance;
         settings.CtrlRightClickEnabled = CtrlRightClickEnabled;
         settings.KeyboardShortcut = KeyboardShortcut;
         settings.StartWithWindows = StartWithWindows;
@@ -61,7 +66,7 @@ public partial class SettingsWindow : Window
 
         if (!int.TryParse(RecentLimitBox.Text, out var recentLimit) || recentLimit is < 1 or > 100)
         {
-            ShowValidationMessage("Recent phrase count must be between 1 and 100.");
+            ShowValidationMessage("Commonly Used limit must be between 1 and 100.");
             return;
         }
 
@@ -84,6 +89,7 @@ public partial class SettingsWindow : Window
         }
 
         CtrlRightClickEnabled = CtrlRightClickBox.IsChecked == true;
+        Appearance = DarkThemeBox.IsChecked == true ? "Dark" : "Light";
         KeyboardShortcut = shortcut;
         StartWithWindows = StartupBox.IsChecked == true;
         RestoreClipboard = RestoreClipboardBox.IsChecked == true;
