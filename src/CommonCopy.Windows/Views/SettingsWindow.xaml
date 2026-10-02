@@ -80,7 +80,7 @@
       </StackPanel>
     </StackPanel>
 
-    <Border Grid.Row="9" Background="{DynamicResource RaisedSurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="10" Margin="0,12,0,8">
+    <Border Grid.Row="9" CornerRadius="8" Background="{DynamicResource RaisedSurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="10" Margin="0,12,0,8">
       <TextBlock TextWrapping="Wrap"
                  Foreground="{DynamicResource MutedBrush}"
                  Text="Shortcut format: Ctrl+Shift+Space, Alt+F2, or Win+Shift+P. If another application already owns the shortcut, Ctrl + Right Click will continue to work." />

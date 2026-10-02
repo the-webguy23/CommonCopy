@@ -80,17 +80,20 @@
               <TextBlock DockPanel.Dock="Left" Text="Your phrases" FontSize="20" FontWeight="SemiBold" />
               <TextBlock x:Name="PhraseCountText" DockPanel.Dock="Right" Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center" />
             </DockPanel>
-            <DataGrid x:Name="PhraseGrid" Grid.Row="1" AutoGenerateColumns="False" CanUserAddRows="False"
-                      IsReadOnly="True" SelectionMode="Single" SelectionUnit="FullRow" RowHeight="37"
-                      AlternationCount="2" MouseDoubleClick="PhraseGrid_MouseDoubleClick">
-              <DataGrid.Columns>
-                <DataGridCheckBoxColumn Header="★" Binding="{Binding IsFavorite}" Width="42" />
-                <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="2*" />
-                <DataGridTextColumn Header="Text preview" Binding="{Binding Text}" Width="4*" />
-                <DataGridCheckBoxColumn Header="Enabled" Binding="{Binding IsEnabled}" Width="75" />
-                <DataGridTextColumn Header="Uses" Binding="{Binding UseCount}" Width="55" />
-              </DataGrid.Columns>
-            </DataGrid>
+            <Border Grid.Row="1" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource BorderBrush}"
+                    Background="{DynamicResource SurfaceBrush}" Padding="5">
+              <DataGrid BorderThickness="0" x:Name="PhraseGrid" AutoGenerateColumns="False" CanUserAddRows="False"
+                        IsReadOnly="True" SelectionMode="Single" SelectionUnit="FullRow" RowHeight="37"
+                        AlternationCount="2" MouseDoubleClick="PhraseGrid_MouseDoubleClick">
+                <DataGrid.Columns>
+                  <DataGridCheckBoxColumn ElementStyle="{StaticResource GridCheck}" Header="★" Binding="{Binding IsFavorite}" Width="42" />
+                  <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="2*" />
+                  <DataGridTextColumn Header="Text preview" Binding="{Binding Text}" Width="4*" />
+                  <DataGridCheckBoxColumn ElementStyle="{StaticResource GridCheck}" Header="Enabled" Binding="{Binding IsEnabled}" Width="75" />
+                  <DataGridTextColumn Header="Uses" Binding="{Binding UseCount}" Width="55" />
+                </DataGrid.Columns>
+              </DataGrid>
+            </Border>
             <Border Grid.Row="2" Background="{DynamicResource RaisedSurfaceBrush}" CornerRadius="9" Padding="13" Margin="0,12,0,8">
               <StackPanel>
                 <TextBlock Text="SELECTED PHRASE" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource MutedBrush}" Margin="0,0,0,5" />

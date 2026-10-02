@@ -56,6 +56,15 @@ For each supported target, highlight text, open CommonCopy with `Ctrl + Right Cl
 
 ## Data and management
 
+For PR #1 visual approval, test both appearances before merge:
+
+- [ ] Verify every action button, menu button, selected category, selected phrase row, hovered item, and open dropdown highlight has white text.
+- [ ] Verify rounded corners on Your phrases (outer panel and inner table), category list selections, category dropdowns and their hovered entries, Enabled/Favourite checks, popup category headers, menus, and Settings guidance box.
+- [ ] Navigate categories, dropdowns, menus, and the popup with mouse and keyboard; verify Enter, Escape, arrow keys, and focus indicators.
+- [ ] Verify nested popup categories expand/collapse and selected text remains readable.
+- [ ] Verify checkboxes remain centred and read-only in the phrase table; Enabled remains editable in the phrase editor.
+- [ ] Switch Light → Dark → Light, reopen all dialogs and the popup, and check 100%, 150%, and 200% scaling. Record screenshots and approval before merging PR #1.
+
 - [ ] In Settings, select Dark (Burnished Copper), save, and verify the manager, popup, phrase editor, category editor, and Settings use light, legible text and copper accents. Check selected rows, menus, dropdowns, search, and buttons.
 - [ ] Restart and verify Dark persists. Switch to Light (Warm Editorial), verify all windows update, and restart again. Confirm an older library without the Appearance field opens in Light.
 

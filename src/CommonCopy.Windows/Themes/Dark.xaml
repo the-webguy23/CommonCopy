@@ -8,8 +8,8 @@
   <SolidColorBrush x:Key="MutedBrush" Color="#CAC9BF" />
   <SolidColorBrush x:Key="BorderBrush" Color="#55594F" />
   <SolidColorBrush x:Key="AccentBrush" Color="#76533E" />
-  <SolidColorBrush x:Key="AccentForegroundBrush" Color="#FFF7EE" />
-  <SolidColorBrush x:Key="SelectionBrush" Color="#554536" />
-  <SolidColorBrush x:Key="SelectionForegroundBrush" Color="#F8EAD9" />
-  <SolidColorBrush x:Key="HoverBrush" Color="#454840" />
+  <SolidColorBrush x:Key="AccentForegroundBrush" Color="#FFFFFF" />
+  <SolidColorBrush x:Key="SelectionBrush" Color="#76533E" />
+  <SolidColorBrush x:Key="SelectionForegroundBrush" Color="#FFFFFF" />
+  <SolidColorBrush x:Key="HoverBrush" Color="#604532" />
 </ResourceDictionary>
