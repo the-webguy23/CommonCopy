@@ -26,6 +26,7 @@ cp src/CommonCopy.Mac/Info.plist "$app/Contents/Info.plist"
 dotnet publish src/CommonCopy.DesktopBridge/CommonCopy.DesktopBridge.csproj \
   --configuration Release --runtime "$runtime" --self-contained true \
   -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=false \
+  -p:DebugType=None -p:DebugSymbols=false \
   --output "$app/Contents/Helpers/Core"
 
 # Ad-hoc signatures are for private testing only, not Developer ID notarization.
