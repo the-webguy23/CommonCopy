@@ -28,6 +28,14 @@ No SDK, .NET install, account, or network connection is needed to run the packag
       and readable inputs. Confirm persistence after quit/relaunch.
 - [ ] Focus TextEdit in plain-text mode. Press Command–Shift–Space, choose Paste,
       grant Accessibility when requested, and retry. Check the original caret.
+- [ ] Highlight text in TextEdit, press Command–Shift–Space, and choose Save
+      highlighted text. Grant Accessibility if needed and retry. Verify the editor
+      contains the exact selection and a generated title; choose a subcategory and
+      Save. Cancel a second capture and verify no new phrase was saved.
+- [ ] Test capture with no selection, non-text content, and permission denied.
+      Expect an explanation, never a phrase created from an old clipboard value.
+      Confirm previous plain-text clipboard restoration, and that a newer copy
+      made during capture is not overwritten. Repeat in a browser/document app.
 - [ ] Repeat in a browser text field and another everyday app.
 - [ ] Deny Accessibility: manual Copy must work; failed Paste must not change the
       clipboard. Focus must be checked before sending Command-V.
@@ -46,8 +54,8 @@ Use Export for a lasting backup; the automatic backup rotates on saves.
 
 ## Later milestones
 
-Highlighted-text capture, login-at-startup, configurable shortcuts, modifier/right
-click activation, and a dedicated compact popup. The shortcut opens the manager
+Login-at-startup, configurable shortcuts, modifier/right-click activation, and a
+dedicated compact popup. The shortcut opens the manager
 in this build. No sync, accounts, telemetry, clipboard history, or secret storage.
 
 ## Build locally (contributors only)
@@ -61,3 +69,13 @@ open artifacts/macos-arm64/CommonCopy.app
 
 The script runs core/bridge tests and smoke-tests the packaged helper using
 disposable data. `x86_64` is accepted but is not the current device test target.
+
+Version 0.2.1 adds Save highlighted text. It sends a single Command-C only after
+that explicit action, verifies the source app's focus, waits for a new clipboard
+change for up to 1.5 seconds, and opens an editable draft. Nothing is saved until
+Save is chosen. This is selection capture, not background clipboard history.
+
+For an update, Quit CommonCopy before replacing the app in Applications. Library
+data stays in Application Support. This is still a private, non-notarized build;
+real-device launch may require a per-app security exception. Developer ID signing
+and notarization remain the proper public-distribution gate.

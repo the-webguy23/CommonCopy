@@ -40,6 +40,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if window == nil {
             let content = ManagerView(store: store, paste: { [weak self] phrase in
                 self?.paste(phrase)
+            }, capture: { [weak self] in
+                self?.captureSelection()
             })
             let created = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 1000, height: 680),
                 styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
@@ -56,7 +58,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func paste(_ phrase: Phrase) {
-        guard phrase.isEnabled, !store.busy, let settings = store.state?.document.settings else { return }
+        guard phrase.isEnabled, !store.busy, !store.capturing, let settings = store.state?.document.settings else { return }
         Task {
             do {
                 try await pasteService.paste(phrase.text, settings: settings)
@@ -64,6 +66,37 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             } catch {
                 showManager()
                 store.error = (error as? CoreError)?.errorDescription ?? "The paste could not complete."
+            }
+        }
+    }
+
+    func captureSelection() {
+        guard !store.busy, !store.capturing, store.phraseEditor == nil,
+              let settings = store.state?.document.settings else { return }
+        guard let categoryId = store.categories.first(where: { $0.id == store.selectedCategory })?.id
+                ?? store.categories.first?.id else {
+            store.error = "Add a category before saving highlighted text."
+            return
+        }
+        store.capturing = true
+        Task {
+            defer { store.capturing = false }
+            do {
+                let text = try await pasteService.captureSelectedText(settings: settings)
+                // Title generation uses the same core routine as Windows. Preparing
+                // a draft never writes the capture into the phrase library.
+                guard await store.perform("captureDraft", ["text": text]) else {
+                    showManager()
+                    return
+                }
+                var draft = PhraseDraft(categoryId: categoryId)
+                draft.text = text
+                draft.title = store.state?.captureTitle ?? "Captured phrase"
+                showManager()
+                store.phraseEditor = draft
+            } catch {
+                showManager()
+                store.error = (error as? CoreError)?.errorDescription ?? "Highlighted text could not be captured."
             }
         }
     }

@@ -6,6 +6,33 @@ namespace CommonCopy.Core.Tests;
 public sealed class DesktopBridgeTests
 {
     [Fact]
+    public async Task CaptureDraft_GeneratesWindowsCompatibleTitleWithoutSavingSelection()
+    {
+        using var directory = new TemporaryDirectory();
+        var bridge = new BridgeService(directory.Path);
+        await bridge.ExecuteAsync(new("snapshot"));
+        var file = System.IO.Path.Combine(directory.Path, "phrases.json");
+        var before = await File.ReadAllBytesAsync(file);
+        var state = await bridge.ExecuteAsync(new("captureDraft", Text: "  First line\nsecond\tline  "));
+        Assert.Equal("First line second line", state.CaptureTitle);
+        Assert.Equal(before, await File.ReadAllBytesAsync(file));
+        Assert.Equal(3, state.Document.Phrases.Count);
+        Assert.False(File.Exists(System.IO.Path.Combine(directory.Path, "phrases.backup.json")));
+    }
+
+    [Fact]
+    public async Task EmptyCaptureDraft_IsRejectedWithoutChangingSavedData()
+    {
+        using var directory = new TemporaryDirectory();
+        var bridge = new BridgeService(directory.Path);
+        await bridge.ExecuteAsync(new("snapshot"));
+        var file = System.IO.Path.Combine(directory.Path, "phrases.json");
+        var before = await File.ReadAllBytesAsync(file);
+        await Assert.ThrowsAsync<InvalidDataException>(() => bridge.ExecuteAsync(new("captureDraft", Text: " \r\n\t")));
+        Assert.Equal(before, await File.ReadAllBytesAsync(file));
+    }
+
+    [Fact]
     public async Task NestedPrompts_RoundTripsThroughCoreAndWindowsCompatibleExport()
     {
         using var directory = new TemporaryDirectory();

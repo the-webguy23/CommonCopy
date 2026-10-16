@@ -30,7 +30,7 @@ struct CopperButton: ButtonStyle {
 struct ManagerView: View {
     @ObservedObject var store: Store
     let paste: (Phrase) -> Void
-    @State private var phraseEditor: PhraseDraft?
+    let capture: () -> Void
     @State private var categoryEditor: CategoryDraft?
     @State private var deletion: Deletion?
     private var palette: Palette { Palette(dark: store.dark) }
@@ -46,12 +46,13 @@ struct ManagerView: View {
                         Text("Save it once. Paste it forever.").foregroundColor(palette.muted)
                     }
                     Spacer()
+                    Button("Save highlighted text…", action: capture)
                     Button("Add phrase") {
                         guard let id = selectedParent ?? store.categories.first?.id else {
                             store.error = "Add a category before creating a phrase."
                             return
                         }
-                        phraseEditor = PhraseDraft(categoryId: id)
+                        store.phraseEditor = PhraseDraft(categoryId: id)
                     }
                 }
                 TextField("Search titles and phrase text", text: $store.search)
@@ -80,8 +81,8 @@ struct ManagerView: View {
         .foregroundColor(palette.text).background(palette.background)
         .buttonStyle(CopperButton(palette: palette))
         .preferredColorScheme(store.dark ? .dark : .light)
-        .disabled(store.busy)
-        .sheet(item: $phraseEditor) { draft in
+        .disabled(store.busy || store.capturing)
+        .sheet(item: $store.phraseEditor) { draft in
             PhraseEditor(store: store, draft: draft)
         }
         .sheet(item: $categoryEditor) { draft in
@@ -170,7 +171,7 @@ struct ManagerView: View {
                     Task { await store.perform("recordUse", ["id": phrase.id]) }
                 }.disabled(!phrase.isEnabled)
                 Spacer()
-                Button("Edit") { phraseEditor = PhraseDraft(phrase: phrase) }
+                Button("Edit") { store.phraseEditor = PhraseDraft(phrase: phrase) }
                 Button("Duplicate") { Task { await store.perform("duplicatePhrase", ["id": phrase.id]) } }
                 Button("Delete") { deletion = Deletion(id: phrase.id, category: false) }
             }

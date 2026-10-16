@@ -9,6 +9,8 @@ final class Store: ObservableObject {
     @Published var search = ""
     @Published var error: String?
     @Published var busy = false
+    @Published var capturing = false
+    @Published var phraseEditor: PhraseDraft?
     private let bridge = CoreBridge()
 
     var dark: Bool { state?.document.settings.appearance == "Dark" }

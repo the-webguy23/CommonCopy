@@ -21,7 +21,8 @@ public sealed record BridgeState(
     IReadOnlyList<CategoryListItem> CategoryList,
     Guid[] Favourites,
     Guid[] CommonlyUsed,
-    Dictionary<Guid, Guid[]> CategoryPhrases);
+    Dictionary<Guid, Guid[]> CategoryPhrases,
+    string? CaptureTitle = null);
 
 public sealed class BridgeService(string dataDirectory)
 {
@@ -31,10 +32,16 @@ public sealed class BridgeService(string dataDirectory)
         var document = await repository.LoadAsync();
         var catalog = new PhraseCatalog(document);
         var changed = true;
+        string? captureTitle = null;
 
         switch (request.Operation)
         {
             case "snapshot":
+                changed = false;
+                break;
+            case "captureDraft":
+                if (string.IsNullOrWhiteSpace(request.Text)) throw new InvalidDataException();
+                captureTitle = PhraseTitleGenerator.Create(request.Text);
                 changed = false;
                 break;
             case "saveCategory":
@@ -118,6 +125,6 @@ public sealed class BridgeService(string dataDirectory)
             catalog.GetFavorites().Select(item => item.Id).ToArray(),
             catalog.GetCommonlyUsed().Select(item => item.Id).ToArray(),
             document.Categories.ToDictionary(item => item.Id,
-                item => catalog.Search(item.Id, null).Select(phrase => phrase.Id).ToArray()));
+                item => catalog.Search(item.Id, null).Select(phrase => phrase.Id).ToArray()), captureTitle);
     }
 }

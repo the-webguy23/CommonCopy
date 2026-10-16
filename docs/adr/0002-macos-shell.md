@@ -36,7 +36,7 @@ no .NET install. Windows UI/integration and shared-core code remain unchanged.
 
 ## Later gates
 
-Highlighted-text capture, configurable hotkey, modifier/right-click activation,
+Configurable hotkey, modifier/right-click activation,
 login-at-startup, and a dedicated compact popup remain subsequent milestones.
 Normal right-click behavior is untouched. Do not claim full Windows parity.
 
@@ -44,3 +44,13 @@ Ad-hoc signing is for private builds. Developer ID signing, notarization, public
 distribution, and paid enrollment require separate decisions. Do not disable
 Gatekeeper globally. CI compilation and helper smoke tests do not substitute
 for user acceptance of paste, focus, Accessibility, appearance, or launch.
+
+## 0.2.1: explicit highlighted-text capture
+
+Save highlighted text now activates the remembered source app, checks Accessibility
+and focus, sends one Command-C, and waits at most 1.5 seconds for fresh clipboard
+text. Missing/empty/non-text selections produce an explanation. Previous plain
+text is restored only while the clipboard change count still matches the capture.
+A prefilled editor uses the core title generator; cancellation never saves a
+phrase. The capture coordinator has isolated Swift tests with fake environments,
+so automated tests do not require access to a user's clipboard or permissions.

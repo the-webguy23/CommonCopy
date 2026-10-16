@@ -17,6 +17,7 @@ esac
 
 dotnet test tests/CommonCopy.Core.Tests/CommonCopy.Core.Tests.csproj --configuration Release
 swift build --package-path src/CommonCopy.Mac --configuration release --arch "$architecture"
+swift test --package-path src/CommonCopy.Mac --configuration release --arch "$architecture"
 binary_dir="$(swift build --package-path src/CommonCopy.Mac --configuration release --arch "$architecture" --show-bin-path)"
 app="$root/artifacts/macos-$architecture/CommonCopy.app"
 rm -rf "$app"

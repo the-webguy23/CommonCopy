@@ -13,6 +13,18 @@ final class PasteService {
         }
     }
 
+    func captureSelectedText(settings: Settings) async throws -> String {
+        guard !inProgress else { throw CoreError.failed("Wait for the current clipboard operation to finish.") }
+        guard let target, !target.isTerminated,
+              target.processIdentifier != ProcessInfo.processInfo.processIdentifier else {
+            throw CoreError.failed("Highlight text in another app, press Command–Shift–Space, then choose Save highlighted text.")
+        }
+        inProgress = true
+        defer { inProgress = false }
+        return try await SelectionCapture.read(from:
+            MacSelectionCaptureEnvironment(target: target, delay: settings.pasteDelayMilliseconds))
+    }
+
     func paste(_ text: String, settings: Settings) async throws {
         guard !inProgress else { throw CoreError.failed("Wait for the current paste to finish.") }
         guard let target, !target.isTerminated,

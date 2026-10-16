@@ -5,5 +5,8 @@ let package = Package(
     name: "CommonCopyMac",
     platforms: [.macOS(.v13)],
     products: [.executable(name: "CommonCopyMac", targets: ["CommonCopyMac"])],
-    targets: [.executableTarget(name: "CommonCopyMac")]
+    targets: [
+        .executableTarget(name: "CommonCopyMac"),
+        .testTarget(name: "CommonCopyMacTests", dependencies: ["CommonCopyMac"])
+    ]
 )

@@ -24,6 +24,11 @@ with tempfile.TemporaryDirectory(prefix="CommonCopy-bridge-test-") as temporary:
         return response.get("state")
 
     state = request("snapshot")
+    initial = (directory / "data/phrases.json").read_bytes()
+    draft = request("captureDraft", text="  Review this\nselected text  ")
+    assert draft["captureTitle"] == "Review this selected text"
+    request("captureDraft", ok=False, text=" \n\t ")
+    assert (directory / "data/phrases.json").read_bytes() == initial
     prompts = next(c for c in state["document"]["categories"] if c["name"] == "Prompts")
     state = request("saveCategory", name="GPT", parentId=prompts["id"])
     gpt = next(c for c in state["document"]["categories"] if c["name"] == "GPT")

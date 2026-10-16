@@ -40,6 +40,7 @@ struct CoreState: Decodable {
     let favourites: [String]
     let commonlyUsed: [String]
     let categoryPhrases: [String: [String]]
+    let captureTitle: String?
 }
 
 struct CoreResponse: Decodable {

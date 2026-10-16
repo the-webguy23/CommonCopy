@@ -1,5 +1,24 @@
 # CommonCopy development checkpoint
 
+## 2026-10-16: first device launch and selection-capture follow-up
+
+- Maintainer confirmed 0.2.0 launched on the M1 MacBook after clearing the
+  quarantine flag for CommonCopy only. Open Anyway had repeatedly failed.
+  Installed-copy `codesign --verify --deep --strict` passed. No system-wide
+  Gatekeeper change was made; notarization remains a public-distribution gate.
+- Maintainer then identified missing Save highlighted text. Version 0.2.1 adds
+  the explicit capture action and prefilled editor, preserving Windows code and
+  the shared storage format. See the current Mac checklist for device acceptance.
+- Capture sends one Command-C after permission/focus checks, requires a fresh
+  clipboard update, restores previous text when safe, and never saves on Cancel.
+- New automated gates: isolated Swift capture-coordinator tests, core draft
+  integrity tests, and a packaged-helper capture-draft protocol check.
+- Local Release solution build passed with zero warnings/errors; all 25 core
+  tests and all 14 executable-helper protocol checks passed. Current native
+  test/build outcomes and exact package revision are recorded in draft PR #2.
+- First-device capture, permission recovery, and supported-app tests remain for
+  the maintainer; CI does not claim end-to-end cross-app capture acceptance.
+
 ## 2026-10-16: macOS foundation
 
 - Maintainer tested Windows: "It works phenomenally."
