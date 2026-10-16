@@ -8,6 +8,7 @@ struct Phrase: Decodable, Identifiable {
     let isFavorite: Bool
     let isEnabled: Bool
     let useCount: Int
+    let sortOrder: Int
 }
 
 struct Category: Decodable, Identifiable {

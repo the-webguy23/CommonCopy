@@ -11,6 +11,10 @@ final class Store: ObservableObject {
     @Published var busy = false
     @Published var capturing = false
     @Published var phraseEditor: PhraseDraft?
+    @Published var commandRightClickAvailable = false
+    @Published var commandRightClickEnabled = UserDefaults.standard.object(forKey: "CommandRightClickEnabled") as? Bool ?? true {
+        didSet { UserDefaults.standard.set(commandRightClickEnabled, forKey: "CommandRightClickEnabled") }
+    }
     private let bridge = CoreBridge()
 
     var dark: Bool { state?.document.settings.appearance == "Dark" }

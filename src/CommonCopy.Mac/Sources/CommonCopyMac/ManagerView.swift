@@ -31,6 +31,7 @@ struct ManagerView: View {
     @ObservedObject var store: Store
     let paste: (Phrase) -> Void
     let capture: () -> Void
+    let configureActivation: () -> Void
     @State private var categoryEditor: CategoryDraft?
     @State private var deletion: Deletion?
     private var palette: Palette { Palette(dark: store.dark) }
@@ -70,11 +71,21 @@ struct ManagerView: View {
                 }
                 .background(palette.surface)
                 .clipShape(RoundedRectangle(cornerRadius: 14))
-                HStack {
-                    Text("⌘⇧Space opens CommonCopy from another app.").font(.caption).foregroundColor(palette.muted)
-                    Spacer()
-                    if store.busy { ProgressView().controlSize(.small) }
-                    Button("Reload") { Task { await store.perform("snapshot") } }
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Toggle("Command + right-click", isOn: $store.commandRightClickEnabled)
+                            .onChange(of: store.commandRightClickEnabled) { _ in configureActivation() }
+                        if store.commandRightClickEnabled && !store.commandRightClickAvailable {
+                            Button("Enable Accessibility…", action: configureActivation)
+                        }
+                        Spacer()
+                        if store.busy { ProgressView().controlSize(.small) }
+                        Button("Reload") { Task { await store.perform("snapshot") } }
+                    }
+                    Text(store.commandRightClickAvailable
+                        ? "⌘ + right-click opens your phrase menu. ⌘⇧Space also works."
+                        : "⌘⇧Space opens your phrase menu. Command + right-click needs Accessibility access.")
+                        .font(.caption).foregroundColor(palette.muted)
                 }
             }.padding(24)
         }

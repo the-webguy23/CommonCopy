@@ -1,5 +1,30 @@
 # CommonCopy development checkpoint
 
+## Required acceptance gates — maintainer directive, 2026-10-16
+
+The right-click workflow is the product's purpose, not optional follow-up scope.
+Do not describe build/test success as complete user acceptance. Verify and report
+each gate separately; keep both PRs unmerged until explicit instructions.
+
+1. Download, installation/replacement, normal launch and relaunch. The private
+   0.2.0 quarantine workaround is not a resolved distribution/installation issue.
+   Public normal installation needs a Developer ID/notarization decision.
+2. Command + right-click opens the pointer-positioned phrase menu, including
+   nested categories, Favourites, Commonly Used, and Save highlighted text.
+3. Capture selected text from another app into a reviewable editor; Save persists
+   exactly once, Cancel does not persist, and stale clipboard text is rejected.
+4. Choosing a saved phrase pastes into the original source field with appropriate
+   Accessibility permission/focus handling and safe text clipboard restoration.
+5. Ordinary right-click is untouched. Permission denial, toggle-off, modifier
+   release, and repeated gestures must fail gracefully rather than disrupt input.
+6. Phrases, hierarchy, preferences, counts, backups and import/export survive
+   relaunch/update. Windows behavior and legacy migration stay intact.
+7. Inspect both themes, management/editor/popup layout, selected text readability,
+   and window sizing. Record observations; never promise perfect untested behavior.
+
+CI can validate build, core/gesture/capture logic, startup, and screenshots.
+Real-device acceptance is required for the actual input/focus/permission workflow.
+
 ## 2026-10-16: first device launch and selection-capture follow-up
 
 - Maintainer confirmed 0.2.0 launched on the M1 MacBook after clearing the
@@ -18,6 +43,12 @@
   test/build outcomes and exact package revision are recorded in draft PR #2.
 - First-device capture, permission recovery, and supported-app tests remain for
   the maintainer; CI does not claim end-to-end cross-app capture acceptance.
+- Before 0.2.1 delivery, the maintainer also identified Command + right-click as
+  the most important activation path. Include it in the same update, opening a
+  compact native phrase menu at the pointer with capture and nested categories.
+  Preserve ordinary right-click, persist a Mac-only on/off preference, and keep
+  Command–Shift–Space as the keyboard alternative. No keyboard stream is logged
+  or monitored. Real event-tap/secondary-click acceptance remains pending.
 
 ## 2026-10-16: macOS foundation
 

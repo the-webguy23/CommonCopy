@@ -28,6 +28,18 @@ No SDK, .NET install, account, or network connection is needed to run the packag
       and readable inputs. Confirm persistence after quit/relaunch.
 - [ ] Focus TextEdit in plain-text mode. Press Command–Shift–Space, choose Paste,
       grant Accessibility when requested, and retry. Check the original caret.
+- [ ] Enable Command + right-click in the manager and grant Accessibility if
+      requested. Return to CommonCopy, then focus TextEdit and Command-right-click:
+      a compact menu must open near the pointer. Choose a phrase from a category
+      submenu; it should paste at the source caret. Two-finger secondary click
+      while Command is held should follow the same path.
+- [ ] The menu must include Save highlighted text, Favourites, Commonly Used,
+      nested categories (including Prompts → GPT), and Manage phrases.
+- [ ] Ordinary right-click must open the source app's normal context menu. Test
+      releasing Command before releasing the right button, and pressing Command
+      only after an ordinary right-button down. No stray context-menu or double
+      activation should appear. Disable the toggle and verify all right-clicks
+      pass through; enable and quit/relaunch to verify the preference persists.
 - [ ] Highlight text in TextEdit, press Command–Shift–Space, and choose Save
       highlighted text. Grant Accessibility if needed and retry. Verify the editor
       contains the exact selection and a generated title; choose a subcategory and
@@ -54,9 +66,9 @@ Use Export for a lasting backup; the automatic backup rotates on saves.
 
 ## Later milestones
 
-Login-at-startup, configurable shortcuts, modifier/right-click activation, and a
-dedicated compact popup. The shortcut opens the manager
-in this build. No sync, accounts, telemetry, clipboard history, or secret storage.
+Login-at-startup and configurable keyboard shortcuts. Command + right-click and
+Command–Shift–Space open the compact native phrase menu. No sync, accounts,
+telemetry, clipboard history, or secret storage.
 
 ## Build locally (contributors only)
 
@@ -74,6 +86,12 @@ Version 0.2.1 adds Save highlighted text. It sends a single Command-C only after
 that explicit action, verifies the source app's focus, waits for a new clipboard
 change for up to 1.5 seconds, and opens an editable draft. Nothing is saved until
 Save is chosen. This is selection capture, not background clipboard history.
+
+Command + right-click uses a mouse-only event tap after Accessibility permission.
+It checks Command on the mouse event, suppresses only the matching right-button
+down/up pair, and opens the native menu at the pointer. No key stream is observed.
+Without permission, keyboard activation remains available; paste and capture
+still require Accessibility. Native menus follow macOS Light/Dark appearance.
 
 For an update, Quit CommonCopy before replacing the app in Applications. Library
 data stays in Application Support. This is still a private, non-notarized build;

@@ -36,8 +36,7 @@ no .NET install. Windows UI/integration and shared-core code remain unchanged.
 
 ## Later gates
 
-Configurable hotkey, modifier/right-click activation,
-login-at-startup, and a dedicated compact popup remain subsequent milestones.
+Configurable keyboard hotkey and login-at-startup remain subsequent milestones.
 Normal right-click behavior is untouched. Do not claim full Windows parity.
 
 Ad-hoc signing is for private builds. Developer ID signing, notarization, public
@@ -54,3 +53,12 @@ text is restored only while the clipboard change count still matches the capture
 A prefilled editor uses the core title generator; cancellation never saves a
 phrase. The capture coordinator has isolated Swift tests with fake environments,
 so automated tests do not require access to a user's clipboard or permissions.
+
+The maintainer identified Command + right-click as essential. It now opens a
+native pointer-positioned NSMenu with category submenus, Favourites, Commonly Used,
+capture, and management actions. A mouse-only active CGEvent tap checks the
+Command flag and consumes only the matching right-button down/up pair. Accessibility
+is required; normal right-click is untouched and a persistent Mac-only toggle can
+disable the tap. The Carbon keyboard shortcut remains available without this
+permission and opens the same menu. Gesture-state and menu-content tests are
+isolated from real system input. Real secondary-click/focus tests remain required.

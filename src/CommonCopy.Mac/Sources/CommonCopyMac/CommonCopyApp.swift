@@ -1,6 +1,7 @@
 import AppKit
 import Carbon
 import SwiftUI
+import ApplicationServices
 
 @main
 enum CommonCopyApp {
@@ -17,6 +18,7 @@ enum CommonCopyApp {
 final class AppDelegate: NSObject, NSApplicationDelegate {
     let store = Store()
     let pasteService = PasteService()
+    private let commandClick = CommandRightClickService()
     private var statusItem: NSStatusItem?
     private var window: NSWindow?
     private var hotkey: EventHotKeyRef?
@@ -31,17 +33,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         item.button?.action = #selector(showManager)
         statusItem = item
         registerShortcut()
+        commandClick.onActivate = { [weak self] in self?.showPhraseMenu() }
+        configureCommandClick()
         showManager()
         Task { await store.perform("snapshot") }
     }
 
     @objc func showManager() {
+        configureCommandClick()
         pasteService.rememberTarget()
         if window == nil {
             let content = ManagerView(store: store, paste: { [weak self] phrase in
                 self?.paste(phrase)
             }, capture: { [weak self] in
                 self?.captureSelection()
+            }, configureActivation: { [weak self] in
+                self?.configureCommandClick(requestPermission: true)
             })
             let created = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 1000, height: 680),
                 styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
@@ -55,6 +62,90 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.unhide(nil)
         NSApp.activate(ignoringOtherApps: true)
         window?.makeKeyAndOrderFront(nil)
+    }
+
+    func applicationDidBecomeActive(_ notification: Notification) { configureCommandClick() }
+
+    func configureCommandClick(requestPermission: Bool = false) {
+        guard store.commandRightClickEnabled else {
+            commandClick.stop()
+            store.commandRightClickAvailable = false
+            return
+        }
+        if requestPermission && !AXIsProcessTrusted() {
+            _ = AXIsProcessTrustedWithOptions(
+                [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary)
+            store.error = "Enable CommonCopy in System Settings → Privacy & Security → Accessibility, then return here. Command–Shift–Space remains available."
+        }
+        store.commandRightClickAvailable = commandClick.start()
+    }
+
+    func showPhraseMenu() {
+        guard !store.busy, !store.capturing, store.phraseEditor == nil, let state = store.state else {
+            showManager()
+            return
+        }
+        pasteService.rememberTarget()
+        let menu = makePhraseMenu(state: state)
+        NSApp.unhide(nil)
+        window?.orderOut(nil)
+        NSApp.activate(ignoringOtherApps: true)
+        menu.popUp(positioning: nil, at: NSEvent.mouseLocation, in: nil)
+    }
+
+    func makePhraseMenu(state: CoreState) -> NSMenu {
+        let menu = NSMenu(title: "CommonCopy")
+        menu.appearance = NSAppearance(named: store.dark ? .darkAqua : .aqua)
+        menu.addItem(withTitle: "Save highlighted text…", action: #selector(captureFromMenu), keyEquivalent: "").target = self
+        menu.addItem(.separator())
+        let byId = Dictionary(uniqueKeysWithValues: state.document.phrases.map { ($0.id, $0) })
+        func appendPhrases(_ ids: [String], to submenu: NSMenu) {
+            for id in ids {
+                guard let phrase = byId[id], phrase.isEnabled else { continue }
+                let item = submenu.addItem(withTitle: phrase.title, action: #selector(pasteFromMenu(_:)), keyEquivalent: "")
+                item.target = self
+                item.representedObject = id
+            }
+        }
+        func appendGroup(_ title: String, ids: [String]) {
+            let item = NSMenuItem(title: title, action: nil, keyEquivalent: "")
+            let submenu = NSMenu(title: title)
+            appendPhrases(ids, to: submenu)
+            if submenu.items.isEmpty { submenu.addItem(withTitle: "No phrases yet", action: nil, keyEquivalent: "") }
+            item.submenu = submenu
+            menu.addItem(item)
+        }
+        appendGroup("Favourites", ids: state.favourites)
+        appendGroup("Commonly Used", ids: state.commonlyUsed)
+        menu.addItem(.separator())
+        let byCategory = Dictionary(uniqueKeysWithValues: state.document.categories.map { ($0.id, $0) })
+        let ordered = state.categoryList.compactMap { $0.id.flatMap { byCategory[$0] } }
+        func appendCategories(parent: String?, to destination: NSMenu) {
+            for category in ordered where category.parentId == parent {
+                let item = NSMenuItem(title: category.name, action: nil, keyEquivalent: "")
+                let submenu = NSMenu(title: category.name)
+                let direct = state.document.phrases.filter { $0.categoryId == category.id && $0.isEnabled }
+                    .sorted { $0.sortOrder == $1.sortOrder
+                        ? $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending
+                        : $0.sortOrder < $1.sortOrder }
+                appendPhrases(direct.map(\.id), to: submenu)
+                appendCategories(parent: category.id, to: submenu)
+                if submenu.items.isEmpty { submenu.addItem(withTitle: "No phrases yet", action: nil, keyEquivalent: "") }
+                item.submenu = submenu
+                destination.addItem(item)
+            }
+        }
+        appendCategories(parent: nil, to: menu)
+        menu.addItem(.separator())
+        menu.addItem(withTitle: "Manage phrases…", action: #selector(showManager), keyEquivalent: "").target = self
+        return menu
+    }
+
+    @objc private func captureFromMenu() { captureSelection() }
+    @objc private func pasteFromMenu(_ sender: NSMenuItem) {
+        guard let id = sender.representedObject as? String,
+              let phrase = store.state?.document.phrases.first(where: { $0.id == id }) else { return }
+        paste(phrase)
     }
 
     func paste(_ phrase: Phrase) {
@@ -112,7 +203,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 return OSStatus(eventNotHandledErr)
             }
             let delegate = Unmanaged<AppDelegate>.fromOpaque(context).takeUnretainedValue()
-            Task { @MainActor in delegate.showManager() }
+            Task { @MainActor in delegate.showPhraseMenu() }
             return noErr
         }
         let installed = InstallEventHandler(GetApplicationEventTarget(), callback, 1, &spec,
@@ -148,6 +239,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        commandClick.stop()
         if let hotkey { UnregisterEventHotKey(hotkey) }
         if let eventHandler { RemoveEventHandler(eventHandler) }
     }
