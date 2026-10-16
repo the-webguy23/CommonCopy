@@ -23,11 +23,21 @@
 - macOS plist, shell-script syntax, and whitespace checks passed.
 - Native Swift/AppKit compilation and Mac device checks have not run. Linux
   cannot provide Apple's SDK. Windows WPF runtime checks require Windows CI.
-- Source is committed locally on `codex/macos-foundation`. Automatic approval
-  review rejected the source push, citing external publication and AGENTS.md's
-  explicit-maintainer-approval requirement. Do not retry or upload via a different
-  tool without the user's authorization for this branch/repository.
-- Next authorized step after approval: push this branch to
-  `the-webguy23/CommonCopy`, open a draft PR targeting `codex/editorial-themes`,
-  run Windows/macOS CI, fix build findings, and deliver the first private arm64
-  package after passing. PR #1 and main stay unmerged.
+- Automatic review initially blocked the source push. The maintainer explicitly
+  approved pushing this branch to `the-webguy23/CommonCopy`, opening a draft PR,
+  and running Windows/macOS CI on 2026-10-16. This authorization also covers
+  necessary build fixes. Command-line Git lacked write authentication, so the
+  authenticated GitHub connection uploaded the identical source tree.
+- Draft PR #2: https://github.com/the-webguy23/CommonCopy/pull/2 ; base is
+  `codex/editorial-themes`. PR #1 and main stay unmerged.
+- Native arm64 compilation, all 23 core tests, signature verification, all 12
+  packaged-helper protocol checks, and native launch passed at `9654146`.
+  Windows Release build and all 28 tests (23 core + 5 WPF) also passed.
+- First packaging failure: PDB symbols were treated as unsigned code in the
+  helper directory. Packaging now omits development symbols; signatures pass.
+- First native screenshot exposed a wrapped wordmark. Runtime refinement
+  `269dd4b` keeps it on one line and expands the sidebar. CI captures Light and
+  Dark startup screenshots for inspection before delivery.
+- Final automated results and downloadable artifact are linked from PR #2.
+  Real-Mac acceptance (Golden Gate 27.0, Accessibility, focus, paste, clipboard
+  restoration, and everyday-app compatibility) remains pending maintainer tests.
