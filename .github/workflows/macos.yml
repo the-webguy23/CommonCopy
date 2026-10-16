@@ -23,6 +23,14 @@ jobs:
         run: bash scripts/build-macos.sh arm64
       - name: Test bridge protocol without modifying a user library
         run: python3 scripts/test-desktop-bridge.py artifacts/macos-arm64/CommonCopy.app/Contents/Helpers/Core/CommonCopy.DesktopBridge
+      - name: Smoke-test the packaged native application
+        run: bash scripts/smoke-test-macos.sh artifacts/macos-arm64/CommonCopy.app
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: macOS-launch-check
+          path: artifacts/macos-launch-check/
+          if-no-files-found: ignore
       - uses: actions/upload-artifact@v4
         with:
           name: CommonCopy-macos-arm64
