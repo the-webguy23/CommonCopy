@@ -24,6 +24,11 @@ each gate separately; keep both PRs unmerged until explicit instructions.
 
 CI can validate build, core/gesture/capture logic, startup, and screenshots.
 Real-device acceptance is required for the actual input/focus/permission workflow.
+Live system-workflow tests also run when the disposable CI Mac is Accessibility
+trusted: a synthetic Command-right-click must reach the real event tap once, and
+capture/paste must work against a separate fixed-text editor process with clipboard
+restoration. These tests skip on non-CI or untrusted sessions rather than changing
+any user's permissions. The fixture executable is never bundled in CommonCopy.app.
 
 ## 2026-10-16: first device launch and selection-capture follow-up
 

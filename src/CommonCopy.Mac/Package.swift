@@ -7,6 +7,7 @@ let package = Package(
     products: [.executable(name: "CommonCopyMac", targets: ["CommonCopyMac"])],
     targets: [
         .executableTarget(name: "CommonCopyMac"),
+        .executableTarget(name: "CommonCopyFixture", path: "Tests/Fixtures/CommonCopyFixture"),
         .testTarget(name: "CommonCopyMacTests", dependencies: ["CommonCopyMac"])
     ]
 )
