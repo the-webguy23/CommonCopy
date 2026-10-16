@@ -106,7 +106,8 @@ struct ManagerView: View {
 
     private var sidebar: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("CommonCopy").font(.system(size: 24, weight: .bold, design: .serif)).padding(.bottom, 12)
+            Text("CommonCopy").font(.system(size: 24, weight: .bold, design: .serif))
+                .lineLimit(1).minimumScaleFactor(0.8).padding(.bottom, 12)
             ScrollView {
                 VStack(alignment: .leading, spacing: 6) {
                     categoryButton("All phrases", id: "all")
@@ -139,7 +140,7 @@ struct ManagerView: View {
                 Button("Export") { store.exportLibrary() }
             }
             Button("Quit CommonCopy") { NSApp.terminate(nil) }
-        }.padding(20).frame(width: 210)
+        }.padding(20).frame(width: 230)
     }
 
     private func categoryButton(_ title: String, id: String) -> some View {
