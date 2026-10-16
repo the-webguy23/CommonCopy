@@ -3,7 +3,7 @@ import AppKit
 @testable import CommonCopyMac
 
 final class CommandClickTests: XCTestCase {
-    @MainActor func testPopupOffersCaptureAndNestedPhrasesButExcludesDisabledPhrases() throws {
+    @MainActor func testPopupOffersCaptureAndNestedPhrasesButExcludesDisabledPhrases() async throws {
         let fixture = """
         {"document":{"phrases":[
           {"id":"one","categoryId":"gpt","title":"Review code","text":"Review this code","isFavorite":true,"isEnabled":true,"useCount":2,"sortOrder":0},
