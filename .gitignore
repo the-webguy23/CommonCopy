@@ -20,6 +20,9 @@ publish/
 
 ## OS files
 .DS_Store
+.build/
+.swiftpm/
+__pycache__/
 Thumbs.db
 
 ## Local CommonCopy data

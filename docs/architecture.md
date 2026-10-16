@@ -6,6 +6,11 @@ CommonCopy should be fast, local-first, understandable to contributors, and depe
 
 ## Components
 
+The macOS prototype adds `CommonCopy.Mac` (SwiftUI/AppKit) and
+`CommonCopy.DesktopBridge` (a bundled local .NET process referencing the core).
+It uses the same validated JSON format, hierarchy, and catalog behavior.
+See [ADR 0002](adr/0002-macos-shell.md) for boundaries and deferred integrations.
+
 ```text
 CommonCopy.Windows
   WPF manager and popup

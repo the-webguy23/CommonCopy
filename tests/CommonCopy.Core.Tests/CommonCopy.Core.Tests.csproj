@@ -20,5 +20,6 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/CommonCopy.Core/CommonCopy.Core.csproj" />
+    <ProjectReference Include="../../src/CommonCopy.DesktopBridge/CommonCopy.DesktopBridge.csproj" />
   </ItemGroup>
 </Project>
