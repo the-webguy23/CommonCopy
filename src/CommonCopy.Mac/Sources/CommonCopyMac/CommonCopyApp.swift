@@ -23,6 +23,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var window: NSWindow?
     private var hotkey: EventHotKeyRef?
     private var eventHandler: EventHandlerRef?
+    private var showingPhraseMenu = false
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -81,7 +82,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func showPhraseMenu() {
-        guard !store.busy, !store.capturing, store.phraseEditor == nil, let state = store.state else {
+        guard !store.busy, !store.capturing, !showingPhraseMenu else { return }
+        guard store.phraseEditor == nil, let state = store.state else {
             showManager()
             return
         }
@@ -90,6 +92,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.unhide(nil)
         window?.orderOut(nil)
         NSApp.activate(ignoringOtherApps: true)
+        showingPhraseMenu = true
+        defer { showingPhraseMenu = false }
         menu.popUp(positioning: nil, at: NSEvent.mouseLocation, in: nil)
     }
 
