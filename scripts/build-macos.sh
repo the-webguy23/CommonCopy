@@ -23,6 +23,7 @@ app="$root/artifacts/macos-$architecture/CommonCopy.app"
 rm -rf "$app"
 mkdir -p "$app/Contents/MacOS" "$app/Contents/Helpers/Core" "$app/Contents/Resources"
 cp "$binary_dir/CommonCopyMac" "$app/Contents/MacOS/"
+cp docs/help/help.html "$app/Contents/Resources/help.html"
 cp src/CommonCopy.Mac/Info.plist "$app/Contents/Info.plist"
 cp src/CommonCopy.Mac/Assets/CommonCopyLogo.svg "$app/Contents/Resources/CommonCopyLogo.svg"
 # Preserve all vector geometry; use the brand reverse colors on dark surfaces.
@@ -66,6 +67,7 @@ codesign --force --sign - --entitlements "$root/artifacts/macos-$architecture/co
   "$app/Contents/Helpers/Core/CommonCopy.DesktopBridge"
 codesign --force --sign - "$app"
 codesign --verify --deep --strict "$app"
+cmp docs/help/help.html "$app/Contents/Resources/help.html"
 
 # Smoke-test the actual packaged helper, using disposable data rather than a real library.
 test_data="$(mktemp -d)"

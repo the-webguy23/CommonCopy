@@ -287,6 +287,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     private var palette: Palette { Palette(dark: store.dark) }
     var body: some View {
+        ScrollView {
         VStack(alignment: .leading, spacing: 22) {
             HStack {
                 Text("Settings").font(.system(size: 26, weight: .medium))
@@ -324,10 +325,27 @@ struct SettingsView: View {
                 }
             }
             Divider()
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Help").font(.headline)
+                Button("Guides, examples & troubleshooting", action: openHelp)
+                Text("Opens the included guide in your browser. Works offline.")
+                    .font(.caption).foregroundColor(palette.muted)
+            }
+            Divider()
             HStack { BrandMark(); Text("CommonCopy\nSave it once. Paste it forever.").font(.caption).foregroundColor(palette.muted) }
             Button("Quit CommonCopy") { NSApp.terminate(nil) }.buttonStyle(.plain).font(.caption)
-        }.padding(28).frame(width: 460).foregroundColor(palette.text).background(palette.background)
+        }.padding(28)
+        }.frame(width: 460, height: 650).foregroundColor(palette.text).background(palette.background)
             .buttonStyle(MonochromeButton(palette: palette)).disabled(store.busy)
+    }
+    private func openHelp() {
+        guard let url = Bundle.main.url(forResource: "help", withExtension: "html") else {
+            store.error = "The included help guide is missing. Reinstall the complete CommonCopy application; keep your phrase data."
+            return
+        }
+        if !NSWorkspace.shared.open(url) {
+            store.error = "Could not open your browser. The included guide is in CommonCopy.app → Contents → Resources → help.html."
+        }
     }
 }
 
