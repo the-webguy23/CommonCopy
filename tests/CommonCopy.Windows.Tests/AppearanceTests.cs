@@ -1,4 +1,8 @@
 using System.Runtime.ExceptionServices;
+using System.IO;
+using System.Windows.Media.Imaging;
+using CommonCopy.Core.Models;
+using CommonCopy.Core.Services;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -11,10 +15,10 @@ public sealed class AppearanceTests
     [Theory]
     [InlineData("Light")]
     [InlineData("Dark")]
-    public void ActualButtonAndSelectedItemTextIsWhite(string theme) => OnSta(() =>
+    public void FilledButtonsAndSelectedItemsKeepWhiteText(string theme) => OnSta(() =>
     {
         var root = CreateRoot(theme);
-        var button = new Button { Content = "Save" };
+        var button = new Button { Content = "Save", Style = (Style)root.FindResource("PrimaryButton") };
         var list = new ListBox();
         list.Items.Add("Favourites");
         list.SelectedIndex = 0;
@@ -53,7 +57,7 @@ public sealed class AppearanceTests
         Layout(root);
 
         Assert.NotEqual(before, ((SolidColorBrush)button.Background).Color);
-        AssertTextWhite(button, "Settings");
+        AssertTextColor(button, "Settings", ((SolidColorBrush)root.FindResource("TextBrush")).Color);
         AssertTextWhite(list, "Day-to-Day");
         root.Resources.MergedDictionaries[0] = Palette("Light");
         Layout(root);
@@ -80,12 +84,68 @@ public sealed class AppearanceTests
         Layout(root);
 
         AssertTextWhite(grid, "Saved reply");
-        AssertTextWhite(grid, "Title");
-        AssertTextWhite(grid, "Enabled");
+        AssertTextColor(grid, "Title", ((SolidColorBrush)root.FindResource("TextBrush")).Color);
+        AssertTextColor(grid, "Enabled", ((SolidColorBrush)root.FindResource("TextBrush")).Color);
         var check = Assert.Single(Descendants<CheckBox>(grid));
         Assert.True(check.IsChecked);
         Assert.False(check.IsHitTestVisible);
         Assert.Contains(Descendants<Border>(check), border => border.CornerRadius.TopLeft > 0);
+    });
+
+    [Fact]
+    public void ActualManagerRendersBothAppearancesAndSearchesWithoutChangingLibrary() => OnSta(() =>
+    {
+        var app = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+        app.Resources.MergedDictionaries.Add(Palette("Light"));
+        app.Resources.MergedDictionaries.Add(new ResourceDictionary
+        {
+            Source = new Uri("/CommonCopy;component/Themes/Controls.xaml", UriKind.Relative),
+        });
+        try
+        {
+            foreach (var theme in new[] { "Light", "Dark" })
+            {
+                app.Resources.MergedDictionaries[0] = Palette(theme);
+                var prompts = new PhraseCategory { Name = "Prompts" };
+                var gpt = new PhraseCategory { Name = "GPT", ParentId = prompts.Id };
+                var document = new PhraseLibraryDocument();
+                document.Categories.AddRange([prompts, gpt]);
+                document.Phrases.AddRange([
+                    new PhraseEntry { Title = "Draft a clear reply", Text = "Write a concise, friendly response to the message below.", CategoryId = gpt.Id, IsFavorite = true },
+                    new PhraseEntry { Title = "Unicode example", Text = "Reusable text — ready when you are. 🧠", CategoryId = gpt.Id },
+                ]);
+                var repository = new JsonPhraseRepository(Path.Combine(Path.GetTempPath(), "CommonCopy-ui-" + Guid.NewGuid()));
+                var window = new MainWindow(repository, document, () => { }, () => { }, () => { });
+                using var tray = new CommonCopy.Windows.Services.TrayIconService(() => { }, () => { }, () => { });
+                window.Show();
+                try
+                {
+                    var search = (TextBox)window.FindName("SearchBox");
+                    var grid = (DataGrid)window.FindName("PhraseGrid");
+                    Assert.Equal(2, grid.Items.Count);
+                    search.Text = "Unicode";
+                    Assert.Single(grid.Items.Cast<object>());
+                    search.Text = "";
+                    grid.SelectedIndex = 0;
+                    window.UpdateLayout();
+                    Assert.Equal(5, ((ListBox)window.FindName("CategoryList")).Items.Count);
+                    Assert.NotNull(window.Icon);
+                    Assert.False(File.Exists(repository.DataPath));
+                    if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true")
+                    {
+                        var bitmap = new RenderTargetBitmap((int)window.ActualWidth, (int)window.ActualHeight, 96, 96, PixelFormats.Pbgra32);
+                        bitmap.Render(window);
+                        var encoder = new PngBitmapEncoder(); encoder.Frames.Add(BitmapFrame.Create(bitmap));
+                        var directory = Path.Combine(Environment.GetEnvironmentVariable("GITHUB_WORKSPACE")!, "artifacts", "menu-check");
+                        Directory.CreateDirectory(directory);
+                        using var stream = File.Create(Path.Combine(directory, $"manager-{theme.ToLowerInvariant()}.png"));
+                        encoder.Save(stream);
+                    }
+                }
+                finally { window.Close(); }
+            }
+        }
+        finally { app.Shutdown(); }
     });
 
     private static StackPanel CreateRoot(string theme)
@@ -115,6 +175,12 @@ public sealed class AppearanceTests
     {
         var label = Assert.Single(Descendants<TextBlock>(root), block => block.Text == text);
         Assert.Equal(Colors.White, ((SolidColorBrush)label.Foreground).Color);
+    }
+
+    private static void AssertTextColor(DependencyObject root, string text, Color color)
+    {
+        var label = Assert.Single(Descendants<TextBlock>(root), block => block.Text == text);
+        Assert.Equal(color, ((SolidColorBrush)label.Foreground).Color);
     }
 
     private static IEnumerable<T> Descendants<T>(DependencyObject root) where T : DependencyObject

@@ -1,119 +1,94 @@
 <Window x:Class="CommonCopy.Windows.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="CommonCopy" Width="1100" Height="740" MinWidth="870" MinHeight="580"
-        WindowStartupLocation="CenterScreen">
-  <DockPanel>
-    <Menu DockPanel.Dock="Top">
-      <MenuItem Header="_File">
-        <MenuItem Header="_Import library…" Click="ImportLibrary_Click" />
-        <MenuItem Header="_Export library…" Click="ExportLibrary_Click" />
-        <Separator />
-        <MenuItem Header="Create _backup…" Click="CreateBackup_Click" />
-        <MenuItem Header="_Restore backup…" Click="RestoreBackup_Click" />
-        <Separator />
-        <MenuItem Header="Open data _folder" Click="OpenDataFolder_Click" />
-        <Separator />
-        <MenuItem Header="E_xit" Click="Exit_Click" />
-      </MenuItem>
-      <MenuItem Header="_Tools">
-        <MenuItem Header="Show _CommonCopy" Click="ShowPopup_Click" />
-        <MenuItem Header="_Settings…" Click="Settings_Click" />
-      </MenuItem>
-      <MenuItem Header="_Help"><MenuItem Header="_About CommonCopy" Click="About_Click" /></MenuItem>
-    </Menu>
-    <StatusBar DockPanel.Dock="Bottom" Padding="12,4">
-      <StatusBarItem><TextBlock x:Name="StatusText" Text="Ready" Foreground="{DynamicResource MutedBrush}" /></StatusBarItem>
-    </StatusBar>
-    <Grid Margin="26,18,26,22">
-      <Grid.RowDefinitions>
-        <RowDefinition Height="Auto" />
-        <RowDefinition Height="Auto" />
-        <RowDefinition Height="*" />
-      </Grid.RowDefinitions>
-      <Grid Margin="0,0,0,20">
-        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-        <StackPanel>
-          <TextBlock Text="COMMONCOPY  /  YOUR PHRASE LIBRARY" FontSize="11" FontWeight="SemiBold"
-                     Foreground="{DynamicResource MutedBrush}" Margin="2,0,0,6" />
-          <TextBlock Text="Words worth keeping." FontSize="30" FontWeight="SemiBold" />
-          <TextBlock Text="Save it once. Paste it forever." Foreground="{DynamicResource MutedBrush}" Margin="2,5,0,0" />
+        Title="CommonCopy" Width="1060" Height="720" MinWidth="900" MinHeight="600"
+        Icon="Assets/CommonCopyLogo.png" WindowStartupLocation="CenterScreen">
+  <Grid>
+    <Grid.ColumnDefinitions><ColumnDefinition Width="220" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+    <Border Background="{DynamicResource RaisedSurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,1,0">
+      <Grid Margin="18,22,18,18">
+        <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,26">
+          <Border Background="White" CornerRadius="4"><Image Source="Assets/CommonCopyLogo.png" Width="38" Height="38" Stretch="Uniform" /></Border>
+          <TextBlock Text="CommonCopy" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" Margin="9,0,0,0" />
         </StackPanel>
-        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-          <Button Content="Settings" Click="Settings_Click" />
-          <Button Content="Show CommonCopy" Style="{StaticResource PrimaryButton}" Click="ShowPopup_Click" />
-        </StackPanel>
-      </Grid>
-      <Border Grid.Row="1" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}"
-              BorderThickness="1" CornerRadius="12" Padding="12,9" Margin="0,0,0,14">
-        <DockPanel>
-          <TextBlock DockPanel.Dock="Left" Text="SEARCH" FontSize="11" FontWeight="SemiBold"
-                     Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center" Margin="7,0,13,0" />
-          <TextBox x:Name="SearchBox" ToolTip="Search phrases" MinWidth="260"
-                   VerticalContentAlignment="Center" TextChanged="SearchBox_TextChanged" />
+        <DockPanel Grid.Row="1" Margin="5,0,0,11">
+          <TextBlock Text="Categories" FontSize="11" Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center" />
+          <Menu DockPanel.Dock="Right" HorizontalAlignment="Right" Background="Transparent" Padding="0">
+            <MenuItem Header="⋯" ToolTip="Category options">
+              <MenuItem Header="Add category…" Click="AddCategory_Click" />
+              <MenuItem Header="Edit category…" Click="EditCategory_Click" />
+              <Separator /><MenuItem Header="Delete category…" Click="DeleteCategory_Click" />
+            </MenuItem>
+          </Menu>
         </DockPanel>
-      </Border>
-      <Grid Grid.Row="2">
-        <Grid.ColumnDefinitions><ColumnDefinition Width="248" /><ColumnDefinition Width="14" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-        <Border Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}"
-                BorderThickness="1" CornerRadius="12" Padding="13">
-          <Grid>
-            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
-            <TextBlock Text="CATEGORIES" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource MutedBrush}" Margin="8,4,0,12" />
-            <ListBox x:Name="CategoryList" Grid.Row="1" BorderThickness="0" DisplayMemberPath="DisplayName"
-                     SelectionChanged="CategoryList_SelectionChanged" />
-            <WrapPanel Grid.Row="2" Margin="0,14,0,0">
-              <Button Content="Add" Click="AddCategory_Click" />
-              <Button Content="Edit" Click="EditCategory_Click" />
-              <Button Content="Delete" Click="DeleteCategory_Click" />
-            </WrapPanel>
-          </Grid>
-        </Border>
-        <Border Grid.Column="2" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}"
-                BorderThickness="1" CornerRadius="12" Padding="16">
-          <Grid>
-            <Grid.RowDefinitions>
-              <RowDefinition Height="Auto" /><RowDefinition Height="*" />
-              <RowDefinition Height="Auto" /><RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-            <DockPanel Margin="4,0,4,13">
-              <TextBlock DockPanel.Dock="Left" Text="Your phrases" FontSize="20" FontWeight="SemiBold" />
-              <TextBlock x:Name="PhraseCountText" DockPanel.Dock="Right" Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center" />
-            </DockPanel>
-            <Border Grid.Row="1" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource BorderBrush}"
-                    Background="{DynamicResource SurfaceBrush}" Padding="5">
-              <DataGrid BorderThickness="0" x:Name="PhraseGrid" AutoGenerateColumns="False" CanUserAddRows="False"
-                        IsReadOnly="True" SelectionMode="Single" SelectionUnit="FullRow" RowHeight="37"
-                        AlternationCount="2" MouseDoubleClick="PhraseGrid_MouseDoubleClick">
-                <DataGrid.Columns>
-                  <DataGridCheckBoxColumn ElementStyle="{StaticResource GridCheck}" Header="★" Binding="{Binding IsFavorite}" Width="42" />
-                  <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="2*" />
-                  <DataGridTextColumn Header="Text preview" Binding="{Binding Text}" Width="4*" />
-                  <DataGridCheckBoxColumn ElementStyle="{StaticResource GridCheck}" Header="Enabled" Binding="{Binding IsEnabled}" Width="75" />
-                  <DataGridTextColumn Header="Uses" Binding="{Binding UseCount}" Width="55" />
-                </DataGrid.Columns>
-              </DataGrid>
-            </Border>
-            <Border Grid.Row="2" Background="{DynamicResource RaisedSurfaceBrush}" CornerRadius="9" Padding="13" Margin="0,12,0,8">
-              <StackPanel>
-                <TextBlock Text="SELECTED PHRASE" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource MutedBrush}" Margin="0,0,0,5" />
-                <TextBlock Text="{Binding ElementName=PhraseGrid, Path=SelectedItem.Title}" FontWeight="SemiBold" />
-                <TextBlock Text="{Binding ElementName=PhraseGrid, Path=SelectedItem.Text}" TextWrapping="Wrap"
-                           MaxHeight="57" Foreground="{DynamicResource MutedBrush}" Margin="0,4,0,0" />
-              </StackPanel>
-            </Border>
-            <WrapPanel Grid.Row="3" Margin="0,4,0,0">
-              <Button Content="Add phrase" Style="{StaticResource PrimaryButton}" Click="AddPhrase_Click" />
-              <Button Content="Edit" Click="EditPhrase_Click" />
-              <Button Content="Duplicate" Click="DuplicatePhrase_Click" />
-              <Button Content="Favorite / Unfavorite" Click="ToggleFavorite_Click" />
-              <Button Content="Move up" Click="MovePhraseUp_Click" />
-              <Button Content="Move down" Click="MovePhraseDown_Click" />
-              <Button Content="Delete" Click="DeletePhrase_Click" />
-            </WrapPanel>
-          </Grid>
-        </Border>
+        <ListBox x:Name="CategoryList" Grid.Row="2" BorderThickness="0" Background="Transparent" Padding="0"
+                 DisplayMemberPath="DisplayName" SelectionChanged="CategoryList_SelectionChanged" />
+        <StackPanel Grid.Row="3" Margin="0,18,0,0">
+          <Button Content="Open phrase menu" Click="ShowPopup_Click" Margin="0,0,0,13" />
+          <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,0,0,13" />
+          <Button Content="Settings" Click="Settings_Click" Margin="0,0,0,6" />
+          <Menu Background="Transparent" Padding="0" HorizontalAlignment="Left">
+            <MenuItem Header="Library">
+              <MenuItem Header="Import library…" Click="ImportLibrary_Click" />
+              <MenuItem Header="Export library…" Click="ExportLibrary_Click" />
+              <Separator /><MenuItem Header="Create backup…" Click="CreateBackup_Click" />
+              <MenuItem Header="Restore backup…" Click="RestoreBackup_Click" />
+              <MenuItem Header="Open data folder" Click="OpenDataFolder_Click" />
+              <Separator /><MenuItem Header="About CommonCopy" Click="About_Click" />
+            </MenuItem>
+            <MenuItem Header="Quit" Click="Exit_Click" />
+          </Menu>
+        </StackPanel>
       </Grid>
+    </Border>
+    <Grid Grid.Column="1" Margin="28,26,28,20">
+      <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+      <Grid Margin="0,0,0,22">
+        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+        <StackPanel><TextBlock Text="Your phrases" FontSize="28" FontWeight="Medium" /><TextBlock Text="Save it once. Paste it forever." FontSize="12" Foreground="{DynamicResource MutedBrush}" Margin="0,7,0,0" /></StackPanel>
+        <Button Grid.Column="1" Content="Add phrase" Style="{StaticResource PrimaryButton}" Click="AddPhrase_Click" VerticalAlignment="Center" Margin="15,0,0,0" />
+      </Grid>
+      <TextBox x:Name="SearchBox" Grid.Row="1" ToolTip="Search phrase titles and text" AutomationProperties.Name="Search your phrases"
+               TextChanged="SearchBox_TextChanged" Margin="0,0,0,20" />
+      <Grid Grid.Row="2" Margin="0,0,0,12">
+        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+        <TextBlock Text="{Binding ElementName=CategoryList, Path=SelectedItem.DisplayName}" FontWeight="Medium" FontSize="13" />
+        <TextBlock Grid.Column="1" x:Name="PhraseCountText" Foreground="{DynamicResource MutedBrush}" FontSize="11" VerticalAlignment="Center" />
+      </Grid>
+      <Border Grid.Row="3" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="1">
+        <DataGrid x:Name="PhraseGrid" BorderThickness="0" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True"
+                  SelectionMode="Single" SelectionUnit="FullRow" RowHeight="43" GridLinesVisibility="Horizontal" HeadersVisibility="Column"
+                  MouseDoubleClick="PhraseGrid_MouseDoubleClick" MinHeight="120">
+          <DataGrid.Columns>
+            <DataGridCheckBoxColumn ElementStyle="{StaticResource GridCheck}" Header="★" Binding="{Binding IsFavorite}" Width="35" />
+            <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="2*" />
+            <DataGridTextColumn Header="Text preview" Binding="{Binding Text}" Width="3*" />
+            <DataGridTextColumn Header="Uses" Binding="{Binding UseCount}" Width="45" />
+          </DataGrid.Columns>
+        </DataGrid>
+      </Border>
+      <Border Grid.Row="4" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="17" Margin="0,15,0,14">
+        <StackPanel>
+          <TextBlock Text="Selected phrase" FontSize="10" Foreground="{DynamicResource MutedBrush}" Margin="0,0,0,8" />
+          <TextBlock Text="{Binding ElementName=PhraseGrid, Path=SelectedItem.Title}" FontWeight="SemiBold" FontSize="14" />
+          <TextBlock Text="{Binding ElementName=PhraseGrid, Path=SelectedItem.Text}" TextWrapping="Wrap" MaxHeight="48" FontSize="12" Foreground="{DynamicResource MutedBrush}" Margin="0,7,0,13" />
+          <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+            <Button Content="Copy" Style="{StaticResource PrimaryButton}" Click="CopyPhrase_Click" Margin="0,0,7,0" IsEnabled="{Binding ElementName=PhraseGrid, Path=SelectedItem.IsEnabled, FallbackValue=False, TargetNullValue=False}" />
+            <Button Grid.Column="1" Content="Edit" Click="EditPhrase_Click" Margin="0" />
+            <Menu Grid.Column="3" Background="Transparent" Padding="0" VerticalAlignment="Center">
+              <MenuItem Header="⋯" ToolTip="Phrase options">
+                <MenuItem Header="Add / remove Favourite" Click="ToggleFavorite_Click" />
+                <MenuItem Header="Enable / disable phrase" Click="ToggleEnabled_Click" />
+                <MenuItem Header="Duplicate phrase" Click="DuplicatePhrase_Click" />
+                <Separator /><MenuItem Header="Move up" Click="MovePhraseUp_Click" /><MenuItem Header="Move down" Click="MovePhraseDown_Click" />
+                <Separator /><MenuItem Header="Delete phrase…" Click="DeletePhrase_Click" />
+              </MenuItem>
+            </Menu>
+          </Grid>
+        </StackPanel>
+      </Border>
+      <StackPanel Grid.Row="5"><TextBlock Text="Ctrl + right-click opens your compact menu." FontSize="10" Foreground="{DynamicResource MutedBrush}" /><TextBlock x:Name="StatusText" Text="Ready" FontSize="10" Foreground="{DynamicResource MutedBrush}" Margin="0,5,0,0" TextTrimming="CharacterEllipsis" /></StackPanel>
     </Grid>
-  </DockPanel>
+  </Grid>
 </Window>

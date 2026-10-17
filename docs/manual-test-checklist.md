@@ -104,3 +104,17 @@ For PR #1 visual approval, test both appearances before merge:
   ampersand titles, screen edges, multiple monitors and 100/150/200% DPI.
 - Search remains in Manage phrases; manager themes still work. Native menu
   follows Windows system styling, independently of the manager theme.
+
+## Monochrome modular revision (Windows 0.4.0)
+
+- Approved logo appears in manager/window/tray. Tray still opens manager/menu/quits.
+- Categories, Add/Edit/Delete and nested Prompts categories remain available.
+- Search and selected phrase preview update; Copy and Edit work on selection.
+- Phrase options expose favourite, enabled, duplicate, reorder and delete.
+- Add/Edit/Capture Save hides the manager only after successful persistence.
+- Light/Dark: outlined and filled controls are legible; selected text stays white.
+- Library menu exposes import/export, backup/restore and data folder; Settings
+  persists activation, appearance and existing behavior preferences.
+- Ctrl-right-click, plain right-click, capture/paste/clipboard restore, keyboard
+  focus, native-menu dismissal and multi-monitor/DPI checks remain required.
+- Device acceptance deferred to Monday, October 19; CI is not device acceptance.

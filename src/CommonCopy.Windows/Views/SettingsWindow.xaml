@@ -75,8 +75,8 @@
     <StackPanel Grid.Row="8" Margin="0,12,0,0">
       <TextBlock Text="Appearance" FontSize="17" FontWeight="SemiBold" Margin="0,0,0,8" />
       <StackPanel Orientation="Horizontal">
-        <RadioButton x:Name="LightThemeBox" GroupName="Appearance" Content="Light · Warm Editorial" Margin="4,4,22,4" />
-        <RadioButton x:Name="DarkThemeBox" GroupName="Appearance" Content="Dark · Burnished Copper" Margin="4" />
+        <RadioButton x:Name="LightThemeBox" GroupName="Appearance" Content="Light" Margin="4,4,22,4" />
+        <RadioButton x:Name="DarkThemeBox" GroupName="Appearance" Content="Dark" Margin="4" />
       </StackPanel>
     </StackPanel>
 

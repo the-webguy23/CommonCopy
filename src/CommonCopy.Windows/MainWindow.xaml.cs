@@ -247,7 +247,7 @@ public partial class MainWindow : Window
             IsEnabled = dialog.PhraseIsEnabled,
             SortOrder = sortOrder,
         });
-        await SaveAndRefreshAsync("Phrase added.");
+        if (await SaveAndRefreshAsync("Phrase added.")) { Hide(); }
     }
 
     private async void EditPhrase_Click(object sender, RoutedEventArgs e)
@@ -269,7 +269,7 @@ public partial class MainWindow : Window
         phrase.IsFavorite = dialog.IsFavorite;
         phrase.IsEnabled = dialog.PhraseIsEnabled;
         phrase.UpdatedAt = DateTimeOffset.UtcNow;
-        await SaveAndRefreshAsync("Phrase updated.", phrase.Id);
+        if (await SaveAndRefreshAsync("Phrase updated.", phrase.Id)) { Hide(); }
     }
 
     private async void DuplicatePhrase_Click(object sender, RoutedEventArgs e)
@@ -295,6 +295,26 @@ public partial class MainWindow : Window
         phrase.IsFavorite = !phrase.IsFavorite;
         phrase.UpdatedAt = DateTimeOffset.UtcNow;
         await SaveAndRefreshAsync(phrase.IsFavorite ? "Added to favorites." : "Removed from favorites.", phrase.Id);
+    }
+
+    private async void CopyPhrase_Click(object sender, RoutedEventArgs e)
+    {
+        if (PhraseGrid.SelectedItem is not PhraseEntry { IsEnabled: true } phrase) { return; }
+        try
+        {
+            Clipboard.SetText(phrase.Text);
+            new PhraseCatalog(document).RecordUse(phrase);
+            await SaveAndRefreshAsync("Phrase copied.", phrase.Id);
+        }
+        catch (Exception error) { ShowOperationError("The phrase could not be copied.", error); }
+    }
+
+    private async void ToggleEnabled_Click(object sender, RoutedEventArgs e)
+    {
+        if (PhraseGrid.SelectedItem is not PhraseEntry phrase) { return; }
+        phrase.IsEnabled = !phrase.IsEnabled;
+        phrase.UpdatedAt = DateTimeOffset.UtcNow;
+        await SaveAndRefreshAsync(phrase.IsEnabled ? "Phrase enabled." : "Phrase disabled.", phrase.Id);
     }
 
     private async void DeletePhrase_Click(object sender, RoutedEventArgs e)
@@ -477,7 +497,7 @@ public partial class MainWindow : Window
     private void Exit_Click(object sender, RoutedEventArgs e) => exit();
 
     private void About_Click(object sender, RoutedEventArgs e) => MessageBox.Show(
-        "CommonCopy\nSave it once. Paste it forever.\n\nWindows available; macOS planned.\nLicensed under the MIT License.",
+        "CommonCopy\nSave it once. Paste it forever.\n\nWindows and macOS.\nLicensed under the MIT License.",
         "About CommonCopy",
         MessageBoxButton.OK,
         MessageBoxImage.Information);
