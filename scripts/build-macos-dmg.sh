@@ -30,26 +30,25 @@ PY
 osascript - "$mount" <<'APPLESCRIPT'
 on run argv
   tell application "Finder"
-    set diskFolder to disk "CommonCopy Installer"
-    open diskFolder
-    delay 1
-    tell container window of diskFolder
-      set current view to icon view
-      set toolbar visible to false
-      set statusbar visible to false
-      set bounds to {100, 100, 820, 580}
-      set viewOptions to icon view options
-      set arrangement of viewOptions to not arranged
-      set icon size of viewOptions to 110
-      set text size of viewOptions to 12
-      set background picture of viewOptions to file ".background:installer.png" of diskFolder
+    tell disk "CommonCopy Installer"
+      open
+      delay 1
+      set current view of container window to icon view
+      set toolbar visible of container window to false
+      set statusbar visible of container window to false
+      set bounds of container window to {100, 100, 820, 580}
+      set theViewOptions to the icon view options of the container window
+      set arrangement of theViewOptions to not arranged
+      set icon size of theViewOptions to 110
+      set text size of theViewOptions to 12
+      set background picture of theViewOptions to file ".background:installer.png"
+      set position of item "CommonCopy.app" to {210, 220}
+      set position of item "Applications" to {510, 220}
+      close container window
+      open
+      update without registering applications
+      delay 3
     end tell
-    set position of item "CommonCopy.app" of diskFolder to {210, 220}
-    set position of item "Applications" of diskFolder to {510, 220}
-    close container window of diskFolder
-    open diskFolder
-    update diskFolder without registering applications
-    delay 3
   end tell
 end run
 APPLESCRIPT
