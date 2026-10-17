@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Privacy — CommonCopy</title>
     <meta name="description" content="How CommonCopy stores phrases, uses the clipboard, and protects user privacy.">
-    <meta name="theme-color" content="#071a34">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%23071a34'/%3E%3Cpath d='M15 18h34v7H15zm0 11h25v7H15zm0 11h30v7H15z' fill='%2365d6ff'/%3E%3C/svg%3E">
+    <meta name="theme-color" content="#242623">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%23a65a3c'/%3E%3Cpath d='M15 18h34v7H15zm0 11h25v7H15zm0 11h30v7H15z' fill='%23f9f7f1'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="styles.css">
     <script src="script.js" defer></script>
   </head>
@@ -28,10 +28,10 @@
         </div>
       </header>
       <div class="container content-shell">
-        <section class="content-card"><h2>Phrase storage</h2><p>Your categories, phrases, settings, favorites, and recent-use information are stored in a readable JSON file under your Windows user profile. CommonCopy does not upload this file.</p></section>
-        <section class="content-card"><h2>Clipboard use</h2><p>When you choose a phrase, CommonCopy temporarily places its text on the Windows clipboard and sends the normal paste shortcut to the application you were using. When you explicitly choose <strong>Save highlighted text…</strong>, it sends the normal copy shortcut once and reads that selected text into the save form. CommonCopy does not continuously inspect the clipboard or application content. It attempts to restore the clipboard’s previous text afterward, and clipboard contents are never transmitted.</p></section>
-        <section class="content-card"><h2>Global input access</h2><p>Windows input hooks are used only to detect the configured Ctrl + Right Click gesture and global keyboard shortcut. CommonCopy does not record typed text, build a keystroke history, or continuously capture application content.</p></section>
-        <section class="content-card"><h2>Website data</h2><p>This initial website includes no cookies, advertising network scripts, tracking pixels, or analytics. If aggregate website analytics are introduced later, this page will be updated before they are enabled.</p></section>
+        <section class="content-card"><h2>Phrase storage</h2><p>Your categories, phrases, settings, favorites, and recent-use information are stored in a readable JSON file under your user profile on Windows or in Application Support on Mac. CommonCopy does not upload this file.</p></section>
+        <section class="content-card"><h2>Clipboard use</h2><p>When you choose a phrase, CommonCopy temporarily places its text on the system clipboard and sends the normal paste shortcut to the application you were using. When you explicitly choose <strong>Save highlighted text…</strong>, it sends the normal copy shortcut once and reads that selected text into the save form. CommonCopy does not continuously inspect the clipboard or application content. It attempts to restore the clipboard’s previous text afterward, and clipboard contents are never transmitted.</p></section>
+        <section class="content-card"><h2>Global input access</h2><p>Windows uses a mouse hook for Ctrl + right-click and a registered keyboard shortcut. Mac uses a mouse-only event tap for Command + right-click and a registered shortcut; Accessibility permission is required for activation, capture, and paste. CommonCopy does not record typed text, build a keystroke history, or continuously capture application content.</p></section>
+        <section class="content-card"><h2>Website data</h2><p>This preview includes no cookies, advertising network scripts, tracking pixels, or analytics. The menu example uses temporary browser memory and does not upload its text. The hosting provider processes standard website requests. Third-party advertising is planned for the website only. The provider, relevant data practices, and any required choices will be documented here before integration is enabled.</p></section>
         <section class="content-card"><h2>Sensitive information</h2><p>CommonCopy is not an encrypted secrets vault. Do not store passwords, access tokens, private keys, recovery codes, or other authentication credentials in it.</p></section>
         <section class="content-card"><h2>Questions and changes</h2><p>The public repository will provide an issue tracker and security-reporting instructions when the project launches. Material privacy changes will be documented in the project changelog and on this page.</p></section>
       </div>

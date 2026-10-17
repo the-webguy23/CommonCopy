@@ -4,9 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>CommonCopy — Save it once. Paste it forever.</title>
-    <meta name="description" content="CommonCopy is a free, open-source reusable text utility. Available for Windows now; macOS is planned.">
-    <meta name="theme-color" content="#071a34">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%23071a34'/%3E%3Cpath d='M15 18h34v7H15zm0 11h25v7H15zm0 11h30v7H15z' fill='%2365d6ff'/%3E%3C/svg%3E">
+    <meta name="description" content="Save phrases, prompts, and snippets once. Bring them back from a compact menu on Windows and Mac. Public downloads are being prepared.">
+    <meta name="theme-color" content="#242623">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%23a65a3c'/%3E%3Cpath d='M15 18h34v7H15zm0 11h25v7H15zm0 11h30v7H15z' fill='%23f9f7f1'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="styles.css">
     <script src="script.js" defer></script>
   </head>
@@ -35,12 +35,12 @@
       <section class="hero">
         <div class="container hero-grid">
           <div class="hero-content">
-            <p class="eyebrow">Windows available · macOS planned</p>
+            <p class="eyebrow">Windows & macOS · public release in preparation</p>
             <h1>Save it once. Paste it forever.</h1>
-            <p class="hero-copy">Save the text you use every day—emails, answers, code, signatures, and templates—then insert it anywhere in seconds.</p>
+            <p class="hero-copy">Your everyday replies. The prompt you finally got right. Save your most useful text, organize it your way, and bring it back from a small menu right where you’re working.</p>
             <div class="hero-actions">
-              <a class="button button-primary" href="#download">Download for Windows <span aria-hidden="true">↓</span></a>
-              <a class="button button-secondary" href="https://github.com/the-webguy23/CommonCopy">View source on GitHub</a>
+              <a class="button button-primary" href="#download">Windows & Mac downloads <span aria-hidden="true">↓</span></a>
+              <a class="button button-secondary" href="#menu-demo">Try the compact menu <span aria-hidden="true">↗</span></a>
             </div>
             <div class="trust-line" aria-label="Product details">
               <span>Local-first</span>
@@ -49,38 +49,24 @@
             </div>
           </div>
 
-          <div class="hero-visual" aria-label="Preview of the CommonCopy phrase manager">
-            <div class="app-window">
-              <div class="window-bar">
-                <span class="window-title"><span class="window-icon">CC</span> CommonCopy</span>
-                <span class="window-controls" aria-hidden="true">— □ ×</span>
+          <div class="hero-visual" id="menu-demo" aria-label="Interactive CommonCopy menu example">
+            <div class="demo-heading"><span>YOUR WORDS. WITHIN REACH.</span><div class="platform-switch" role="group" aria-label="Example platform"><button type="button" data-platform="mac" aria-pressed="true">macOS</button><button type="button" data-platform="windows" aria-pressed="false">Windows</button></div></div>
+            <div class="demo-workspace">
+              <div class="demo-message"><label for="demo-message">A reply, without the retyping.</label><textarea id="demo-message" placeholder="Hi Alex,&#10;&#10;Choose a phrase from the menu below…" spellcheck="false"></textarea></div>
+              <div class="compact-menu" aria-label="Example phrase menu">
+                <button type="button" data-capture-demo>Save highlighted text…</button><hr>
+                <button type="button" data-demo-group="favourites" aria-expanded="false">Favourites <span aria-hidden="true">›</span></button>
+                <button type="button" data-demo-group="common" aria-expanded="false">Commonly Used <span aria-hidden="true">›</span></button><hr>
+                <button type="button" data-demo-group="prompts" aria-expanded="false">Prompts <span aria-hidden="true">›</span></button>
+                <button type="button" data-demo-group="code" aria-expanded="false">Code <span aria-hidden="true">›</span></button>
+                <button type="button" data-demo-group="daily" aria-expanded="false">Day-to-Day <span aria-hidden="true">›</span></button><hr>
+                <a href="#features">Manage phrases…</a>
+                <div class="demo-submenu" data-demo-submenu hidden></div>
               </div>
-              <div class="window-toolbar">
-                <div class="mock-search">Search phrases…</div>
-                <div class="mock-button">Show CommonCopy</div>
-              </div>
-              <div class="window-content">
-                <aside class="mock-sidebar">
-                  <p class="mock-label">Categories</p>
-                  <span class="mock-category">All phrases</span>
-                  <span class="mock-category">Favourites</span>
-                  <span class="mock-category">Commonly Used</span>
-                  <span class="mock-category active">Prompts</span>
-                  <span class="mock-category">Code</span>
-                  <span class="mock-category">Day-to-Day</span>
-                </aside>
-                <div class="mock-table">
-                  <div class="mock-table-head"><span>Title</span><span>Text preview</span><span>Status</span></div>
-                  <div class="mock-row"><strong>Draft a clear reply</strong><span>Draft a clear, friendly reply…</span><span class="status-pill">Ready</span></div>
-                  <div class="mock-row"><strong>HTML document</strong><span>&lt;!doctype html&gt;…</span><span class="status-pill">Ready</span></div>
-                  <div class="mock-row"><strong>Email signature</strong><span>Best regards, Alex…</span><span class="status-pill">Ready</span></div>
-                </div>
-              </div>
-              <div class="shortcut-card">
-                <div><kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>Space</kbd></div>
-                <span>Open anywhere</span>
-              </div>
+              <p class="demo-feedback" role="status" aria-live="polite" data-demo-feedback>Choose a category, then a phrase.</p>
             </div>
+            <div class="demo-footnote"><span><kbd data-demo-modifier>⌘</kbd> + right-click in the desktop app</span><span>Interactive illustration · sample text only</span></div>
+            <button type="button" class="demo-reset" data-demo-reset>Reset example</button>
           </div>
         </div>
       </section>
@@ -88,8 +74,8 @@
       <aside class="sponsor-strip" aria-label="Sponsorship">
         <div class="container sponsor-inner">
           <span class="sponsor-label">Sponsor</span>
-          <span>This focused placement is available to developer tools and productivity companies.</span>
-          <a href="sponsor.html">View sponsorship options</a>
+          <span>Website advertising supports the project. The desktop app stays ad-free.</span>
+          <a href="sponsor.html">About website advertising</a>
         </div>
       </aside>
 
@@ -98,7 +84,7 @@
           <div class="section-heading">
             <p class="eyebrow">How it works</p>
             <h2>Three steps between you and less repetition.</h2>
-            <p>CommonCopy stays quietly in the Windows notification area until you need it.</p>
+            <p>CommonCopy stays quietly in the Windows notification area or Mac menu bar until you need it.</p>
           </div>
           <div class="steps-grid">
             <article class="step-card">
@@ -109,12 +95,12 @@
             <article class="step-card">
               <span class="step-number">2</span>
               <h3>Open CommonCopy</h3>
-              <p>Press Ctrl + Shift + Space or Ctrl + Right Click from almost any application.</p>
+              <p>Use Ctrl + right-click on Windows or Command + right-click on Mac. A keyboard shortcut is available too.</p>
             </article>
             <article class="step-card">
               <span class="step-number">3</span>
               <h3>Choose and continue</h3>
-              <p>Select a phrase and CommonCopy pastes it into the field you were already using.</p>
+              <p>Choose a phrase and paste it into the field you were using. After saving captured text, the window closes so you can carry on.</p>
             </article>
           </div>
         </div>
@@ -127,12 +113,12 @@
             <h2>Simple enough to disappear. Useful enough to keep.</h2>
           </div>
           <div class="feature-grid">
-            <article class="feature-card large"><span class="feature-symbol">⌘</span><h3>System-wide access</h3><p>Open your phrases beside the cursor or with a keyboard shortcut while working in other Windows applications.</p></article>
+            <article class="feature-card large"><span class="feature-symbol">⌘</span><h3>System-wide access</h3><p>Open your phrases beside the cursor or with a keyboard shortcut while working in other applications.</p></article>
             <article class="feature-card large"><span class="feature-symbol">＋</span><h3>Capture highlighted text</h3><p>Select text in a webpage, document, email, or PDF and save it as a categorized phrase from the same popup.</p></article>
-            <article class="feature-card large"><span class="feature-symbol">⌕</span><h3>Fast search</h3><p>Find long replies and small snippets by title or content without digging through documents.</p></article>
+            <article class="feature-card large"><span class="feature-symbol">⌕</span><h3>Fast search</h3><p>Search phrase titles and text in the manager. Keep the quick menu small, with Favourites, Commonly Used, and nested categories.</p></article>
             <article class="feature-card"><span class="feature-symbol">★</span><h3>Favourites and Commonly Used</h3><p>Keep favourites close; sort commonly used phrases by use count, then most-recent use.</p></article>
             <article class="feature-card"><span class="feature-symbol">↕</span><h3>Import and export</h3><p>Move or back up your phrase library using a readable JSON file.</p></article>
-            <article class="feature-card"><span class="feature-symbol">◎</span><h3>Portable option</h3><p>Choose the installer or use the portable ZIP when installation is not appropriate.</p></article>
+            <article class="feature-card"><span class="feature-symbol">◎</span><h3>Categories that fit you</h3><p>Keep prompts under GPT, Image based, or a project name. Add subcategories and organize phrases in the way you work.</p></article>
           </div>
         </div>
       </section>
@@ -157,31 +143,17 @@
       <section class="section" id="download">
         <div class="container downloads-layout">
           <div class="section-heading">
-            <p class="eyebrow">Local preview release</p>
-            <h2>Download CommonCopy for Windows.</h2>
-            <p>Choose the normal installer for everyday use or the portable ZIP for a self-contained folder.</p>
-            <div class="release-meta">
-              <span class="tag">v0.2.0 development build</span>
-              <span class="tag">Windows x64</span>
-              <span class="tag">Unsigned</span>
-            </div>
+            <p class="eyebrow">Public release in preparation</p>
+            <h2>A small menu.<br>On Windows and Mac.</h2>
+            <p>Both versions are in private testing. We’re finishing the installers and compatibility checks before opening public downloads.</p>
+            <div class="release-meta"><span class="tag">Windows x64</span><span class="tag">Apple Silicon Mac</span><span class="tag">Coming soon</span></div>
           </div>
           <div>
             <div class="download-stack">
-              <article class="download-card">
-                <div><h3>Windows installer</h3><p>Guided installation, clean uninstall, and an optional start-with-Windows setting.</p></div>
-                <a class="button button-primary" href="downloads/CommonCopy-Setup-x64.exe" download>Download .exe</a>
-              </article>
-              <article class="download-card">
-                <div><h3>Portable ZIP</h3><p>Extract the folder and run CommonCopy without installing it.</p></div>
-                <a class="button button-outline" href="downloads/CommonCopy-Portable-x64.zip" download>Download .zip</a>
-              </article>
-              <article class="download-card">
-                <div><h3>SHA-256 checksums</h3><p>Verify that your downloaded release files arrived unchanged.</p></div>
-                <a class="button button-outline" href="downloads/SHA256SUMS.txt" download>Checksums</a>
-              </article>
+              <article class="download-card"><div><h3>CommonCopy for Windows</h3><p>Ctrl + right-click. Compact native menu, phrase manager, and highlighted-text capture.</p><p class="release-status">Compact-menu device testing pending</p></div><button class="button button-unavailable" type="button" disabled>Windows · coming soon</button></article>
+              <article class="download-card"><div><h3>CommonCopy for macOS</h3><p>Command + right-click. Native menu, highlighted-text capture, and automatic dismissal after Save.</p><p class="release-status">Apple Silicon · public installer in preparation</p></div><button class="button button-unavailable" type="button" disabled>macOS · coming soon</button></article>
             </div>
-            <p class="download-note">This development build is not code-signed, so Windows may identify the publisher as unknown. Public distribution will follow broader compatibility testing.</p>
+            <p class="download-note">Public installers, version details, installation guidance, and SHA-256 checksums will appear here together. Private test builds are not offered as public releases.</p>
           </div>
         </div>
       </section>
@@ -193,12 +165,12 @@
             <h2>Useful answers before you install.</h2>
           </div>
           <div class="faq-list">
-            <details><summary>Does CommonCopy work in every Windows application?</summary><p>It is designed to paste into standard text fields across Windows. Some elevated, protected, remote, or unusually implemented applications may restrict simulated paste input and require additional compatibility work.</p></details>
-            <details><summary>Does it replace the normal right-click menu?</summary><p>No. Your normal right-click remains unchanged. CommonCopy appears only when you use its configured Ctrl + Right Click gesture, or its keyboard shortcut.</p></details>
+            <details><summary>Does CommonCopy work in every application?</summary><p>It is designed for standard text fields on Windows and Mac. Some elevated, protected, remote, or unusually implemented applications may restrict copy and paste. Mac activation, capture, and paste require Accessibility permission.</p></details>
+            <details><summary>Does it replace the normal right-click menu?</summary><p>No. Your normal right-click remains unchanged. CommonCopy appears only when you use Ctrl + right-click on Windows, Command + right-click on Mac, or its keyboard shortcut.</p></details>
             <details><summary>Can it save text I highlight in another app?</summary><p>Yes. Highlight selectable text, open CommonCopy, and choose <strong>Save highlighted text…</strong>. You can review the generated title and category before saving. Copy-protected or image-only content may not be available.</p></details>
-            <details><summary>Where are my phrases stored?</summary><p>CommonCopy stores them as local JSON under your Windows user profile. The manager also provides import, export, backup, and restore tools.</p></details>
+            <details><summary>Where are my phrases stored?</summary><p>CommonCopy stores them as local JSON under your user profile: AppData on Windows and Application Support on Mac. The manager provides import and export; the application also keeps a rotating previous-version backup.</p></details>
             <details><summary>Can I store passwords in CommonCopy?</summary><p>No. The initial version stores phrases as readable local text. Use a dedicated password manager for passwords, authentication codes, and recovery keys.</p></details>
-            <details><summary>Is CommonCopy really open source?</summary><p>Yes. The application is MIT licensed. The source is available at <a href="https://github.com/the-webguy23/CommonCopy">GitHub</a>.</p></details>
+            <details><summary>Is CommonCopy open source?</summary><p>The application uses the MIT license. Public source access and release information will be linked here when the project launches.</p></details><details><summary>Will there be ads inside the app?</summary><p>No. Advertising is limited to this website. No advertising provider is connected to this preview; the privacy page will explain the provider and any required choices before ads are enabled.</p></details>
           </div>
         </div>
       </section>
@@ -206,10 +178,10 @@
       <section class="section">
         <div class="container open-source-panel" id="open-source">
           <div>
-            <h2>Free software, built in the open.</h2>
-            <p>CommonCopy’s desktop application remains free and open source. Browse the source, report issues, and contribute through the public repository.</p>
+            <h2>Your library. Your control.</h2>
+            <p>CommonCopy’s desktop application is MIT licensed and stores phrases locally. Public release notes and source access will be available alongside the downloads.</p>
           </div>
-          <a class="button button-secondary" href="https://github.com/the-webguy23/CommonCopy">View repository</a>
+          <a class="button button-secondary" href="privacy.html">Read our privacy details</a>
         </div>
       </section>
     </main>
@@ -218,7 +190,7 @@
       <div class="container footer-inner">
         <div>
           <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">CC</span><span class="footer-brand-text">CommonCopy</span></a>
-          <p>A local-first Windows utility for the text you use every day.</p>
+          <p>A local-first Windows and Mac utility for the text you use every day.</p>
         </div>
         <nav class="footer-links" aria-label="Footer navigation">
           <a href="#download">Download</a>
@@ -229,5 +201,6 @@
       </div>
       <div class="container footer-bottom">© <span data-current-year></span> CommonCopy contributors · MIT licensed</div>
     </footer>
+    <dialog class="demo-dialog" data-demo-dialog aria-labelledby="demo-save-title"><form data-demo-form><button type="button" class="dialog-close" data-demo-cancel aria-label="Close example editor">×</button><p class="eyebrow">Interactive example</p><h2 id="demo-save-title">Save a useful phrase.</h2><label for="demo-title">Title</label><input id="demo-title" required maxlength="80" value="My saved prompt"><label for="demo-body">Text</label><textarea id="demo-body" required rows="4"></textarea><p>Saved under Prompts → GPT in this example. Temporary browser memory only; no text is uploaded or written to disk.</p><div class="dialog-actions"><button type="button" class="button button-outline" data-demo-cancel>Cancel</button><button type="submit" class="button button-primary">Save phrase</button></div></form></dialog>
   </body>
 </html>
