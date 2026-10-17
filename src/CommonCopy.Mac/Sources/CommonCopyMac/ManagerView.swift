@@ -224,7 +224,7 @@ struct ManagerView: View {
                 Text(title).lineLimit(2).frame(maxWidth: .infinity, alignment: .leading)
             }.font(.system(size: 12)).padding(.horizontal, 10).padding(.vertical, 10)
                 .foregroundColor(selected ? .white : palette.text)
-                .background(selected ? Color(hex: 0x222222) : .clear)
+                .background(selected ? Color(hex: store.dark ? 0x3A3A3A : 0x222222) : .clear)
                 .clipShape(RoundedRectangle(cornerRadius: 7))
         }.buttonStyle(.plain)
     }
