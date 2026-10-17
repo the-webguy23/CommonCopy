@@ -135,3 +135,19 @@ options (edit/duplicate/favourite/enable/delete), search, Copy/Paste, capture,
 Save auto-dismissal, cancel and failed saves. The 0.2.2 capture/save/auto-dismiss
 workflow passed the maintainer's actual Mac test; the redesign needs a fresh
 visual/workflow check.
+
+
+## Branded DMG installation review
+
+Open CommonCopy-0.3.0-macos-arm64.dmg. In the branded Finder window, drag the
+CommonCopy application onto Applications. For an update, quit the running app
+first and choose Replace. Open CommonCopy from Applications, then eject the
+CommonCopy Installer disk. Do not run the utility from inside the disk image.
+Saved phrases in Application Support must remain untouched.
+
+Check the logo, instructions, real Applications shortcut and drag/copy behavior;
+then confirm the installed app opens and Command + right-click, capture, Save
+and automatic dismissal still work. The DMG does not remove the existing
+private-signing/Gatekeeper or stale Accessibility-entry limitations documented
+above. Developer ID/notarization are required before the intended public flow
+can be considered complete.

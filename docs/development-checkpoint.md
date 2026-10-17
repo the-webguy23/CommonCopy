@@ -129,3 +129,23 @@ and moves infrequent phrase/category actions into menus. Light/Dark persisted
 values remain compatible. Approved original logo is packaged unchanged and used
 to derive standard app icon sizes. Source asset Git blob:
 43f93281b2e033e8d264758461c9d84a3e8843a7. Desktop remains local-only and ad-free.
+
+
+## 2026-10-16: Mac redesign accepted; installer implementation
+
+Maintainer confirmed Mac 0.3.0 works fully on the MacBook, then authorized the
+previously approved branded DMG installation flow. This is the tested Mac UI /
+workflow baseline; Windows 0.4.0 physical review remains Monday October 19.
+
+The installer uses a native Finder window, the approved logo unchanged,
+monochrome artwork, the actual draggable application bundle and a real
+/Applications symlink. A read-only compressed DMG carries Finder layout metadata.
+Packaging tests verify the image, link, signature, byte-identical bundle copying
+and launch from a copied bundle, with installer screenshots for visual review.
+No phrase data or application runtime logic is changed by this packaging work.
+
+This improves installation presentation. Private ad-hoc signing still requires
+the known app-specific Gatekeeper repair on affected devices, and replacement
+builds can require removal/re-addition of Accessibility permissions. Developer ID
+signing/notarization remain public-release gates; no paid enrollment authorized.
+PR #2 remains draft/unmerged. Actual DMG device acceptance is pending delivery.
