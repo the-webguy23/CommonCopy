@@ -154,3 +154,13 @@ The maintainer also requested the newly created SVG master be integrated during
 installer work. Use Library CommonCopy_Approved_Logo.svg unchanged (contour
 master, not the editable construction derivative). Mac manager and installer
 load that SVG; native icon rasters are derived from it at packaging time.
+
+
+## 2026-10-16: Retina installer artwork and transparent manager mark
+
+Maintainer screenshots exposed standard-resolution DMG background enlargement
+on Retina and the explicit white manager logo tile. Installer artwork now carries
+1x/2x TIFF representations at the same logical dimensions, with dimensions checked
+after encoding. The manager uses transparent SVG directly, with reverse brand
+colors in Dark appearance. App icon tiles remain unchanged. Device verification
+of sharpness and transparent Light/Dark presentation is pending the new build.

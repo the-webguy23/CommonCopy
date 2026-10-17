@@ -22,7 +22,7 @@ PY
 )"
 [[ "$(readlink "$mount/Applications")" == /Applications ]]
 [[ -s "$mount/CommonCopy.app/Contents/Resources/CommonCopyLogo.svg" ]]
-[[ -s "$mount/.DS_Store" && -s "$mount/.background/installer.png" ]]
+[[ -s "$mount/.DS_Store" && -s "$mount/.background/installer.tiff" ]]
 codesign --verify --deep --strict "$mount/CommonCopy.app"
 # The drag operation copies a bundle. Test that same copy without touching /Applications.
 ditto "$mount/CommonCopy.app" "$work/CommonCopy.app"

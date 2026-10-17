@@ -25,6 +25,14 @@ mkdir -p "$app/Contents/MacOS" "$app/Contents/Helpers/Core" "$app/Contents/Resou
 cp "$binary_dir/CommonCopyMac" "$app/Contents/MacOS/"
 cp src/CommonCopy.Mac/Info.plist "$app/Contents/Info.plist"
 cp src/CommonCopy.Mac/Assets/CommonCopyLogo.svg "$app/Contents/Resources/CommonCopyLogo.svg"
+# Preserve all vector geometry; use the brand reverse colors on dark surfaces.
+python3 - "$app/Contents/Resources" <<'PYLOGO'
+from pathlib import Path
+import sys
+resources = Path(sys.argv[1])
+source = (resources / 'CommonCopyLogo.svg').read_text()
+(resources / 'CommonCopyLogoReverse.svg').write_text(source.replace('fill="#000000"', 'fill="#FFFFFF"').replace('fill="#585858"', 'fill="#AAAAAA"'))
+PYLOGO
 # Render platform icon sizes directly from the approved vector master.
 swift scripts/render-macos-icon.swift src/CommonCopy.Mac/Assets/CommonCopyLogo.svg "$app/Contents/Resources/CommonCopyLogo.png"
 # Derive standard macOS icon sizes from the approved artwork, without redrawing it.

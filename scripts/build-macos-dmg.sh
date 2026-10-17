@@ -17,7 +17,7 @@ trap cleanup EXIT
 mkdir -p "$work/staging/.background"
 ditto "$app" "$work/staging/CommonCopy.app"
 ln -s /Applications "$work/staging/Applications"
-swift scripts/render-dmg-background.swift src/CommonCopy.Mac/Assets/CommonCopyLogo.svg "$work/staging/.background/installer.png"
+swift scripts/render-dmg-background.swift src/CommonCopy.Mac/Assets/CommonCopyLogo.svg "$work/staging/.background/installer.tiff"
 hdiutil create -quiet -volname "CommonCopy Installer" -srcfolder "$work/staging" -fs HFS+ -format UDRW "$work/writable.dmg"
 hdiutil attach -readwrite -noverify -noautoopen -plist "$work/writable.dmg" > "$work/attach.plist"
 mount="$(python3 - "$work/attach.plist" <<'PY'
@@ -41,7 +41,7 @@ on run argv
       set arrangement of theViewOptions to not arranged
       set icon size of theViewOptions to 110
       set text size of theViewOptions to 12
-      set background picture of theViewOptions to file ".background:installer.png"
+      set background picture of theViewOptions to file ".background:installer.tiff"
       set position of item "CommonCopy.app" to {210, 220}
       set position of item "Applications" to {510, 220}
       close container window

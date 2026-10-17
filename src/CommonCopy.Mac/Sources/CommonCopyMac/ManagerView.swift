@@ -35,12 +35,12 @@ struct MonochromeButton: ButtonStyle {
 }
 
 struct BrandMark: View {
+    @Environment(\.colorScheme) private var colorScheme
     var body: some View {
         if let image = NSImage(contentsOf: Bundle.main.bundleURL
-            .appendingPathComponent("Contents/Resources/CommonCopyLogo.svg")) {
+            .appendingPathComponent("Contents/Resources/" + (colorScheme == .dark ? "CommonCopyLogoReverse.svg" : "CommonCopyLogo.svg"))) {
             Image(nsImage: image).resizable().scaledToFit()
-                .frame(width: 38, height: 38).background(Color.white)
-                .clipShape(RoundedRectangle(cornerRadius: 4)).accessibilityHidden(true)
+                .frame(width: 38, height: 38).accessibilityHidden(true)
         }
     }
 }
