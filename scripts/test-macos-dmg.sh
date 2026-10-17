@@ -39,7 +39,7 @@ osascript - "$mount" <<'APPLESCRIPT'
 on run argv
   tell application "Finder"
     activate
-    open POSIX file (item 1 of argv)
+    open disk "CommonCopy Installer"
     delay 2
   end tell
 end run
