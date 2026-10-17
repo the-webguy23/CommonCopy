@@ -12,8 +12,8 @@
     <Setter Property="Padding" Value="13,7" />
     <Setter Property="Margin" Value="3" />
     <Setter Property="MinHeight" Value="34" />
-    <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
-    <Setter Property="Foreground" Value="{DynamicResource AccentForegroundBrush}" />
+    <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="Cursor" Value="Hand" />
@@ -21,12 +21,13 @@
       <Setter.Value>
         <ControlTemplate TargetType="Button">
           <Border x:Name="Shell" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
-                  BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                  BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="17" Padding="{TemplateBinding Padding}">
             <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                               VerticalAlignment="{TemplateBinding VerticalContentAlignment}" RecognizesAccessKey="True" />
           </Border>
           <ControlTemplate.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
+              <Setter Property="Foreground" Value="{DynamicResource SelectionForegroundBrush}" />
               <Setter TargetName="Shell" Property="BorderBrush" Value="{DynamicResource SelectionBrush}" />
               <Setter TargetName="Shell" Property="Background" Value="{DynamicResource HoverBrush}" />
             </Trigger>
@@ -218,8 +219,8 @@
     <Setter Property="Padding" Value="4" />
   </Style>
   <Style TargetType="MenuItem">
-    <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
-    <Setter Property="Foreground" Value="{DynamicResource AccentForegroundBrush}" />
+    <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
     <Setter Property="Padding" Value="10,6" />
     <Setter Property="Template">
       <Setter.Value>
@@ -234,13 +235,13 @@
                 <ContentPresenter ContentSource="Icon" VerticalAlignment="Center" />
                 <ContentPresenter Grid.Column="1" ContentSource="Header" RecognizesAccessKey="True" VerticalAlignment="Center" />
                 <TextBlock Grid.Column="2" Text="{TemplateBinding InputGestureText}" Margin="18,0,0,0" VerticalAlignment="Center" />
-                <Path x:Name="Arrow" Grid.Column="3" Data="M 0 0 L 4 4 L 0 8" Stroke="White" StrokeThickness="1.5"
+                <Path x:Name="Arrow" Grid.Column="3" Data="M 0 0 L 4 4 L 0 8" Stroke="{TemplateBinding Foreground}" StrokeThickness="1.5"
                       HorizontalAlignment="Right" VerticalAlignment="Center" Visibility="Collapsed" />
               </Grid>
             </Border>
             <Popup x:Name="PART_Popup" IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}"
                    Placement="Right" PlacementTarget="{Binding ElementName=Shell}" AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
-              <Border Background="{DynamicResource AccentBrush}" BorderBrush="{DynamicResource BorderBrush}"
+              <Border Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}"
                       BorderThickness="1" CornerRadius="8" Padding="4">
                 <ScrollViewer CanContentScroll="True"><ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle" /></ScrollViewer>
               </Border>
@@ -257,8 +258,8 @@
               <Setter TargetName="ArrowColumn" Property="Width" Value="0" />
             </Trigger>
             <Trigger Property="Role" Value="SubmenuHeader"><Setter TargetName="Arrow" Property="Visibility" Value="Visible" /></Trigger>
-            <Trigger Property="IsHighlighted" Value="True"><Setter TargetName="Shell" Property="Background" Value="{DynamicResource HoverBrush}" /></Trigger>
-            <Trigger Property="IsSubmenuOpen" Value="True"><Setter TargetName="Shell" Property="Background" Value="{DynamicResource SelectionBrush}" /></Trigger>
+            <Trigger Property="IsHighlighted" Value="True"><Setter Property="Foreground" Value="{DynamicResource SelectionForegroundBrush}" /><Setter TargetName="Shell" Property="Background" Value="{DynamicResource HoverBrush}" /></Trigger>
+            <Trigger Property="IsSubmenuOpen" Value="True"><Setter Property="Foreground" Value="{DynamicResource SelectionForegroundBrush}" /><Setter TargetName="Shell" Property="Background" Value="{DynamicResource SelectionBrush}" /></Trigger>
             <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.5" /></Trigger>
           </ControlTemplate.Triggers>
         </ControlTemplate>
@@ -324,11 +325,11 @@
     <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
     <Style.Triggers>
       <Trigger Property="IsMouseOver" Value="True">
-        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SelectionBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource SelectionForegroundBrush}" />
       </Trigger>
       <Trigger Property="IsSelected" Value="True">
-        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SelectionBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource SelectionForegroundBrush}" />
       </Trigger>
     </Style.Triggers>
@@ -341,8 +342,8 @@
     </Setter>
   </Style>
   <Style TargetType="DataGridColumnHeader">
-    <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
-    <Setter Property="Foreground" Value="{DynamicResource AccentForegroundBrush}" />
+    <Setter Property="Background" Value="{DynamicResource RaisedSurfaceBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
     <Setter Property="Padding" Value="10,9" />
     <Setter Property="Template">
@@ -352,7 +353,7 @@
             <Border x:Name="Shell" Background="{TemplateBinding Background}" CornerRadius="6"
                     Padding="{TemplateBinding Padding}" Margin="1">
               <DockPanel>
-                <Path x:Name="SortArrow" DockPanel.Dock="Right" Data="M 0 5 L 4 0 L 8 5" Stroke="White"
+                <Path x:Name="SortArrow" DockPanel.Dock="Right" Data="M 0 5 L 4 0 L 8 5" Stroke="{TemplateBinding Foreground}"
                       StrokeThickness="1.5" Margin="6,0,0,0" VerticalAlignment="Center" Visibility="Collapsed" />
                 <ContentPresenter RecognizesAccessKey="True" VerticalAlignment="Center" />
               </DockPanel>
@@ -361,7 +362,7 @@
             <Thumb x:Name="PART_RightHeaderGripper" Style="{StaticResource HeaderGripper}" HorizontalAlignment="Right" />
           </Grid>
           <ControlTemplate.Triggers>
-            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Shell" Property="Background" Value="{DynamicResource HoverBrush}" /></Trigger>
+            <Trigger Property="IsMouseOver" Value="True"><Setter Property="Foreground" Value="{DynamicResource SelectionForegroundBrush}" /><Setter TargetName="Shell" Property="Background" Value="{DynamicResource HoverBrush}" /></Trigger>
             <Trigger Property="SortDirection" Value="Ascending"><Setter TargetName="SortArrow" Property="Visibility" Value="Visible" /></Trigger>
             <Trigger Property="SortDirection" Value="Descending">
               <Setter TargetName="SortArrow" Property="Visibility" Value="Visible" />

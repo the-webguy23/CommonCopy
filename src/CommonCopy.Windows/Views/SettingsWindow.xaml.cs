@@ -1,3 +1,7 @@
+using System;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using CommonCopy.Core.Models;
 
@@ -53,6 +57,24 @@ public partial class SettingsWindow : Window
         settings.PasteDelayMilliseconds = PasteDelay;
         settings.ClipboardRestoreDelayMilliseconds = ClipboardDelay;
         settings.ClosePopupWhenFocusIsLost = CloseOnFocusLoss;
+    }
+
+    private void Help_Click(object sender, RoutedEventArgs e)
+    {
+        var path = Path.Combine(AppContext.BaseDirectory, "Help", "help.html");
+        if (!File.Exists(path))
+        {
+            ShowValidationMessage("The included help guide is missing. Re-extract the complete CommonCopy package and keep its Help folder beside the application.");
+            return;
+        }
+        try
+        {
+            Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+        }
+        catch (Exception error) when (error is Win32Exception or InvalidOperationException)
+        {
+            ShowValidationMessage($"Could not open your browser. Open the included guide manually at: {path}");
+        }
     }
 
     private void Save_Click(object sender, RoutedEventArgs e)

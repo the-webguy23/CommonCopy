@@ -4,7 +4,7 @@ on:
   push:
     branches: [main, "codex/**"]
   pull_request:
-    branches: [main]
+    branches: [main, "codex/editorial-themes"]
   workflow_dispatch:
 
 permissions:
@@ -42,6 +42,12 @@ jobs:
           -p:PublishSingleFile=true
           --output artifacts/publish/win-x64
 
+      - name: Verify offline help in published package
+        shell: pwsh
+        run: |
+          if (!(Test-Path artifacts/publish/win-x64/Help/help.html)) { throw "Offline help was not published" }
+          if ((Get-FileHash docs/help/help.html).Hash -ne (Get-FileHash artifacts/publish/win-x64/Help/help.html).Hash) { throw "Published help differs from source" }
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
@@ -55,3 +61,11 @@ jobs:
         with:
           name: CommonCopy-Portable-win-x64
           path: artifacts/publish/win-x64/
+
+      - name: Upload native menu visual check
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-native-menu-check
+          path: artifacts/menu-check/
+          if-no-files-found: ignore

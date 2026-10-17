@@ -1,12 +1,14 @@
-<Window x:Class="CommonCopy.Windows.Views.SettingsWindow"
+<Window Style="{StaticResource {x:Type Window}}" x:Class="CommonCopy.Windows.Views.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="CommonCopy settings"
         Width="540"
-        Height="670"
+        Height="740"
+        MaxHeight="800"
         ResizeMode="NoResize"
         ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner">
+  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
   <Grid Margin="24">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
@@ -18,7 +20,8 @@
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
-      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
 
@@ -59,15 +62,15 @@
       </Grid.RowDefinitions>
       <TextBlock Text="Commonly Used limit" VerticalAlignment="Center" />
       <TextBox x:Name="RecentLimitBox" Grid.Column="1" />
-      <TextBlock Grid.Row="1" Text="Popup width" VerticalAlignment="Center" />
-      <TextBox x:Name="PopupWidthBox" Grid.Row="1" Grid.Column="1" />
+      <TextBlock Grid.Row="1" Text="Popup width" Visibility="Collapsed" VerticalAlignment="Center" />
+      <TextBox x:Name="PopupWidthBox" Grid.Row="1" Grid.Column="1" Visibility="Collapsed" />
       <TextBlock Grid.Row="2" Text="Paste delay (ms)" VerticalAlignment="Center" />
       <TextBox x:Name="PasteDelayBox" Grid.Row="2" Grid.Column="1" />
       <TextBlock Grid.Row="3" Text="Clipboard restore delay (ms)" VerticalAlignment="Center" TextWrapping="Wrap" />
       <TextBox x:Name="ClipboardDelayBox" Grid.Row="3" Grid.Column="1" />
     </Grid>
 
-    <CheckBox x:Name="CloseOnFocusLossBox"
+    <CheckBox x:Name="CloseOnFocusLossBox" Visibility="Collapsed"
               Grid.Row="7"
               Content="Close the popup when it loses focus"
               Margin="3,4" />
@@ -75,20 +78,27 @@
     <StackPanel Grid.Row="8" Margin="0,12,0,0">
       <TextBlock Text="Appearance" FontSize="17" FontWeight="SemiBold" Margin="0,0,0,8" />
       <StackPanel Orientation="Horizontal">
-        <RadioButton x:Name="LightThemeBox" GroupName="Appearance" Content="Light · Warm Editorial" Margin="4,4,22,4" />
-        <RadioButton x:Name="DarkThemeBox" GroupName="Appearance" Content="Dark · Burnished Copper" Margin="4" />
+        <RadioButton x:Name="LightThemeBox" GroupName="Appearance" Content="Light" Margin="4,4,22,4" />
+        <RadioButton x:Name="DarkThemeBox" GroupName="Appearance" Content="Dark" Margin="4" />
       </StackPanel>
     </StackPanel>
 
-    <Border Grid.Row="9" CornerRadius="8" Background="{DynamicResource RaisedSurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="10" Margin="0,12,0,8">
+    <StackPanel Grid.Row="9" Margin="0,14,0,0">
+      <TextBlock Text="Help" FontSize="17" FontWeight="SemiBold" Margin="0,0,0,8" />
+      <Button Content="Guides, examples &amp; troubleshooting" Click="Help_Click" HorizontalAlignment="Left" />
+      <TextBlock Text="Opens the included guide in your browser. Works offline." Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap" FontSize="12" Margin="3,6,0,0" />
+    </StackPanel>
+
+    <Border Grid.Row="10" CornerRadius="8" Background="{DynamicResource RaisedSurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="10" Margin="0,12,0,8">
       <TextBlock TextWrapping="Wrap"
                  Foreground="{DynamicResource MutedBrush}"
-                 Text="Shortcut format: Ctrl+Shift+Space, Alt+F2, or Win+Shift+P. If another application already owns the shortcut, Ctrl + Right Click will continue to work." />
+                 Text="The compact menu follows Windows sizing and closes when dismissed. Search is available in Manage phrases. Shortcut format: Ctrl+Shift+Space, Alt+F2, or Win+Shift+P. If another application already owns the shortcut, Ctrl + Right Click will continue to work." />
     </Border>
 
-    <StackPanel Grid.Row="10" Orientation="Horizontal" HorizontalAlignment="Right">
+    <StackPanel Grid.Row="11" Orientation="Horizontal" HorizontalAlignment="Right">
       <Button Content="Cancel" IsCancel="True" />
       <Button Content="Save" Style="{StaticResource PrimaryButton}" IsDefault="True" Click="Save_Click" />
     </StackPanel>
   </Grid>
+  </ScrollViewer>
 </Window>

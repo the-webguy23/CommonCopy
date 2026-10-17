@@ -90,3 +90,31 @@ For PR #1 visual approval, test both appearances before merge:
 - [ ] Test with clipboard text restoration enabled and disabled.
 - [ ] Test when the clipboard is temporarily locked by another application.
 - [ ] Confirm application errors show a useful message without exposing phrase contents.
+
+## Compact native Windows menu
+
+- Ctrl + right-click and configured hotkey open the small native menu at pointer.
+- Save highlighted text, Favourites, Commonly Used, categories, nested Prompts
+  subcategories, and Manage phrases appear; empty menus show a disabled hint.
+- Choose a phrase: menu closes and existing target/clipboard paste runs once.
+- Capture multiline text, Save: manager hides; source regains focus. On failure
+  the manager stays visible. Cancel never saves.
+- Escape, outside click, switching apps and repeated activation dismiss cleanly.
+- Plain right-click, modifier timing, keyboard submenu navigation, Unicode and
+  ampersand titles, screen edges, multiple monitors and 100/150/200% DPI.
+- Search remains in Manage phrases; manager themes still work. Native menu
+  follows Windows system styling, independently of the manager theme.
+
+## Monochrome modular revision (Windows 0.4.0)
+
+- Approved logo appears in manager/window/tray. Tray still opens manager/menu/quits.
+- Categories, Add/Edit/Delete and nested Prompts categories remain available.
+- Search and selected phrase preview update; Copy and Edit work on selection.
+- Phrase options expose favourite, enabled, duplicate, reorder and delete.
+- Add/Edit/Capture Save hides the manager only after successful persistence.
+- Light/Dark: outlined and filled controls are legible; selected text stays white.
+- Library menu exposes import/export, backup/restore and data folder; Settings
+  persists activation, appearance and existing behavior preferences.
+- Ctrl-right-click, plain right-click, capture/paste/clipboard restore, keyboard
+  focus, native-menu dismissal and multi-monitor/DPI checks remain required.
+- Device acceptance deferred to Monday, October 19; CI is not device acceptance.

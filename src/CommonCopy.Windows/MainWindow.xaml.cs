@@ -122,8 +122,7 @@ public partial class MainWindow : Window
             SortOrder = sortOrder,
         };
         document.Phrases.Add(phrase);
-        await SaveAndRefreshAsync("Highlighted text saved.", phrase.Id);
-        if (!managerWasVisible)
+        if (await SaveAndRefreshAsync("Highlighted text saved.", phrase.Id))
         {
             Hide();
         }
@@ -248,7 +247,7 @@ public partial class MainWindow : Window
             IsEnabled = dialog.PhraseIsEnabled,
             SortOrder = sortOrder,
         });
-        await SaveAndRefreshAsync("Phrase added.");
+        if (await SaveAndRefreshAsync("Phrase added.")) { Hide(); }
     }
 
     private async void EditPhrase_Click(object sender, RoutedEventArgs e)
@@ -270,7 +269,7 @@ public partial class MainWindow : Window
         phrase.IsFavorite = dialog.IsFavorite;
         phrase.IsEnabled = dialog.PhraseIsEnabled;
         phrase.UpdatedAt = DateTimeOffset.UtcNow;
-        await SaveAndRefreshAsync("Phrase updated.", phrase.Id);
+        if (await SaveAndRefreshAsync("Phrase updated.", phrase.Id)) { Hide(); }
     }
 
     private async void DuplicatePhrase_Click(object sender, RoutedEventArgs e)
@@ -296,6 +295,26 @@ public partial class MainWindow : Window
         phrase.IsFavorite = !phrase.IsFavorite;
         phrase.UpdatedAt = DateTimeOffset.UtcNow;
         await SaveAndRefreshAsync(phrase.IsFavorite ? "Added to favorites." : "Removed from favorites.", phrase.Id);
+    }
+
+    private async void CopyPhrase_Click(object sender, RoutedEventArgs e)
+    {
+        if (PhraseGrid.SelectedItem is not PhraseEntry { IsEnabled: true } phrase) { return; }
+        try
+        {
+            Clipboard.SetText(phrase.Text);
+            new PhraseCatalog(document).RecordUse(phrase);
+            await SaveAndRefreshAsync("Phrase copied.", phrase.Id);
+        }
+        catch (Exception error) { ShowOperationError("The phrase could not be copied.", error); }
+    }
+
+    private async void ToggleEnabled_Click(object sender, RoutedEventArgs e)
+    {
+        if (PhraseGrid.SelectedItem is not PhraseEntry phrase) { return; }
+        phrase.IsEnabled = !phrase.IsEnabled;
+        phrase.UpdatedAt = DateTimeOffset.UtcNow;
+        await SaveAndRefreshAsync(phrase.IsEnabled ? "Phrase enabled." : "Phrase disabled.", phrase.Id);
     }
 
     private async void DeletePhrase_Click(object sender, RoutedEventArgs e)
@@ -478,7 +497,7 @@ public partial class MainWindow : Window
     private void Exit_Click(object sender, RoutedEventArgs e) => exit();
 
     private void About_Click(object sender, RoutedEventArgs e) => MessageBox.Show(
-        "CommonCopy\nSave it once. Paste it forever.\n\nWindows available; macOS planned.\nLicensed under the MIT License.",
+        "CommonCopy\nSave it once. Paste it forever.\n\nWindows and macOS.\nLicensed under the MIT License.",
         "About CommonCopy",
         MessageBoxButton.OK,
         MessageBoxImage.Information);
@@ -522,7 +541,7 @@ public partial class MainWindow : Window
         PhraseCountText.Text = $"{visiblePhrases.Count} shown · {document.Phrases.Count} total";
     }
 
-    private async Task SaveAndRefreshAsync(string status, Guid? selectedPhraseId = null)
+    private async Task<bool> SaveAndRefreshAsync(string status, Guid? selectedPhraseId = null)
     {
         try
         {
@@ -534,10 +553,12 @@ public partial class MainWindow : Window
             }
 
             StatusText.Text = status;
+            return true;
         }
         catch (Exception exception)
         {
             ShowOperationError("CommonCopy could not save the change.", exception);
+            return false;
         }
     }
 
