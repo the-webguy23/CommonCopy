@@ -104,3 +104,10 @@ tracking, ads, public utility downloads or new publishing audience are introduce
 Validation: exact kit-byte comparisons, SVG vector-only structure, ICO dimensions,
 manifest icon links, local page asset/fragment references and favicon declarations.
 Browser visual QA is unavailable without the required browser-control capability.
+
+
+## Help center (2026-10-16)
+
+Help is linked from the header, footer, and download guidance. The guide covers both platforms, capture/paste, nested Prompts examples, troubleshooting and backups. Public downloads remain disabled; private-build security repairs are explicitly separated. Identical help sections ship offline with each utility and open from Settings.
+
+Validated local asset/fragment links, headings, navigation, offline content parity and JavaScript syntax. Existing private audience is preserved. Native utility builds and on-device Help launch review are tracked on their respective draft branches.
