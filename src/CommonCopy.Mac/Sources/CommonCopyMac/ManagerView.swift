@@ -32,6 +32,8 @@ struct ManagerView: View {
     let paste: (Phrase) -> Void
     let capture: () -> Void
     let configureActivation: () -> Void
+    let finishPhraseSave: () -> Void
+    @State private var phraseSaved = false
     @State private var categoryEditor: CategoryDraft?
     @State private var deletion: Deletion?
     private var palette: Palette { Palette(dark: store.dark) }
@@ -93,8 +95,12 @@ struct ManagerView: View {
         .buttonStyle(CopperButton(palette: palette))
         .preferredColorScheme(store.dark ? .dark : .light)
         .disabled(store.busy || store.capturing)
-        .sheet(item: $store.phraseEditor) { draft in
-            PhraseEditor(store: store, draft: draft)
+        .sheet(item: $store.phraseEditor, onDismiss: {
+            guard phraseSaved else { return }
+            phraseSaved = false
+            finishPhraseSave()
+        }) { draft in
+            PhraseEditor(store: store, draft: draft, onSaved: { phraseSaved = true })
         }
         .sheet(item: $categoryEditor) { draft in
             CategoryEditor(store: store, draft: draft)
@@ -210,6 +216,7 @@ struct PhraseDraft: Identifiable {
 struct PhraseEditor: View {
     @ObservedObject var store: Store
     @State var draft: PhraseDraft
+    let onSaved: () -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var failure = false
     var body: some View {
@@ -236,7 +243,10 @@ struct PhraseEditor: View {
                         var fields: [String: Any] = ["categoryId": draft.categoryId, "title": draft.title,
                             "text": draft.text, "isFavorite": draft.favourite, "isEnabled": draft.enabled]
                         if let id = draft.existingId { fields["id"] = id }
-                        if await store.perform("savePhrase", fields) { dismiss() } else { failure = true }
+                        if await store.perform("savePhrase", fields) {
+                            onSaved()
+                            dismiss()
+                        } else { failure = true }
                     }
                 }.keyboardShortcut(.defaultAction)
                     .disabled(draft.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || draft.text.isEmpty || store.busy)

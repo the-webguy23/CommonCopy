@@ -50,6 +50,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 self?.captureSelection()
             }, configureActivation: { [weak self] in
                 self?.configureCommandClick(requestPermission: true)
+            }, finishPhraseSave: { [weak self] in
+                self?.finishPhraseSave()
             })
             let created = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 1000, height: 680),
                 styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
@@ -63,6 +65,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.unhide(nil)
         NSApp.activate(ignoringOtherApps: true)
         window?.makeKeyAndOrderFront(nil)
+    }
+
+    // Wait for the editor sheet to dismiss before hiding its parent window.
+    // Keep the menu-bar utility alive and return the user to the source app.
+    func finishPhraseSave() {
+        window?.orderOut(nil)
+        NSApp.hide(nil)
+        if let target = pasteService.target, !target.isTerminated {
+            target.activate(options: .activateIgnoringOtherApps)
+        }
     }
 
     func applicationDidBecomeActive(_ notification: Notification) { configureCommandClick() }

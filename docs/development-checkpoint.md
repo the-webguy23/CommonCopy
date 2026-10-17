@@ -96,3 +96,21 @@ any user's permissions. The fixture executable is never bundled in CommonCopy.ap
 - Final automated results and downloadable artifact are linked from PR #2.
   Real-Mac acceptance (Golden Gate 27.0, Accessibility, focus, paste, clipboard
   restoration, and everyday-app compatibility) remains pending maintainer tests.
+
+## 2026-10-16: device acceptance and automatic dismissal
+
+- Maintainer confirmed 0.2.1 Command + right-click, highlighted-text capture,
+  save under Prompts, and insertion all succeeded on the MacBook. Activation
+  worked after opening the manager and enabling the required permission.
+- Open Anyway still looped for the replacement private build. The same
+  app-specific quarantine workaround was needed; normal installation is not
+  resolved by successful CI checks.
+- Approved future installer: branded drag-to-install DMG with CommonCopy.app,
+  Applications shortcut, clear drag guidance, and consistent Finder artwork and
+  layout. Developer ID signing/notarization remain distribution gates; no paid
+  enrollment or certificate purchase authorized.
+- New request: save and get out of the way. Version 0.2.2 hides the manager only
+  after successful phrase saving and editor dismissal, then restores the source
+  app when available. It remains a menu-bar utility. Failed saves stay visible.
+  Applies to captured and manually added/edited phrases. User device acceptance
+  of this new behavior remains pending.

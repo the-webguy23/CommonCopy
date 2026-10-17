@@ -97,3 +97,13 @@ For an update, Quit CommonCopy before replacing the app in Applications. Library
 data stays in Application Support. This is still a private, non-notarized build;
 real-device launch may require a per-app security exception. Developer ID signing
 and notarization remain the proper public-distribution gate.
+
+## Version 0.2.2: finish and get out of the way
+
+After any successful phrase Save (captured text, Add phrase, or Edit phrase),
+the editor dismisses and the manager hides automatically. CommonCopy stays in
+the menu bar and returns focus to the remembered source application if it is
+still running. Save errors keep the editor open; Cancel does not trigger the
+successful-save behavior. Category and settings management remain available
+until the user finishes them. Test a captured Save, a manual Add/Edit Save, an
+invalid/failed Save, then reopen using the menu bar and Command + right-click.
