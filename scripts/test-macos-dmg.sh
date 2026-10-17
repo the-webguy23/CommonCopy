@@ -21,6 +21,7 @@ print(next(e['mount-point'] for e in p['system-entities'] if 'mount-point' in e)
 PY
 )"
 [[ "$(readlink "$mount/Applications")" == /Applications ]]
+[[ -s "$mount/CommonCopy.app/Contents/Resources/CommonCopyLogo.svg" ]]
 [[ -s "$mount/.DS_Store" && -s "$mount/.background/installer.png" ]]
 codesign --verify --deep --strict "$mount/CommonCopy.app"
 # The drag operation copies a bundle. Test that same copy without touching /Applications.

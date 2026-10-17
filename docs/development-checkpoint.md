@@ -149,3 +149,8 @@ the known app-specific Gatekeeper repair on affected devices, and replacement
 builds can require removal/re-addition of Accessibility permissions. Developer ID
 signing/notarization remain public-release gates; no paid enrollment authorized.
 PR #2 remains draft/unmerged. Actual DMG device acceptance is pending delivery.
+
+The maintainer also requested the newly created SVG master be integrated during
+installer work. Use Library CommonCopy_Approved_Logo.svg unchanged (contour
+master, not the editable construction derivative). Mac manager and installer
+load that SVG; native icon rasters are derived from it at packaging time.

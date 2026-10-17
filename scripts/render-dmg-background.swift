@@ -3,7 +3,7 @@ import AppKit
 // Native rendering keeps installer artwork independent of third-party tools.
 guard CommandLine.arguments.count == 3,
       let logo = NSImage(contentsOfFile: CommandLine.arguments[1]) else {
-    fatalError("Usage: render-dmg-background.swift APPROVED-LOGO.png OUTPUT.png")
+    fatalError("Usage: render-dmg-background.swift APPROVED-LOGO.svg OUTPUT.png")
 }
 let size = NSSize(width: 720, height: 440)
 let image = NSImage(size: size)
@@ -17,7 +17,9 @@ func label(_ text: String, x: CGFloat, y: CGFloat, width: CGFloat, font: NSFont,
         .font: font, .foregroundColor: color, .paragraphStyle: paragraph
     ])
 }
-logo.draw(in: NSRect(x: 38, y: 339, width: 62, height: 62))
+let logoScale = min(62 / logo.size.width, 62 / logo.size.height)
+let logoSize = NSSize(width: logo.size.width * logoScale, height: logo.size.height * logoScale)
+logo.draw(in: NSRect(x: 38 + (62 - logoSize.width) / 2, y: 339 + (62 - logoSize.height) / 2, width: logoSize.width, height: logoSize.height))
 label("CommonCopy", x: 116, y: 363, width: 540, font: .systemFont(ofSize: 27, weight: .semibold))
 label("Save it once. Paste it forever.", x: 117, y: 337, width: 540, font: .systemFont(ofSize: 13), color: .darkGray)
 NSColor(white: 0.75, alpha: 1).setStroke()

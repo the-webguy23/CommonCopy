@@ -17,9 +17,9 @@ trap cleanup EXIT
 mkdir -p "$work/staging/.background"
 ditto "$app" "$work/staging/CommonCopy.app"
 ln -s /Applications "$work/staging/Applications"
-swift scripts/render-dmg-background.swift src/CommonCopy.Mac/Assets/CommonCopyLogo.png "$work/staging/.background/installer.png"
+swift scripts/render-dmg-background.swift src/CommonCopy.Mac/Assets/CommonCopyLogo.svg "$work/staging/.background/installer.png"
 hdiutil create -quiet -volname "CommonCopy Installer" -srcfolder "$work/staging" -fs HFS+ -format UDRW "$work/writable.dmg"
-hdiutil attach -quiet -readwrite -noverify -noautoopen -plist "$work/writable.dmg" > "$work/attach.plist"
+hdiutil attach -readwrite -noverify -noautoopen -plist "$work/writable.dmg" > "$work/attach.plist"
 mount="$(python3 - "$work/attach.plist" <<'PY'
 import plistlib,sys
 with open(sys.argv[1],'rb') as f: p=plistlib.load(f)

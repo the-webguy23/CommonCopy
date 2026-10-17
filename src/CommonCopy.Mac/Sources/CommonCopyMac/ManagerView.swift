@@ -37,7 +37,7 @@ struct MonochromeButton: ButtonStyle {
 struct BrandMark: View {
     var body: some View {
         if let image = NSImage(contentsOf: Bundle.main.bundleURL
-            .appendingPathComponent("Contents/Resources/CommonCopyLogo.png")) {
+            .appendingPathComponent("Contents/Resources/CommonCopyLogo.svg")) {
             Image(nsImage: image).resizable().scaledToFit()
                 .frame(width: 38, height: 38).background(Color.white)
                 .clipShape(RoundedRectangle(cornerRadius: 4)).accessibilityHidden(true)

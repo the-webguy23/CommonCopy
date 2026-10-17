@@ -24,14 +24,16 @@ rm -rf "$app"
 mkdir -p "$app/Contents/MacOS" "$app/Contents/Helpers/Core" "$app/Contents/Resources"
 cp "$binary_dir/CommonCopyMac" "$app/Contents/MacOS/"
 cp src/CommonCopy.Mac/Info.plist "$app/Contents/Info.plist"
-cp src/CommonCopy.Mac/Assets/CommonCopyLogo.png "$app/Contents/Resources/CommonCopyLogo.png"
+cp src/CommonCopy.Mac/Assets/CommonCopyLogo.svg "$app/Contents/Resources/CommonCopyLogo.svg"
+# Render platform icon sizes directly from the approved vector master.
+swift scripts/render-macos-icon.swift src/CommonCopy.Mac/Assets/CommonCopyLogo.svg "$app/Contents/Resources/CommonCopyLogo.png"
 # Derive standard macOS icon sizes from the approved artwork, without redrawing it.
 iconset="$root/artifacts/CommonCopy.iconset"
 mkdir -p "$iconset"
 for size in 16 32 128 256 512; do
-  sips -z "$size" "$size" src/CommonCopy.Mac/Assets/CommonCopyLogo.png --out "$iconset/icon_${size}x${size}.png" >/dev/null
+  sips -z "$size" "$size" "$app/Contents/Resources/CommonCopyLogo.png" --out "$iconset/icon_${size}x${size}.png" >/dev/null
   double=$((size * 2))
-  sips -z "$double" "$double" src/CommonCopy.Mac/Assets/CommonCopyLogo.png --out "$iconset/icon_${size}x${size}@2x.png" >/dev/null
+  sips -z "$double" "$double" "$app/Contents/Resources/CommonCopyLogo.png" --out "$iconset/icon_${size}x${size}@2x.png" >/dev/null
 done
 iconutil -c icns "$iconset" -o "$app/Contents/Resources/CommonCopy.icns"
 dotnet publish src/CommonCopy.DesktopBridge/CommonCopy.DesktopBridge.csproj \
