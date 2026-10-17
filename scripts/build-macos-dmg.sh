@@ -29,9 +29,10 @@ PY
 # Finder owns the real icon positions and .DS_Store; no simulated installer UI.
 osascript - "$mount" <<'APPLESCRIPT'
 on run argv
-  set diskFolder to POSIX file (item 1 of argv) as alias
   tell application "Finder"
+    set diskFolder to disk "CommonCopy Installer"
     open diskFolder
+    delay 1
     tell container window of diskFolder
       set current view to icon view
       set toolbar visible to false
