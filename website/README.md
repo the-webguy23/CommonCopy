@@ -22,8 +22,7 @@ The script copies these files into `dist/downloads`:
 
 ## Current continuation (2026-10-16)
 
-The existing three-page site is retained, with the current Warm Editorial / copper
-palette, a compact-menu example, Windows/macOS copy, and explicit coming-soon
+The existing three-page site is retained, with a compact-menu example, Windows/macOS copy, and explicit coming-soon
 release controls. macOS core workflows and automatic dismissal after Save passed
 maintainer testing; the new compact Windows menu still needs device acceptance.
 No private test binaries are exposed by this website.
@@ -48,3 +47,21 @@ or application release is implied by publishing the owner-private preview.
 - Add privacy-conscious aggregate analytics only after a separate review.
 
 Public launch is deferred pending approved installers and compatibility testing. An owner-private website preview may be deployed for review.
+
+## Approved design revision (2026-10-16)
+
+The maintainer requested a simpler modular direction, referencing
+https://openai.com/open-models/ and ChatGPT navigation: white and black, thin
+black rules, filled and outlined buttons, restrained typography and fewer
+competing controls. This supersedes the previous copper/cream website styling.
+Website first; desktop utility redesign follows after website review. No desktop
+source is modified by this website revision.
+
+The three existing pages remain. The interactive example now dismisses its
+menu after insertion or saving and has an explicit reopen control. Public
+downloads stay disabled and advertising remains website-only and unconnected.
+
+Validation includes JavaScript syntax, local links/assets/fragments, unique IDs,
+labels/control targets, monochrome colors, and balanced stylesheet blocks. Automated
+browser rendering/interaction QA is unavailable in the current environment;
+responsive layout and real browser interaction remain review items.
