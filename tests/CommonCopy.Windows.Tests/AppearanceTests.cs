@@ -135,6 +135,7 @@ public sealed class AppearanceTests
                     Assert.Equal(((SolidColorBrush)app.FindResource("TextBrush")).Color, ((SolidColorBrush)window.Foreground).Color);
                     Assert.Equal(5, ((ListBox)window.FindName("CategoryList")).Items.Count);
                     Assert.NotNull(window.Icon);
+                    Assert.IsType<DrawingImage>(((Image)window.FindName("BrandLogo")).Source);
                     Assert.False(File.Exists(repository.DataPath));
                     if (Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true")
                     {
