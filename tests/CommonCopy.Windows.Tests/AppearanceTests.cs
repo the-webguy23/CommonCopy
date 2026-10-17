@@ -127,7 +127,12 @@ public sealed class AppearanceTests
                     Assert.Single(grid.Items.Cast<object>());
                     search.Text = "";
                     grid.SelectedIndex = 0;
+                    window.Dispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
                     window.UpdateLayout();
+                    Assert.True(grid.Columns[1].ActualWidth >= 160);
+                    Assert.True(grid.Columns[2].ActualWidth >= 220);
+                    Assert.Equal(((SolidColorBrush)app.FindResource("AppBackgroundBrush")).Color, ((SolidColorBrush)window.Background).Color);
+                    Assert.Equal(((SolidColorBrush)app.FindResource("TextBrush")).Color, ((SolidColorBrush)window.Foreground).Color);
                     Assert.Equal(5, ((ListBox)window.FindName("CategoryList")).Items.Count);
                     Assert.NotNull(window.Icon);
                     Assert.False(File.Exists(repository.DataPath));
