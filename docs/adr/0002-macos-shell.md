@@ -1,0 +1,64 @@
+# ADR 0002: Native macOS shell with the shared phrase engine
+
+- **Status:** Implemented for private prototype testing; runtime acceptance pending
+- **Date:** 2026-10-16
+- **Base checkpoint:** Windows appearance branch, `0e5be09`
+
+## Decision
+
+Use SwiftUI and AppKit for macOS. Bundle a self-contained .NET 10 helper that
+references `CommonCopy.Core`. Swift sends one JSON request over stdin and reads
+a JSON response over stdout. Each operation starts a helper process; there is
+no network listener, shell interpolation, account, or clipboard collection.
+
+The native shell supplies standard Mac windows, text editing, file dialogs,
+menu-bar integration, and Core Graphics paste support without a third-party UI
+framework. The helper preserves the existing validator, atomic repository,
+backups, nested categories, Favourites, and Commonly Used ranking. Users need
+no .NET install. Windows UI/integration and shared-core code remain unchanged.
+
+## Boundaries
+
+- The helper serializes processes with an exclusive file lease before loading
+  the current library. Rejected mutations do not save.
+- Data: `~/Library/Application Support/CommonCopy/phrases.json`.
+- Imported Windows settings are preserved. Windows startup/activation settings
+  are not executed on macOS. The initial Mac hotkey is Command–Shift–Space.
+- macOS 13 is the compile-time minimum; Apple Silicon is the packaged target.
+  Golden Gate 27.0 on the user's M1 requires real-device testing.
+- Accessibility is requested only on explicit Paste. Copy works without it.
+  Carbon hotkey registration avoids a general keyboard event monitor.
+- Clipboard restoration restores previous text only, and only if its change
+  count still matches our write. Rich formats are not restored.
+- Counts reflect explicit copies/dispatched pastes, not confirmed insertion.
+- Process startup and full snapshots should be measured on the real Mac before
+  optimizing. There is no persistent helper supervision in this milestone.
+
+## Later gates
+
+Configurable keyboard hotkey and login-at-startup remain subsequent milestones.
+Normal right-click behavior is untouched. Do not claim full Windows parity.
+
+Ad-hoc signing is for private builds. Developer ID signing, notarization, public
+distribution, and paid enrollment require separate decisions. Do not disable
+Gatekeeper globally. CI compilation and helper smoke tests do not substitute
+for user acceptance of paste, focus, Accessibility, appearance, or launch.
+
+## 0.2.1: explicit highlighted-text capture
+
+Save highlighted text now activates the remembered source app, checks Accessibility
+and focus, sends one Command-C, and waits at most 1.5 seconds for fresh clipboard
+text. Missing/empty/non-text selections produce an explanation. Previous plain
+text is restored only while the clipboard change count still matches the capture.
+A prefilled editor uses the core title generator; cancellation never saves a
+phrase. The capture coordinator has isolated Swift tests with fake environments,
+so automated tests do not require access to a user's clipboard or permissions.
+
+The maintainer identified Command + right-click as essential. It now opens a
+native pointer-positioned NSMenu with category submenus, Favourites, Commonly Used,
+capture, and management actions. A mouse-only active CGEvent tap checks the
+Command flag and consumes only the matching right-button down/up pair. Accessibility
+is required; normal right-click is untouched and a persistent Mac-only toggle can
+disable the tap. The Carbon keyboard shortcut remains available without this
+permission and opens the same menu. Gesture-state and menu-content tests are
+isolated from real system input. Real secondary-click/focus tests remain required.

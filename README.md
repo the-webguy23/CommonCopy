@@ -8,6 +8,11 @@ CommonCopy is a privacy-friendly utility for saving reusable text and inserting 
 
 ## Project status
 
+The Apple Silicon macOS prototype is under development on `codex/macos-foundation`,
+based on the tested Windows appearance checkpoint. It uses a native SwiftUI/AppKit
+shell and the existing shared phrase engine. See [Mac testing](docs/macos-testing.md)
+for scope, build instructions, and acceptance checks. It is not a public release.
+
 CommonCopy is an early prototype. The Windows edition includes a functional phrase manager, local JSON persistence, a tray application, a system-wide `Ctrl + Right Click` trigger, highlighted-text capture, a configurable global keyboard shortcut, a popup phrase browser, import/export, backup/restore, Favourites, Commonly Used, and Windows startup registration. Commonly Used ranks saved phrases by use count, then most-recent use. New libraries have Prompts, Code, and Day-to-Day categories; Favourites and Commonly Used are dynamic lists.
 
 The interface offers two appearance options in Settings: Light (Warm Editorial) and Dark (Burnished Copper). The selection is stored with the local phrase library and applies to the manager, popup, and editors. Existing libraries default to Light until the user chooses Dark.

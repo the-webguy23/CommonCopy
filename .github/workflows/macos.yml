@@ -1,0 +1,55 @@
+name: macOS prototype
+
+on:
+  push:
+    branches: ["codex/macos-**"]
+  pull_request:
+    branches: [main, "codex/editorial-themes"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-test-package:
+    runs-on: macos-15
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Build, test, package, and smoke-test the Apple Silicon app
+        run: bash scripts/build-macos.sh arm64
+      - name: Test bridge protocol without modifying a user library
+        run: python3 scripts/test-desktop-bridge.py artifacts/macos-arm64/CommonCopy.app/Contents/Helpers/Core/CommonCopy.DesktopBridge
+      - name: Smoke-test the packaged native application
+        run: bash scripts/smoke-test-macos.sh artifacts/macos-arm64/CommonCopy.app
+      - name: Build the branded drag-to-Applications disk image
+        run: bash scripts/build-macos-dmg.sh artifacts/macos-arm64/CommonCopy.app
+      - name: Verify the disk image and launch a copied application
+        run: bash scripts/test-macos-dmg.sh artifacts/CommonCopy-0.3.0-macos-arm64.dmg artifacts/macos-arm64/CommonCopy.app
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: macOS-installer-check
+          path: artifacts/macos-installer-check/
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CommonCopy-DMG-macos-arm64
+          path: artifacts/CommonCopy-*-macos-arm64.dmg
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: macOS-launch-check
+          path: artifacts/macos-launch-check/
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CommonCopy-macos-arm64
+          path: |
+            artifacts/CommonCopy-macos-arm64.zip
+            artifacts/macos-arm64/READ-ME-FIRST.md
+          if-no-files-found: error

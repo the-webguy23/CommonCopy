@@ -1,6 +1,7 @@
 ## .NET build output
 bin/
 obj/
+*_wpftmp.csproj
 artifacts/
 TestResults/
 
@@ -20,6 +21,9 @@ publish/
 
 ## OS files
 .DS_Store
+.build/
+.swiftpm/
+__pycache__/
 Thumbs.db
 
 ## Local CommonCopy data
