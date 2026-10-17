@@ -1651,6 +1651,7 @@ kbd {
   width: 42px;
   height: 42px;
   object-fit: contain;
+  background: transparent;
   flex-shrink: 0;
 }
 .brand>.brand-name {

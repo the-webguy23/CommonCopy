@@ -84,3 +84,23 @@ and as the browser icon. No regeneration, tracing, cropping or recoloring.
 Checks: JavaScript syntax, page links/IDs/control targets/labels, two original-logo
 placements per page, a single inverted download card, exact FAQ title, and release
 gating pass. Browser/mobile visual review remains unavailable in this environment.
+
+
+## SVG logo kit integration (2026-10-16)
+
+All three pages now use the exact production SVG contour master from
+CommonCopy_Logo_Kit_v1.0 for their two header/footer marks. Existing navigation,
+wordmark text, system typography and approved layout are retained. The SVG has
+transparent surroundings; no white background tile is added. Primary and reverse
+masters are preserved unchanged under dist/assets/brand.
+
+All pages declare the kit's dedicated compact SVG favicon and multi-size ICO
+fallback, Apple touch icon and web manifest with 192/512 icons. Versioned favicon
+URLs distinguish them from the former raster tab icon. Icons are copied from the
+kit, not produced by shrinking the detailed full mark. Body fonts remain native
+system fonts, as the kit recommends for interfaces. No external font requests,
+tracking, ads, public utility downloads or new publishing audience are introduced.
+
+Validation: exact kit-byte comparisons, SVG vector-only structure, ICO dimensions,
+manifest icon links, local page asset/fragment references and favicon declarations.
+Browser visual QA is unavailable without the required browser-control capability.
