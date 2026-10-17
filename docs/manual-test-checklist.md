@@ -90,3 +90,17 @@ For PR #1 visual approval, test both appearances before merge:
 - [ ] Test with clipboard text restoration enabled and disabled.
 - [ ] Test when the clipboard is temporarily locked by another application.
 - [ ] Confirm application errors show a useful message without exposing phrase contents.
+
+## Compact native Windows menu
+
+- Ctrl + right-click and configured hotkey open the small native menu at pointer.
+- Save highlighted text, Favourites, Commonly Used, categories, nested Prompts
+  subcategories, and Manage phrases appear; empty menus show a disabled hint.
+- Choose a phrase: menu closes and existing target/clipboard paste runs once.
+- Capture multiline text, Save: manager hides; source regains focus. On failure
+  the manager stays visible. Cancel never saves.
+- Escape, outside click, switching apps and repeated activation dismiss cleanly.
+- Plain right-click, modifier timing, keyboard submenu navigation, Unicode and
+  ampersand titles, screen edges, multiple monitors and 100/150/200% DPI.
+- Search remains in Manage phrases; manager themes still work. Native menu
+  follows Windows system styling, independently of the manager theme.

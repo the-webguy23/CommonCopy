@@ -35,7 +35,7 @@ This WPF executable owns Windows integration:
 
 - `TrayIconService` exposes management, popup, and exit commands.
 - `GlobalInputService` registers the configured keyboard hotkey and a low-level mouse hook. It suppresses right-click only while Ctrl is held and the feature is enabled.
-- `PhrasePopupWindow` renders Favourites, commonly used phrases, and the category tree near the pointer.
+- `PhrasePopupMenu` uses a native Windows shortcut menu near the pointer, with Save highlighted text, Favourites, Commonly Used, nested categories, and Manage phrases. Windows handles sizing, submenus, keyboard navigation and dismissal; search remains in the manager.
 - `ClipboardPasteService` records the previously focused window, places the selected phrase on the clipboard, restores focus, and sends Ctrl+V.
 - `SelectedTextCaptureService` runs only after the user chooses **Save highlighted text…**. It restores the source window, sends Ctrl+C once, detects the resulting clipboard update, and returns the text to a prefilled phrase editor.
 - `StartupRegistrationService` uses the current-user Run key and requires no administrator rights.

@@ -12,7 +12,7 @@ public partial class App : Application
     private JsonPhraseRepository? repository;
     private PhraseLibraryDocument? document;
     private MainWindow? managerWindow;
-    private PhrasePopupWindow? popupWindow;
+    private PhrasePopupMenu? popupMenu;
     private GlobalInputService? globalInput;
     private TrayIconService? trayIcon;
     private bool isExiting;
@@ -88,7 +88,7 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
-        popupWindow?.Close();
+        popupMenu?.Close();
         globalInput?.Dispose();
         trayIcon?.Dispose();
         base.OnExit(e);
@@ -117,20 +117,18 @@ public partial class App : Application
         ShowPhrasePopup(context.TargetWindow, context.CursorPosition);
     }
 
-    private void ShowPhrasePopup(nint targetWindow, Point cursorPosition)
+    private async void ShowPhrasePopup(nint targetWindow, Point cursorPosition)
     {
         if (repository is null || document is null)
         {
             return;
         }
 
-        if (popupWindow is { IsVisible: true })
-        {
-            popupWindow.Activate();
-            return;
-        }
+        if (popupMenu is not null) { return; }
+        managerWindow?.Hide();
 
-        popupWindow = new PhrasePopupWindow(
+        popupMenu = new PhrasePopupMenu(
+
             document,
             async phrase =>
             {
@@ -149,10 +147,31 @@ public partial class App : Application
                 }
 
                 await managerWindow.AddCapturedPhraseAsync(capturedText);
+                if (!managerWindow.IsVisible)
+                {
+                    CommonCopy.Windows.Infrastructure.NativeMethods.SetForegroundWindow(targetWindow);
+                }
             },
             ShowManager);
-        popupWindow.Closed += (_, _) => popupWindow = null;
-        popupWindow.ShowNear(cursorPosition);
+        try
+        {
+            var owner = new WindowInteropHelper(managerWindow!).EnsureHandle();
+            await popupMenu.ShowNearAsync(owner, cursorPosition);
+        }
+        catch (Exception exception)
+        {
+            MessageBox.Show($"CommonCopy could not complete the action.\n\n{exception.Message}",
+                "CommonCopy", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            popupMenu?.Dispose();
+            popupMenu = null;
+            if (managerWindow is { IsVisible: false })
+            {
+                CommonCopy.Windows.Infrastructure.NativeMethods.SetForegroundWindow(targetWindow);
+            }
+        }
     }
 
     private void ApplySettings()
@@ -170,7 +189,7 @@ public partial class App : Application
     private void RequestExit()
     {
         isExiting = true;
-        popupWindow?.Close();
+        popupMenu?.Close();
         managerWindow?.Close();
         Shutdown();
     }

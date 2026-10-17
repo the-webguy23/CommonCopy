@@ -59,15 +59,15 @@
       </Grid.RowDefinitions>
       <TextBlock Text="Commonly Used limit" VerticalAlignment="Center" />
       <TextBox x:Name="RecentLimitBox" Grid.Column="1" />
-      <TextBlock Grid.Row="1" Text="Popup width" VerticalAlignment="Center" />
-      <TextBox x:Name="PopupWidthBox" Grid.Row="1" Grid.Column="1" />
+      <TextBlock Grid.Row="1" Text="Popup width" Visibility="Collapsed" VerticalAlignment="Center" />
+      <TextBox x:Name="PopupWidthBox" Grid.Row="1" Grid.Column="1" Visibility="Collapsed" />
       <TextBlock Grid.Row="2" Text="Paste delay (ms)" VerticalAlignment="Center" />
       <TextBox x:Name="PasteDelayBox" Grid.Row="2" Grid.Column="1" />
       <TextBlock Grid.Row="3" Text="Clipboard restore delay (ms)" VerticalAlignment="Center" TextWrapping="Wrap" />
       <TextBox x:Name="ClipboardDelayBox" Grid.Row="3" Grid.Column="1" />
     </Grid>
 
-    <CheckBox x:Name="CloseOnFocusLossBox"
+    <CheckBox x:Name="CloseOnFocusLossBox" Visibility="Collapsed"
               Grid.Row="7"
               Content="Close the popup when it loses focus"
               Margin="3,4" />
@@ -83,7 +83,7 @@
     <Border Grid.Row="9" CornerRadius="8" Background="{DynamicResource RaisedSurfaceBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="10" Margin="0,12,0,8">
       <TextBlock TextWrapping="Wrap"
                  Foreground="{DynamicResource MutedBrush}"
-                 Text="Shortcut format: Ctrl+Shift+Space, Alt+F2, or Win+Shift+P. If another application already owns the shortcut, Ctrl + Right Click will continue to work." />
+                 Text="The compact menu follows Windows sizing and closes when dismissed. Search is available in Manage phrases. Shortcut format: Ctrl+Shift+Space, Alt+F2, or Win+Shift+P. If another application already owns the shortcut, Ctrl + Right Click will continue to work." />
     </Border>
 
     <StackPanel Grid.Row="10" Orientation="Horizontal" HorizontalAlignment="Right">

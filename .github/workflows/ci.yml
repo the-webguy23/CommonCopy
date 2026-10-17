@@ -55,3 +55,11 @@ jobs:
         with:
           name: CommonCopy-Portable-win-x64
           path: artifacts/publish/win-x64/
+
+      - name: Upload native menu visual check
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-native-menu-check
+          path: artifacts/menu-check/
+          if-no-files-found: ignore

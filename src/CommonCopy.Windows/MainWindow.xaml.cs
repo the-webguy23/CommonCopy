@@ -122,8 +122,7 @@ public partial class MainWindow : Window
             SortOrder = sortOrder,
         };
         document.Phrases.Add(phrase);
-        await SaveAndRefreshAsync("Highlighted text saved.", phrase.Id);
-        if (!managerWasVisible)
+        if (await SaveAndRefreshAsync("Highlighted text saved.", phrase.Id))
         {
             Hide();
         }
@@ -522,7 +521,7 @@ public partial class MainWindow : Window
         PhraseCountText.Text = $"{visiblePhrases.Count} shown · {document.Phrases.Count} total";
     }
 
-    private async Task SaveAndRefreshAsync(string status, Guid? selectedPhraseId = null)
+    private async Task<bool> SaveAndRefreshAsync(string status, Guid? selectedPhraseId = null)
     {
         try
         {
@@ -534,10 +533,12 @@ public partial class MainWindow : Window
             }
 
             StatusText.Text = status;
+            return true;
         }
         catch (Exception exception)
         {
             ShowOperationError("CommonCopy could not save the change.", exception);
+            return false;
         }
     }
 
