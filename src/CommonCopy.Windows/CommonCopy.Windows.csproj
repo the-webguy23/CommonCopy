@@ -16,6 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="../../docs/help/help.html" Link="Help/help.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
     <Resource Include="Assets/CommonCopyLogo.png" />
     <ProjectReference Include="../CommonCopy.Core/CommonCopy.Core.csproj" />
   </ItemGroup>
