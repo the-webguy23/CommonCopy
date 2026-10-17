@@ -21,9 +21,19 @@ swift test --package-path src/CommonCopy.Mac --configuration release --arch "$ar
 binary_dir="$(swift build --package-path src/CommonCopy.Mac --configuration release --arch "$architecture" --show-bin-path)"
 app="$root/artifacts/macos-$architecture/CommonCopy.app"
 rm -rf "$app"
-mkdir -p "$app/Contents/MacOS" "$app/Contents/Helpers/Core"
+mkdir -p "$app/Contents/MacOS" "$app/Contents/Helpers/Core" "$app/Contents/Resources"
 cp "$binary_dir/CommonCopyMac" "$app/Contents/MacOS/"
 cp src/CommonCopy.Mac/Info.plist "$app/Contents/Info.plist"
+cp src/CommonCopy.Mac/Assets/CommonCopyLogo.png "$app/Contents/Resources/CommonCopyLogo.png"
+# Derive standard macOS icon sizes from the approved artwork, without redrawing it.
+iconset="$root/artifacts/CommonCopy.iconset"
+mkdir -p "$iconset"
+for size in 16 32 128 256 512; do
+  sips -z "$size" "$size" src/CommonCopy.Mac/Assets/CommonCopyLogo.png --out "$iconset/icon_${size}x${size}.png" >/dev/null
+  double=$((size * 2))
+  sips -z "$double" "$double" src/CommonCopy.Mac/Assets/CommonCopyLogo.png --out "$iconset/icon_${size}x${size}@2x.png" >/dev/null
+done
+iconutil -c icns "$iconset" -o "$app/Contents/Resources/CommonCopy.icns"
 dotnet publish src/CommonCopy.DesktopBridge/CommonCopy.DesktopBridge.csproj \
   --configuration Release --runtime "$runtime" --self-contained true \
   -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=false \

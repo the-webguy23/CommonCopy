@@ -32,7 +32,7 @@ app_pid=$!
 sleep 5
 kill -0 "$app_pid"
 if screencapture -x "$output/dark-appearance.png"; then
-  echo "Captured Burnished Copper for visual inspection."
+  echo "Captured monochrome Dark for visual inspection."
 else
   echo "Dark screen capture unavailable; device testing remains required."
 fi

@@ -3,11 +3,13 @@ import SwiftUI
 
 struct Palette {
     let dark: Bool
-    var background: Color { Color(hex: dark ? 0x242623 : 0xF9F7F1) }
-    var surface: Color { Color(hex: dark ? 0x30322D : 0xFFFFFF) }
-    var text: Color { Color(hex: dark ? 0xF5F1E8 : 0x252A25) }
-    var muted: Color { Color(hex: dark ? 0xCAC9BF : 0x656D64) }
-    var accent: Color { Color(hex: dark ? 0x76533E : 0xA65A3C) }
+    var background: Color { Color(hex: dark ? 0x181818 : 0xFFFFFF) }
+    var surface: Color { Color(hex: dark ? 0x222222 : 0xF5F5F5) }
+    var text: Color { Color(hex: dark ? 0xF5F5F5 : 0x111111) }
+    var muted: Color { Color(hex: dark ? 0xBBBBBB : 0x686868) }
+    var border: Color { Color(hex: dark ? 0x666666 : 0xBDBDBD) }
+    var accent: Color { dark ? .white : .black }
+    var accentText: Color { dark ? .black : .white }
 }
 
 extension Color {
@@ -17,13 +19,29 @@ extension Color {
     }
 }
 
-struct CopperButton: ButtonStyle {
+struct MonochromeButton: ButtonStyle {
     let palette: Palette
+    var filled = false
+    @Environment(\.isEnabled) private var enabled
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label.padding(.horizontal, 12).padding(.vertical, 8)
-            .foregroundColor(.white)
-            .background(palette.accent.opacity(configuration.isPressed ? 0.75 : 1))
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+        configuration.label.font(.system(size: 12, weight: .medium))
+            .padding(.horizontal, 14).padding(.vertical, 8)
+            .foregroundColor(filled ? palette.accentText : palette.text)
+            .background(filled ? palette.accent : palette.background)
+            .clipShape(Capsule())
+            .overlay(Capsule().stroke(palette.border, lineWidth: 0.7))
+            .opacity(!enabled ? 0.4 : configuration.isPressed ? 0.65 : 1)
+    }
+}
+
+struct BrandMark: View {
+    var body: some View {
+        if let image = NSImage(contentsOf: Bundle.main.bundleURL
+            .appendingPathComponent("Contents/Resources/CommonCopyLogo.png").path) {
+            Image(nsImage: image).resizable().scaledToFit()
+                .frame(width: 38, height: 38).background(Color.white)
+                .clipShape(RoundedRectangle(cornerRadius: 4)).accessibilityHidden(true)
+        }
     }
 }
 
@@ -36,64 +54,72 @@ struct ManagerView: View {
     @State private var phraseSaved = false
     @State private var categoryEditor: CategoryDraft?
     @State private var deletion: Deletion?
+    @State private var settingsOpen = false
     private var palette: Palette { Palette(dark: store.dark) }
+    private var sectionTitle: String {
+        switch store.selectedCategory {
+        case "all": return "All phrases"
+        case "favourites": return "Favourites"
+        case "common": return "Commonly Used"
+        default: return store.categories.first { $0.id == store.selectedCategory }?.displayName ?? "Your phrases"
+        }
+    }
 
     var body: some View {
         HStack(spacing: 0) {
             sidebar
-            Divider()
-            VStack(alignment: .leading, spacing: 16) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text("Your phrases").font(.system(size: 30, weight: .semibold, design: .serif))
-                        Text("Save it once. Paste it forever.").foregroundColor(palette.muted)
+            Rectangle().fill(palette.border).frame(width: 0.7)
+            VStack(alignment: .leading, spacing: 20) {
+                HStack(alignment: .center) {
+                    VStack(alignment: .leading, spacing: 7) {
+                        Text("Your phrases").font(.system(size: 28, weight: .medium))
+                        Text("Save it once. Paste it forever.").font(.system(size: 12)).foregroundColor(palette.muted)
                     }
                     Spacer()
-                    Button("Save highlighted text…", action: capture)
-                    Button("Add phrase") {
-                        guard let id = selectedParent ?? store.categories.first?.id else {
-                            store.error = "Add a category before creating a phrase."
-                            return
-                        }
-                        store.phraseEditor = PhraseDraft(categoryId: id)
-                    }
+                    Button("Add phrase", action: addPhrase)
+                        .buttonStyle(MonochromeButton(palette: palette, filled: true))
                 }
-                TextField("Search titles and phrase text", text: $store.search)
-                    .textFieldStyle(.roundedBorder)
+                HStack(spacing: 9) {
+                    Image(systemName: "magnifyingglass").foregroundColor(palette.muted)
+                    TextField("Search your phrases", text: $store.search).textFieldStyle(.plain)
+                        .accessibilityLabel("Search phrase titles and text")
+                    if !store.search.isEmpty {
+                        Button { store.search = "" } label: { Image(systemName: "xmark.circle.fill") }
+                            .buttonStyle(.plain).help("Clear search").accessibilityLabel("Clear search")
+                    }
+                }.padding(11).background(palette.background)
+                    .overlay(RoundedRectangle(cornerRadius: 7).stroke(palette.border, lineWidth: 0.7))
+                HStack {
+                    Text(sectionTitle).font(.system(size: 13, weight: .medium))
+                    Spacer()
+                    Text("\(store.phrases.count) \(store.phrases.count == 1 ? "phrase" : "phrases")")
+                        .font(.system(size: 11)).foregroundColor(palette.muted)
+                }
                 ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 10) {
+                    LazyVStack(alignment: .leading, spacing: 12) {
                         if store.state == nil {
-                            Text(store.busy ? "Loading your library…" : "Library unavailable. Try Reload.")
-                                .foregroundColor(palette.muted).padding()
+                            emptyState(store.busy ? "Loading your library…" : "Your library couldn’t be loaded.",
+                                detail: "Open Settings to reload your library.")
                         } else if store.phrases.isEmpty {
-                            Text("No phrases here yet.").foregroundColor(palette.muted).padding()
+                            emptyState(store.search.isEmpty ? "A place for your next useful phrase." : "No matching phrases.",
+                                detail: store.search.isEmpty ? "Add a phrase, or save highlighted text from another app." : "Try another word or choose a different category.")
                         }
                         ForEach(store.phrases) { phrase in phraseCard(phrase) }
-                    }.padding(12)
+                    }.padding(1)
                 }
-                .background(palette.surface)
-                .clipShape(RoundedRectangle(cornerRadius: 14))
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Toggle("Command + right-click", isOn: $store.commandRightClickEnabled)
-                            .onChange(of: store.commandRightClickEnabled) { _ in configureActivation() }
-                        if store.commandRightClickEnabled && !store.commandRightClickAvailable {
-                            Button("Enable Accessibility…", action: configureActivation)
-                        }
-                        Spacer()
-                        if store.busy { ProgressView().controlSize(.small) }
-                        Button("Reload") { Task { await store.perform("snapshot") } }
-                    }
-                    Text(store.commandRightClickAvailable
-                        ? "⌘ + right-click opens your phrase menu. ⌘⇧Space also works."
-                        : "⌘⇧Space opens your phrase menu. Command + right-click needs Accessibility access.")
-                        .font(.caption).foregroundColor(palette.muted)
-                }
-            }.padding(24)
+                HStack {
+                    Image(systemName: store.commandRightClickAvailable ? "checkmark.circle" : "info.circle")
+                    Text(store.commandRightClickAvailable ? "⌘ + right-click opens your menu.  ⌘⇧Space also works."
+                         : "Enable Accessibility in Settings to use Command + right-click.")
+                    Spacer()
+                    if store.busy || store.capturing { ProgressView().controlSize(.small) }
+                }.font(.system(size: 10)).foregroundColor(palette.muted)
+            }.padding(28)
         }
         .foregroundColor(palette.text).background(palette.background)
-        .buttonStyle(CopperButton(palette: palette))
+        .buttonStyle(MonochromeButton(palette: palette))
         .preferredColorScheme(store.dark ? .dark : .light)
+        .tint(palette.accent)
         .disabled(store.busy || store.capturing)
         .sheet(item: $store.phraseEditor, onDismiss: {
             guard phraseSaved else { return }
@@ -102,8 +128,9 @@ struct ManagerView: View {
         }) { draft in
             PhraseEditor(store: store, draft: draft, onSaved: { phraseSaved = true })
         }
-        .sheet(item: $categoryEditor) { draft in
-            CategoryEditor(store: store, draft: draft)
+        .sheet(item: $categoryEditor) { draft in CategoryEditor(store: store, draft: draft) }
+        .sheet(isPresented: $settingsOpen) {
+            SettingsView(store: store, configureActivation: configureActivation)
         }
         .alert("CommonCopy", isPresented: Binding(get: { store.error != nil },
             set: { if !$0 { store.error = nil } })) {
@@ -122,77 +149,185 @@ struct ManagerView: View {
         store.categories.contains { $0.id == store.selectedCategory } ? store.selectedCategory : nil
     }
 
+    private func addPhrase() {
+        guard let id = selectedParent ?? store.categories.first?.id else {
+            store.error = "Add a category before creating a phrase."
+            return
+        }
+        store.phraseEditor = PhraseDraft(categoryId: id)
+    }
+
     private var sidebar: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("CommonCopy").font(.system(size: 24, weight: .bold, design: .serif))
-                .lineLimit(1).minimumScaleFactor(0.8).padding(.bottom, 12)
+        VStack(alignment: .leading, spacing: 21) {
+            HStack(spacing: 9) {
+                BrandMark()
+                Text("CommonCopy").font(.system(size: 18, weight: .semibold)).lineLimit(1)
+            }.padding(.bottom, 6)
+            VStack(alignment: .leading, spacing: 5) {
+                categoryButton("All phrases", icon: "square.stack", id: "all")
+                categoryButton("Favourites", icon: "star", id: "favourites")
+                categoryButton("Commonly Used", icon: "clock", id: "common")
+            }
+            Rectangle().fill(palette.border).frame(height: 0.7)
+            HStack {
+                Text("Categories").font(.system(size: 11)).foregroundColor(palette.muted)
+                Spacer()
+                Button { categoryEditor = CategoryDraft(parentId: selectedParent ?? "") } label: { Image(systemName: "plus") }
+                    .buttonStyle(.plain).help("Add category").accessibilityLabel("Add category")
+            }
             ScrollView {
-                VStack(alignment: .leading, spacing: 6) {
-                    categoryButton("All phrases", id: "all")
-                    categoryButton("Favourites", id: "favourites")
-                    categoryButton("Commonly Used", id: "common")
-                    Divider().padding(.vertical, 6)
-                    ForEach(store.categories) { category in
-                        if let id = category.id { categoryButton(category.displayName, id: id) }
+                VStack(alignment: .leading, spacing: 5) {
+                    ForEach(store.categories) { item in
+                        if let id = item.id {
+                            categoryButton(item.displayName, icon: "folder", id: id)
+                                .contextMenu {
+                                    Button("Add subcategory") { categoryEditor = CategoryDraft(parentId: id) }
+                                    if let category = store.state?.document.categories.first(where: { $0.id == id }) {
+                                        Button("Edit category") { categoryEditor = CategoryDraft(category: category) }
+                                    }
+                                    Button("Delete category", role: .destructive) { deletion = Deletion(id: id, category: true) }
+                                }
+                        }
                     }
                 }
             }
-            Button("Add category") { categoryEditor = CategoryDraft(parentId: selectedParent ?? "") }
             if let id = selectedParent,
                let category = store.state?.document.categories.first(where: { $0.id == id }) {
                 HStack {
-                    Button("Edit") { categoryEditor = CategoryDraft(category: category) }
-                    Button("Delete") { deletion = Deletion(id: id, category: true) }
+                    Text("Category options").font(.system(size: 10)).foregroundColor(palette.muted)
+                    Spacer()
+                    Menu {
+                        Button("Add subcategory") { categoryEditor = CategoryDraft(parentId: id) }
+                        Button("Edit category") { categoryEditor = CategoryDraft(category: category) }
+                        Button("Delete category", role: .destructive) { deletion = Deletion(id: id, category: true) }
+                    } label: { Image(systemName: "ellipsis") }
+                    .menuStyle(.borderlessButton).fixedSize().help("Category options")
                 }
             }
-            Divider()
-            Text("Appearance").font(.caption).foregroundColor(palette.muted)
-            Picker("Appearance", selection: Binding(get: { store.dark ? "Dark" : "Light" }, set: { value in
-                Task { await store.perform("appearance", ["appearance": value]) }
-            })) {
-                Text("Warm Editorial").tag("Light")
-                Text("Burnished Copper").tag("Dark")
-            }.labelsHidden()
+            Button("Save highlighted text…", action: capture).frame(maxWidth: .infinity, alignment: .leading)
+            Rectangle().fill(palette.border).frame(height: 0.7)
             HStack {
-                Button("Import") { store.importLibrary() }
-                Button("Export") { store.exportLibrary() }
-            }
-            Button("Quit CommonCopy") { NSApp.terminate(nil) }
-        }.padding(20).frame(width: 230)
+                Button { settingsOpen = true } label: { Label("Settings", systemImage: "slider.horizontal.3") }
+                    .buttonStyle(.plain)
+                Spacer()
+                Button { NSApp.terminate(nil) } label: { Image(systemName: "power") }
+                    .buttonStyle(.plain).help("Quit CommonCopy").accessibilityLabel("Quit CommonCopy")
+            }.font(.system(size: 12))
+        }.padding(20).frame(width: 220).background(palette.surface)
     }
 
-    private func categoryButton(_ title: String, id: String) -> some View {
-        Button { store.selectedCategory = id } label: {
-            Text(title).frame(maxWidth: .infinity, alignment: .leading).padding(10)
-                .foregroundColor(store.selectedCategory == id ? .white : palette.text)
-                .background(store.selectedCategory == id ? palette.accent : palette.surface)
-                .clipShape(RoundedRectangle(cornerRadius: 9))
+    private func categoryButton(_ title: String, icon: String, id: String) -> some View {
+        let selected = store.selectedCategory == id
+        return Button { store.selectedCategory = id } label: {
+            HStack(spacing: 9) {
+                Image(systemName: icon).frame(width: 14)
+                Text(title).lineLimit(2).frame(maxWidth: .infinity, alignment: .leading)
+            }.font(.system(size: 12)).padding(.horizontal, 10).padding(.vertical, 10)
+                .foregroundColor(selected ? .white : palette.text)
+                .background(selected ? Color(hex: 0x222222) : .clear)
+                .clipShape(RoundedRectangle(cornerRadius: 7))
         }.buttonStyle(.plain)
     }
 
+    private func emptyState(_ title: String, detail: String) -> some View {
+        VStack(alignment: .leading, spacing: 9) {
+            Text(title).font(.system(size: 16, weight: .medium))
+            Text(detail).font(.system(size: 12)).foregroundColor(palette.muted)
+        }.padding(24).frame(maxWidth: .infinity, alignment: .leading)
+    }
+
     private func phraseCard(_ phrase: Phrase) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text(phrase.title).font(.headline)
-                if phrase.isFavorite { Image(systemName: "star.fill").foregroundColor(palette.accent) }
+        VStack(alignment: .leading, spacing: 13) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(phrase.title).font(.system(size: 14, weight: .semibold)).lineLimit(2)
+                    Text(store.categories.first { $0.id == phrase.categoryId }?.displayName ?? "Phrase")
+                        .font(.system(size: 10)).foregroundColor(palette.muted)
+                }
                 Spacer()
-                if !phrase.isEnabled { Text("Disabled").font(.caption).foregroundColor(palette.muted) }
-                Text("\(phrase.useCount) uses").font(.caption).foregroundColor(palette.muted)
+                if phrase.isFavorite { Image(systemName: "star.fill").font(.system(size: 11)) }
+                if !phrase.isEnabled { Text("Disabled").font(.system(size: 10)).foregroundColor(palette.muted) }
             }
-            Text(phrase.text).lineLimit(3).foregroundColor(palette.muted).textSelection(.enabled)
-            HStack {
+            Text(phrase.text).font(.system(size: 12)).lineLimit(2).foregroundColor(palette.muted).textSelection(.enabled)
+            HStack(spacing: 8) {
                 Button("Paste") { paste(phrase) }.disabled(!phrase.isEnabled)
+                    .buttonStyle(MonochromeButton(palette: palette, filled: true))
                 Button("Copy") {
                     NSPasteboard.general.clearContents()
                     NSPasteboard.general.setString(phrase.text, forType: .string)
                     Task { await store.perform("recordUse", ["id": phrase.id]) }
                 }.disabled(!phrase.isEnabled)
                 Spacer()
-                Button("Edit") { store.phraseEditor = PhraseDraft(phrase: phrase) }
-                Button("Duplicate") { Task { await store.perform("duplicatePhrase", ["id": phrase.id]) } }
-                Button("Delete") { deletion = Deletion(id: phrase.id, category: false) }
+                Text("\(phrase.useCount) \(phrase.useCount == 1 ? "use" : "uses")")
+                    .font(.system(size: 10)).foregroundColor(palette.muted)
+                Menu {
+                    Button("Edit phrase") { store.phraseEditor = PhraseDraft(phrase: phrase) }
+                    Button(phrase.isFavorite ? "Remove from Favourites" : "Add to Favourites") { saveFlags(phrase, favourite: !phrase.isFavorite) }
+                    Button(phrase.isEnabled ? "Disable phrase" : "Enable phrase") { saveFlags(phrase, enabled: !phrase.isEnabled) }
+                    Button("Duplicate phrase") { Task { await store.perform("duplicatePhrase", ["id": phrase.id]) } }
+                    Divider()
+                    Button("Delete phrase", role: .destructive) { deletion = Deletion(id: phrase.id, category: false) }
+                } label: { Image(systemName: "ellipsis") }
+                .menuStyle(.borderlessButton).fixedSize().help("Phrase options").accessibilityLabel("Options for \(phrase.title)")
             }
-        }.padding(14).background(palette.background).clipShape(RoundedRectangle(cornerRadius: 10))
+        }.padding(18).frame(maxWidth: .infinity, alignment: .leading).background(palette.background)
+            .overlay(RoundedRectangle(cornerRadius: 8).stroke(palette.border, lineWidth: 0.7))
+    }
+
+    private func saveFlags(_ phrase: Phrase, favourite: Bool? = nil, enabled: Bool? = nil) {
+        Task { await store.perform("savePhrase", ["id": phrase.id, "categoryId": phrase.categoryId,
+            "title": phrase.title, "text": phrase.text, "isFavorite": favourite ?? phrase.isFavorite,
+            "isEnabled": enabled ?? phrase.isEnabled]) }
+    }
+}
+
+struct SettingsView: View {
+    @ObservedObject var store: Store
+    let configureActivation: () -> Void
+    @Environment(\.dismiss) private var dismiss
+    private var palette: Palette { Palette(dark: store.dark) }
+    var body: some View {
+        VStack(alignment: .leading, spacing: 22) {
+            HStack {
+                Text("Settings").font(.system(size: 26, weight: .medium))
+                Spacer()
+                Button("Done") { dismiss() }.keyboardShortcut(.cancelAction)
+            }
+            Divider()
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Quick access").font(.headline)
+                Toggle("Command + right-click", isOn: $store.commandRightClickEnabled)
+                    .onChange(of: store.commandRightClickEnabled) { _ in configureActivation() }
+                Text("⌘⇧Space also opens your compact phrase menu.").font(.caption).foregroundColor(palette.muted)
+                if store.commandRightClickEnabled && !store.commandRightClickAvailable {
+                    Button("Enable Accessibility…", action: configureActivation)
+                    Text("Enable CommonCopy in System Settings → Privacy & Security → Accessibility, then return here.")
+                        .font(.caption).foregroundColor(palette.muted)
+                }
+            }
+            Divider()
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Appearance").font(.headline)
+                Picker("Appearance", selection: Binding(get: { store.dark ? "Dark" : "Light" }, set: { value in
+                    Task { await store.perform("appearance", ["appearance": value]) }
+                })) { Text("Light").tag("Light"); Text("Dark").tag("Dark") }.pickerStyle(.segmented).labelsHidden()
+            }
+            Divider()
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Your library").font(.headline)
+                Text("Stored on this Mac. Export a copy for a lasting backup.").font(.caption).foregroundColor(palette.muted)
+                HStack {
+                    Button("Import…") { store.importLibrary() }
+                    Button("Export…") { store.exportLibrary() }
+                    Spacer()
+                    Button("Reload") { Task { await store.perform("snapshot") } }
+                }
+            }
+            Divider()
+            HStack { BrandMark(); Text("CommonCopy\nSave it once. Paste it forever.").font(.caption).foregroundColor(palette.muted) }
+            Button("Quit CommonCopy") { NSApp.terminate(nil) }.buttonStyle(.plain).font(.caption)
+        }.padding(28).frame(width: 460).foregroundColor(palette.text).background(palette.background)
+            .buttonStyle(MonochromeButton(palette: palette)).disabled(store.busy)
     }
 }
 
@@ -221,7 +356,7 @@ struct PhraseEditor: View {
     @State private var failure = false
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text(draft.existingId == nil ? "Add phrase" : "Edit phrase").font(.title2)
+            Text(draft.existingId == nil ? "Add phrase" : "Edit phrase").font(.system(size: 24, weight: .medium))
             TextField("Title", text: $draft.title)
             Picker("Category", selection: $draft.categoryId) {
                 ForEach(store.categories) { item in
@@ -249,10 +384,11 @@ struct PhraseEditor: View {
                         } else { failure = true }
                     }
                 }.keyboardShortcut(.defaultAction)
+                    .buttonStyle(MonochromeButton(palette: Palette(dark: store.dark), filled: true))
                     .disabled(draft.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || draft.text.isEmpty || store.busy)
             }
         }.padding(24).frame(width: 520)
-            .buttonStyle(CopperButton(palette: Palette(dark: store.dark)))
+            .buttonStyle(MonochromeButton(palette: Palette(dark: store.dark)))
     }
 }
 
@@ -312,9 +448,10 @@ struct CategoryEditor: View {
                         if await store.perform("saveCategory", fields) { dismiss() } else { failure = true }
                     }
                 }.keyboardShortcut(.defaultAction)
+                    .buttonStyle(MonochromeButton(palette: Palette(dark: store.dark), filled: true))
                     .disabled(draft.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || store.busy)
             }
         }.padding(24).frame(width: 420)
-            .buttonStyle(CopperButton(palette: Palette(dark: store.dark)))
+            .buttonStyle(MonochromeButton(palette: Palette(dark: store.dark)))
     }
 }

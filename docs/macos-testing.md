@@ -107,3 +107,31 @@ still running. Save errors keep the editor open; Cancel does not trigger the
 successful-save behavior. Category and settings management remain available
 until the user finishes them. Test a captured Save, a manual Add/Edit Save, an
 invalid/failed Save, then reopen using the menu bar and Command + right-click.
+
+## Version 0.3.0: approved modular redesign
+
+White/black/gray UI with thin borders, filled and outlined controls, the approved
+solid-C/dotted-copy logo and a clearer category/search/phrase layout. Category
+options and phrase editing actions use small menus; Settings groups activation,
+appearance and library transfer. Light/Dark still use the same stored values,
+so existing data needs no migration. Native compact-menu activation is unchanged.
+
+Update: Quit the old app, replace only CommonCopy.app in Applications, keep all
+Application Support data. If blocked, the known private-build repair is:
+
+```bash
+xattr -dr com.apple.quarantine "/Applications/CommonCopy.app"
+open "/Applications/CommonCopy.app"
+```
+
+If Command + right-click remains unavailable after an update, Quit CommonCopy,
+remove its old Accessibility entry with the minus button, add the application
+from Applications again, enable it, and reopen. Toggling the stale entry was
+insufficient during 0.2.2 device testing; removal/re-addition restored access.
+The private build still lacks stable Developer ID signing/notarization.
+
+Check both appearances, Settings, category add/edit/delete/subcategories, phrase
+options (edit/duplicate/favourite/enable/delete), search, Copy/Paste, capture,
+Save auto-dismissal, cancel and failed saves. The 0.2.2 capture/save/auto-dismiss
+workflow passed the maintainer's actual Mac test; the redesign needs a fresh
+visual/workflow check.

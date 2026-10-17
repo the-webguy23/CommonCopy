@@ -114,3 +114,18 @@ any user's permissions. The fixture executable is never bundled in CommonCopy.ap
   app when available. It remains a menu-bar utility. Failed saves stay visible.
   Applies to captured and manually added/edited phrases. User device acceptance
   of this new behavior remains pending.
+
+## 2026-10-16: approved utility redesign
+
+Maintainer approved the monochrome modular website and solid-C/dotted-copy logo
+and authorized redesign of both utilities. Mac will be reviewed immediately;
+Windows device acceptance is deferred until Monday, October 19. Preserve native
+compact menus, capture/paste safeguards, JSON data and automatic dismissal after
+Save. PRs stay unmerged. The 0.2.2 Mac workflow including automatic window closing
+passed device testing after the old Accessibility entry was removed and re-added.
+
+Mac 0.3.0 groups settings/data transfer, simplifies the sidebar and phrase cards,
+and moves infrequent phrase/category actions into menus. Light/Dark persisted
+values remain compatible. Approved original logo is packaged unchanged and used
+to derive standard app icon sizes. Source asset Git blob:
+43f93281b2e033e8d264758461c9d84a3e8843a7. Desktop remains local-only and ad-free.
