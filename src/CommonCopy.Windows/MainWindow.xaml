@@ -10,7 +10,7 @@
       <Grid Margin="18,22,18,18">
         <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal" Margin="0,0,0,26">
-          <Border Background="White" CornerRadius="4"><Image x:Name="BrandLogo" Source="{StaticResource ApprovedLogo}" Width="38" Height="38" Stretch="Uniform" /></Border>
+          <Image x:Name="BrandLogo" Source="{StaticResource ApprovedLogo}" Width="38" Height="38" Stretch="Uniform" />
           <TextBlock Text="CommonCopy" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" Margin="9,0,0,0" />
         </StackPanel>
         <DockPanel Grid.Row="1" Margin="5,0,0,11">

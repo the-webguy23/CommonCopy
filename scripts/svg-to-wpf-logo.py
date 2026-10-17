@@ -22,7 +22,7 @@ for path in svg.iter('{http://www.w3.org/2000/svg}path'):
     translated = ET.SubElement(group, tag('DrawingGroup'))
     prop = ET.SubElement(translated, tag('DrawingGroup.Transform'))
     ET.SubElement(prop, tag('TranslateTransform'), {'X':transform[1], 'Y':transform[2]})
-    ET.SubElement(translated, tag('GeometryDrawing'), {'Brush':path.attrib['fill'], 'Geometry':'F1 '+path.attrib['d']})
+    ET.SubElement(translated, tag('GeometryDrawing'), {'Brush':'{DynamicResource LogoInkBrush}' if path.attrib['fill']=='#000000' else '{DynamicResource LogoCopyBrush}', 'Geometry':'F1 '+path.attrib['d']})
     count += 1
 assert count == 105
 ET.indent(root)

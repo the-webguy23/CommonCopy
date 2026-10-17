@@ -11,4 +11,6 @@
   <SolidColorBrush x:Key="SelectionBrush" Color="#333333" />
   <SolidColorBrush x:Key="SelectionForegroundBrush" Color="#FFFFFF" />
   <SolidColorBrush x:Key="HoverBrush" Color="#444444" />
+  <SolidColorBrush x:Key="LogoInkBrush" Color="#FFFFFF" />
+  <SolidColorBrush x:Key="LogoCopyBrush" Color="#AAAAAA" />
 </ResourceDictionary>
