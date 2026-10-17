@@ -1608,3 +1608,55 @@ kbd {
     animation:none!important
   }
 }
+
+/* Alternate module contrast while preserving the approved monochrome layout. */
+.how-section {
+  background: #111;
+  color: #fff;
+  padding: 28px 35px 35px;
+  margin-bottom: 24px;
+  border-radius: 3px;
+}
+.how-section .section-topline {
+  border-top-color: #fff;
+  color: #bbb;
+}
+.how-section .section-topline>span:first-child { color: #fff; }
+.how-section .section-heading>p,
+.how-section .steps-grid p { color: #c4c4c4; }
+.how-section .steps-grid,
+.how-section .steps-grid article { border-color: #777; }
+.download-card--inverse { background: #111; color: #fff; }
+.download-card--inverse .download-card-top>span,
+.download-card--inverse p { color: #c4c4c4; }
+.download-card--inverse kbd {
+  background: transparent;
+  color: #fff;
+  border-color: #aaa;
+}
+.download-card--inverse .button-unavailable {
+  background: transparent;
+  color: #ccc;
+  border-color: #aaa;
+}
+@media(max-width:800px) {
+  .how-section { padding: 25px 27px 29px; }
+}
+@media(max-width:600px) {
+  .how-section { padding: 21px 20px 25px; margin-bottom: 20px; }
+}
+
+.brand-logo {
+  display: block;
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.brand>.brand-name {
+  font-size: inherit;
+  font-weight: inherit;
+}
+@media(max-width:600px) {
+  .brand-logo { width: 36px; height: 36px; }
+}

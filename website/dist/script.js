@@ -34,13 +34,22 @@
   const form = document.querySelector('[data-demo-form]');
   const title = document.querySelector('#demo-title');
   const body = document.querySelector('#demo-body');
+  const reply = ['A quick follow-up', 'Hi Alex,\n\nJust following up on my previous message. Let me know if you need anything else from me.\n\nThanks!'];
+  const summaryPrompt = ['GPT → Summarize a document', 'Summarize the text below in three bullet points. Finish with one clear next step.\n\nText: [paste text here]'];
+  const codeSnippet = ['JavaScript → Remove duplicates', 'const uniqueItems = [...new Set(items)];\nconsole.log(uniqueItems);'];
   const groups = {
-    favourites: [['A thoughtful reply', 'Thanks for reaching out. I’ll take a look and get back to you shortly.']],
-    common: [['Email sign-off', 'Best regards,\nAlex']],
-    prompts: [['GPT → Draft a clear reply', 'Draft a clear, friendly reply to the following message:'], ['Image based → Product photo', 'A softly lit product photograph on a neutral background.']],
-    code: [['HTML document', '<!doctype html>\n<html lang="en">\n</html>']],
-    daily: [['Email sign-off', 'Best regards,\nAlex'], ['A thoughtful reply', 'Thanks for reaching out. I’ll take a look and get back to you shortly.']]
+    favourites: [reply, summaryPrompt],
+    common: [reply, ['Email sign-off', 'Best regards,\nAlex Morgan']],
+    prompts: [
+      summaryPrompt,
+      ['GPT → Write a follow-up', 'Write a polite, two-sentence follow-up asking whether there is an update on my request. Keep the tone friendly and professional.'],
+      ['GPT → Review my code', 'Review the code below for bugs and readability. Suggest a corrected version and briefly explain each change.\n\nCode: [paste code here]'],
+      ['Image based → Product photo', 'A minimalist product photograph of a white ceramic coffee cup on a pale stone surface. Soft window light from the left, gentle shadows, neutral background, no text.']
+    ],
+    code: [codeSnippet, ['CSS → Center a layout', '.container {\n  display: grid;\n  place-items: center;\n  min-height: 100vh;\n}']],
+    daily: [reply, ['Email sign-off', 'Best regards,\nAlex Morgan'], ['Meeting confirmation', 'Thanks for confirming. I’ve added the meeting to my calendar and look forward to speaking with you.']]
   };
+  const originalPromptCount = groups.prompts.length;
   let caret = 0, selectionEnd = 0, capturedSelection = '', activeGroup = null;
   const rememberSelection = () => {
     caret = message.selectionStart; selectionEnd = message.selectionEnd;
@@ -83,9 +92,9 @@
     showMenu(true);
   }));
   document.querySelector('[data-capture-demo]').addEventListener('click', () => {
-    showMenu(false); title.value = 'My saved prompt';
+    showMenu(false); title.value = capturedSelection ? 'My saved selection' : 'Summarize a document';
     title.setCustomValidity(''); body.setCustomValidity('');
-    body.value = capturedSelection || 'Draft a clear, friendly reply to the following message:';
+    body.value = capturedSelection || summaryPrompt[1];
     dialog.showModal();
   });
   form.addEventListener('submit', event => {
@@ -101,7 +110,7 @@
   dialog.addEventListener('close', () => openButton.focus());
   document.querySelectorAll('[data-demo-cancel]').forEach(button => button.addEventListener('click', () => dialog.close()));
   document.querySelector('[data-demo-reset]').addEventListener('click', () => {
-    message.value = ''; caret = selectionEnd = 0; capturedSelection = ''; groups.prompts.splice(2);
+    message.value = ''; caret = selectionEnd = 0; capturedSelection = ''; groups.prompts.splice(originalPromptCount);
     showMenu(true); feedback.textContent = 'Choose a category, then a phrase.';
   });
   document.addEventListener('keydown', event => {

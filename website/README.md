@@ -65,3 +65,22 @@ Validation includes JavaScript syntax, local links/assets/fragments, unique IDs,
 labels/control targets, monochrome colors, and balanced stylesheet blocks. Automated
 browser rendering/interaction QA is unavailable in the current environment;
 responsive layout and real browser interaction remain review items.
+
+## Approved refinements and logo (2026-10-16)
+
+Maintainer approved the monochrome modular layout and interactive demo. Bounded
+refinements invert the full 02 / How it works module and the Mac download card,
+while keeping the Windows card light. FAQ title: "Common questions. Clear answers."
+Demo categories now insert realistic reusable GPT instructions, an image prompt,
+valid JavaScript/CSS snippets, and everyday replies/sign-offs. Reset retains every
+built-in prompt and removes only phrases saved during the demo.
+
+Approved logo is the solid upper C with dotted lower copy. Original Library file:
+CommonCopy_Approved_Logo.png, libfile_77b400cffbd8819196af1d1555c73dcf. It is copied
+unchanged as dist/commoncopy-approved-logo.png (Git blob
+43f93281b2e033e8d264758461c9d84a3e8843a7), used in the header/footer on all pages
+and as the browser icon. No regeneration, tracing, cropping or recoloring.
+
+Checks: JavaScript syntax, page links/IDs/control targets/labels, two original-logo
+placements per page, a single inverted download card, exact FAQ title, and release
+gating pass. Browser/mobile visual review remains unavailable in this environment.
