@@ -1,0 +1,29 @@
+name: macOS UI recording
+on:
+  push:
+    branches: ["media/commoncopy-macos-hero"]
+permissions:
+  contents: read
+jobs:
+  record:
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Build actual macOS application
+        run: bash scripts/build-macos.sh arm64
+      - name: Verify native recording access
+        run: |
+          mkdir -p artifacts/mac-ui
+          swift -e 'import AppKit; import ApplicationServices; print("accessibility=\(AXIsProcessTrusted())"); print("screen=\(CGPreflightScreenCaptureAccess())")' > artifacts/mac-ui/access.txt
+          open artifacts/macos-arm64/CommonCopy.app
+          sleep 3
+          screencapture -x artifacts/mac-ui/desktop.png
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: CommonCopy-mac-UI
+          path: artifacts/mac-ui/
