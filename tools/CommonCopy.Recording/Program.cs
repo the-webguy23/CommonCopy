@@ -65,7 +65,7 @@ internal static class Program
         editor.SelectAll(); Mark("real editable text selected");await Task.Delay(700);
         OpenMenu();await Task.Delay(900);Mark("native CommonCopy menu opened");
         Forms.SendKeys.SendWait("{DOWN}{ENTER}");
-        var dialog=await WaitWindow("Phrase"); Mark("real capture editor opened");await Task.Delay(600);
+        var dialog=await WaitWindow("Save highlighted text"); Mark("real capture editor opened");await Task.Delay(600);
         var text=Child(dialog,"TextBox");
         if (((ValuePattern)text.GetCurrentPattern(ValuePattern.Pattern)).Current.Value != Phrase) throw new Exception("Capture differs from selection");
         ((ValuePattern)Child(dialog,"TitleBox").GetCurrentPattern(ValuePattern.Pattern)).SetValue("Quick follow-up");
@@ -115,9 +115,11 @@ internal static class Program
             while(capture){
                 g.CopyFromScreen(bounds.Left,bounds.Top,0,0,bmp.Size);
                 var ci=new CURSORINFO { cbSize=Marshal.SizeOf<CURSORINFO>() };
-                if(GetCursorInfo(ref ci)&&ci.flags==1)DrawIconEx(g.GetHdc(),ci.ptScreenPos.X-bounds.Left,ci.ptScreenPos.Y-bounds.Top,ci.hCursor,0,0,0,IntPtr.Zero,3);
-                // Release only if a cursor DC was acquired.
-                if(ci.flags==1)g.ReleaseHdc();
+                if(GetCursorInfo(ref ci)&&ci.flags==1) {
+                    var dc=g.GetHdc();
+                    try { DrawIconEx(dc,ci.ptScreenPos.X-bounds.Left,ci.ptScreenPos.Y-bounds.Top,ci.hCursor,0,0,0,IntPtr.Zero,3); }
+                    finally { g.ReleaseHdc(dc); }
+                }
                 bmp.Save(Path.Combine(output,$"frame-{index:D5}.jpg"),System.Drawing.Imaging.ImageFormat.Jpeg);
                 index++;var remaining=index*100-start.ElapsedMilliseconds;if(remaining>0)Thread.Sleep((int)remaining);
             }
