@@ -8,7 +8,7 @@ enum Failure:Error {case message(String)}
  @MainActor static func main() {
   let app=NSApplication.shared
   let runner=Runner()
-  Task {do {try await runner.run();exit(0)}catch{try? String(describing:error).write(to:runner.dir.appendingPathComponent("failure.txt"),atomically:true,encoding:.utf8);exit(1)}}
+  Task {do {try await runner.run();exit(0)}catch{let p=Process();p.executableURL=URL(fileURLWithPath:"/usr/sbin/screencapture");p.arguments=["-x",runner.dir.appendingPathComponent("failure.png").path];try? p.run();p.waitUntilExit();try? String(describing:error).write(to:runner.dir.appendingPathComponent("failure.txt"),atomically:true,encoding:.utf8);exit(1)}}
   app.run()
  }
 }
@@ -98,16 +98,27 @@ done > "$report_dir/checksums.sha256"
   down.post(tap:.cghidEventTap);up.post(tap:.cghidEventTap);await pause(0.4)
  }
  func openApp(_ name:String,_ document:String?=nil)async throws{
-  var args=["-a",name];if let document{args.append(document)}
-  let p=try process(URL(fileURLWithPath:"/usr/bin/open"),args);p.waitUntilExit();await pause(1.5)
   let bundle=name=="Terminal" ? "com.apple.Terminal":"com.apple.Safari"
-  guard let app=NSRunningApplication.runningApplications(withBundleIdentifier:bundle).first else{throw Failure.message("Destination app did not open")}
-  targetPID=app.processIdentifier;app.activate(options:.activateIgnoringOtherApps);await pause(0.5)
+  guard let appURL=NSWorkspace.shared.urlForApplication(withBundleIdentifier:bundle)else{throw Failure.message("Destination missing")}
+  let config=NSWorkspace.OpenConfiguration();config.activates=true
+  let app:NSRunningApplication=try await withCheckedThrowingContinuation{continuation in
+   if let document {
+    let url=document.hasPrefix("https:") ? URL(string:document)!:URL(fileURLWithPath:document)
+    NSWorkspace.shared.open([url],withApplicationAt:appURL,configuration:config){app,error in
+     if let app{continuation.resume(returning:app)}else{continuation.resume(throwing:error ?? Failure.message("Document launch failed"))}
+    }
+   }else{
+    NSWorkspace.shared.openApplication(at:appURL,configuration:config){app,error in
+     if let app{continuation.resume(returning:app)}else{continuation.resume(throwing:error ?? Failure.message("App launch failed"))}
+    }
+   }
+  }
+  targetPID=app.processIdentifier;app.activate(options:.activateIgnoringOtherApps);await pause(2)
  }
  func fitWindow()throws{
   let targetAX=AXUIElementCreateApplication(targetPID)
   guard let window=(attr(targetAX,kAXWindowsAttribute)as? [AXUIElement])?.first else{throw Failure.message("Missing destination window")}
-  var point=CGPoint(x:0,y:25),size=CGSize(width:1024,height:680)
+  var point=CGPoint(x:0,y:25),size=CGSize(width:1024,height:640)
   AXUIElementSetAttributeValue(window,kAXPositionAttribute as CFString,AXValueCreate(.cgPoint,&point)!)
   AXUIElementSetAttributeValue(window,kAXSizeAttribute as CFString,AXValueCreate(.cgSize,&size)!)
  }
@@ -143,7 +154,7 @@ done > "$report_dir/checksums.sha256"
   await type("exec /bin/zsh -l");await key(36);await pause(0.8)
   await type("PS1='project % '; clear");await key(36);await pause(0.7)
   for _ in 0..<3{await key(24,[.maskCommand,.maskShift])}
-  try fitWindow();await pause(0.5)
+  try fitWindow();await key(37,.maskControl);await pause(0.5)
   beginCapture();mark("actual Terminal ready");await pause(1)
   await menu();mark("Terminal CommonCopy menu")
   try await choose("Code","Project checksum report");await pause(1.5)
@@ -152,21 +163,20 @@ done > "$report_dir/checksums.sha256"
   try check(findText(terminalAX,"Build a dated checksum report") != nil,"Code was not visible in actual Terminal")
   try check(!FileManager.default.fileExists(atPath:NSHomeDirectory()+"/Projects/commoncopy-demo/reports"),"Demo script unexpectedly executed")
   mark("actual Terminal code pasted without execution");await pause(2.5)
-  try await openApp("Safari","https://chatgpt.com/");try fitWindow();await pause(18)
+  try await openApp("Safari","https://chatgpt.com/");try fitWindow();await pause(25)
   await click(CGPoint(x:972,y:165));await pause(0.5)
   let safariAX=AXUIElementCreateApplication(targetPID)
-  guard let composer=find(safariAX,role:kAXTextAreaRole)else{throw Failure.message("Actual ChatGPT composer unavailable")}
-  AXUIElementSetAttributeValue(composer,kAXFocusedAttribute as CFString,kCFBooleanTrue)
+  if let composer=find(safariAX,role:kAXTextAreaRole){AXUIElementSetAttributeValue(composer,kAXFocusedAttribute as CFString,kCFBooleanTrue)}else{await click(CGPoint(x:450,y:430))}
   await pause(0.5);mark("actual ChatGPT composer ready");await pause(0.7)
   await menu();try await choose("GPT","Draft a project brief");await pause(1.7)
   await key(0,.maskCommand);await key(8,.maskCommand);await pause(0.3)
-  try check(NSPasteboard.general.string(forType:.string)?.contains(prompt)==true,"Prompt was not pasted into actual ChatGPT composer")
+  try check(NSPasteboard.general.string(forType:.string)?.trimmingCharacters(in:.whitespacesAndNewlines)==prompt,"Prompt was not pasted into actual ChatGPT composer")
   await key(124);mark("actual ChatGPT prompt pasted unsent");await pause(2)
   let emailPath=URL(fileURLWithPath:CommandLine.arguments[3]).path
   try await openApp("Safari",emailPath);try fitWindow();await pause(2)
   let emailText="Thanks for the thoughtful feedback. I have updated the project brief and the revised timeline is ready for your review."
-  guard let paragraph=findText(safariAX,emailText)else{throw Failure.message("Sample email paragraph unavailable")}
-  let pos=try point(paragraph)
+  let pos:CGPoint
+  if let paragraph=findText(safariAX,emailText){pos=try point(paragraph)}else{pos=CGPoint(x:360,y:367)}
   mark("sample email in actual Safari window");await pause(1)
   await click(CGPoint(x:pos.x+40,y:pos.y+12),count:3);await pause(0.6)
   await key(8,.maskCommand);await pause(0.3)
@@ -198,7 +208,7 @@ final class ScreenFrames: @unchecked Sendable {
    while running{
     let url=dir.appendingPathComponent(String(format:"frame-%05d.jpg",n))
     let shot=Process();shot.executableURL=URL(fileURLWithPath:"/usr/sbin/screencapture");shot.arguments=["-x","-C","-t","jpg",url.path];shot.standardError=FileHandle.nullDevice
-    do{try shot.run();shot.waitUntilExit();if shot.terminationStatus==0{n+=1}else{break}}catch{break}
+    do{try shot.run();shot.waitUntilExit();if shot.terminationStatus==0{n+=1}else{Thread.sleep(forTimeInterval:0.2)}}catch{Thread.sleep(forTimeInterval:0.2)}
     let remaining=Double(n)*0.1-Date().timeIntervalSince(began);if remaining>0{Thread.sleep(forTimeInterval:remaining)}
    }
    let j:[String:Any]=["frames":n,"elapsedSeconds":Date().timeIntervalSince(began)]
