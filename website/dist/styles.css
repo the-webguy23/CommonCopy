@@ -1689,3 +1689,6 @@ kbd {
 @media(max-width:800px){.download-help-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}.download-help-tabs a:nth-child(3){border-right:0}.download-help-tabs a:nth-child(-n+3){border-bottom:1px solid var(--ink)}.help-module-heading{align-items:start;flex-direction:column;gap:14px}}
 @media(max-width:600px){.download-help{margin-top:30px}.help-module-heading,.download-help-body{padding:22px 18px}.help-module-heading h2{font-size:27px}.download-help-tabs a{font-size:11px;padding:10px 6px;min-height:58px}.download-help .help-section>h2{font-size:25px}}
 @media print{.download-help-tabs{display:none}.download-help [hidden]{display:block!important}.download-help[data-tabs-ready] .help-section{margin:20px 0}.download-help{border:0}}
+
+/* Direct development sponsorship: the founding tier has a distinct, quiet emphasis. */
+.sponsor-card ul{padding-left:18px;margin:4px 0 18px;font-size:13px;line-height:1.8}.sponsor-card li{margin:8px 0}.sponsor-card--founding{background:var(--ink);color:var(--paper)}.sponsor-card--founding p,.sponsor-card--founding .sponsor-label{color:#c4c4c4}.page-hero>.button{margin-top:14px}.page-note>p:last-child{margin-bottom:0}

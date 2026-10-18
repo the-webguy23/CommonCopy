@@ -118,3 +118,9 @@ Validated local asset/fragment links, headings, navigation, offline content pari
 All six Help topics now appear directly beneath the homepage download cards. The responsive module shows one panel at a time, with black selected tabs, thin borders, arrow/Home/End/Enter/Space controls, ARIA relationships and direct topic links. Header/footer Help links target the homepage module. Existing help.html remains available; all original guide content and disabled public download buttons are preserved. Without JavaScript, anchor links and full content remain accessible.
 
 Validation: HTML asset/fragment links and unique IDs, exact guide-content parity, tab selection and keyboard/focus/hash behavior, JavaScript syntax and whitespace checks passed. Browser visual QA was unavailable. Private preview source: 72847b11254ceb72cf61382cfce07e9602301586.
+
+
+## Direct sponsorship program — 2026-10-17
+
+
+Replaces the planned ad-reseller model with Supporter, Development Sponsor and Founding Sponsor tiers. Founding recognition is permanent; prominent logo/link placement lasts 30 days from going live, optionally renewable for another 30-day term subject to availability. Early-access invitations depend on preview availability; no dates or custom work are promised. Pricing, terms, enquiry contact, payments and signups remain pending rather than invented. Footer links, homepage support strip/FAQ and privacy wording now reflect sponsorship. Sponsor recognition remains website-only, with no access to local phrase or clipboard data.
