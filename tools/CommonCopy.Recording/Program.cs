@@ -126,7 +126,7 @@ internal static class Program
         Mark("webpage article visible");
         dynamic html=webpage.Document;dynamic range=html.body.createTextRange();range.moveToElementText(html.getElementById("excerpt"));range.select();
         Mark("webpage paragraph highlighted");await Task.Delay(800);
-        OpenMenu();await Task.Delay(900);Mark("webpage native capture menu visible");Forms.SendKeys.SendWait("{DOWN}{ENTER}");
+        OpenMenu();await Task.Delay(900);Mark("webpage native capture menu visible");SetCursorPos(520,274);mouse_event(0x0002,0,0,0,UIntPtr.Zero);mouse_event(0x0004,0,0,0,UIntPtr.Zero);
         var webDialog=await WaitWindow("Save highlighted text");await Task.Delay(500);
         var captured=((ValuePattern)Child(webDialog,"TextBox").GetCurrentPattern(ValuePattern.Pattern)).Current.Value;
         if(captured.Trim()!=WebText)throw new Exception("Webpage capture mismatch");
