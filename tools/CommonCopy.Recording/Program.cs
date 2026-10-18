@@ -89,6 +89,22 @@ internal static class Program
         ((ValuePattern)Child(libraryWindow,"SearchBox").GetCurrentPattern(ValuePattern.Pattern)).SetValue("Quick");
         Mark("real manager search finds saved phrase");await Task.Delay(1400);
         ((ValuePattern)Child(libraryWindow,"SearchBox").GetCurrentPattern(ValuePattern.Pattern)).SetValue("");await Task.Delay(1000);
+        var add=libraryWindow.FindFirst(TreeScope.Descendants,new PropertyCondition(AutomationElement.NameProperty,"Add phrase"));
+        ((InvokePattern)add.GetCurrentPattern(InvokePattern.Pattern)).Invoke();
+        var promptDialog=await WaitWindow("Phrase");
+        const string promptText="Summarize the text below in three clear bullet points. Finish with one practical next step.";
+        ((ValuePattern)Child(promptDialog,"TitleBox").GetCurrentPattern(ValuePattern.Pattern)).SetValue("Summarize a document");
+        ((ValuePattern)Child(promptDialog,"TextBox").GetCurrentPattern(ValuePattern.Pattern)).SetValue(promptText);
+        Child(promptDialog,"CategoryBox").SetFocus();Forms.SendKeys.SendWait("{END}{TAB}");
+        Mark("different workflow: adding a GPT prompt");await Task.Delay(1300);
+        var promptSave=promptDialog.FindFirst(TreeScope.Descendants,new PropertyCondition(AutomationElement.NameProperty,"Save"));
+        ((InvokePattern)promptSave.GetCurrentPattern(InvokePattern.Pattern)).Invoke();await Task.Delay(900);
+        source.Activate();editor.Focus();editor.Clear();await Task.Delay(400);
+        OpenMenu();await Task.Delay(700);Forms.SendKeys.SendWait("{DOWN}{DOWN}{DOWN}{DOWN}{RIGHT}");await Task.Delay(700);
+        Forms.SendKeys.SendWait("{RIGHT}");await Task.Delay(1100);Mark("nested Prompts GPT submenu visible");
+        Forms.SendKeys.SendWait("{END}{ENTER}");await Task.Delay(1200);
+        if(editor.Text!=promptText)throw new Exception("Nested prompt paste failed: "+editor.Text);
+        Mark("different saved GPT prompt pasted correctly");await Task.Delay(1000);
         capture=false;await recording;if(captureError is not null)throw captureError;
         File.WriteAllText(Path.Combine(output,"workflow.json"),JsonSerializer.Serialize(new { platform="Windows", source="Actual CommonCopy native application on disposable CI desktop; external editor is a plain WPF recording fixture", realCaptureVerified=true, realPersistedSaveVerified=true, realPasteVerified=true, events },new JsonSerializerOptions{WriteIndented=true}));
     }
