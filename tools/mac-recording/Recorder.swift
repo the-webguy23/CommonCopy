@@ -48,7 +48,7 @@ enum Failure:Error {case message(String)}
   for child in (attr(el,kAXChildrenAttribute)as? [AXUIElement] ?? []){if let found=find(child,role:role,title:title,depth:depth+1){return found}}
   return nil
  }
- func press(_ el:AXUIElement)throws{guard AXUIElementPerformAction(el,kAXPressAction as CFString)== .success else{throw Failure.message("Could not press native control")}}
+ func press(_ el:AXUIElement)throws{guard AXUIElementPerformAction(el,kAXPressAction as CFString) == .success else{throw Failure.message("Could not press native control")}}
  var ax:AXUIElement{AXUIElementCreateApplication(common.processIdentifier)}
  func check(_ ok:Bool,_ message:String)throws{if !ok{throw Failure.message(message)}}
  func menu() async {
@@ -123,10 +123,9 @@ final class ScreenFrames: @unchecked Sendable {
   Thread.detachNewThread{[self] in
    let began=Date();var n=0
    while running{
-    if let img=CGDisplayCreateImage(CGMainDisplayID()){
-     let url=dir.appendingPathComponent(String(format:"frame-%05d.jpg",n))
-     if let dst=CGImageDestinationCreateWithURL(url as CFURL,UTType.jpeg.identifier as CFString,1,nil){CGImageDestinationAddImage(dst,img,[kCGImageDestinationLossyCompressionQuality:0.85]as CFDictionary);CGImageDestinationFinalize(dst);n+=1}
-    }
+    let url=dir.appendingPathComponent(String(format:"frame-%05d.jpg",n))
+    let shot=Process();shot.executableURL=URL(fileURLWithPath:"/usr/sbin/screencapture");shot.arguments=["-x","-C","-t","jpg",url.path];shot.standardError=FileHandle.nullDevice
+    do{try shot.run();shot.waitUntilExit();if shot.terminationStatus==0{n+=1}else{break}}catch{break}
     let remaining=Double(n)*0.1-Date().timeIntervalSince(began);if remaining>0{Thread.sleep(forTimeInterval:remaining)}
    }
    let j:[String:Any]=["frames":n,"elapsedSeconds":Date().timeIntervalSince(began)]
