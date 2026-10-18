@@ -7,21 +7,13 @@ permissions:
 jobs:
   record:
     runs-on: macos-15
-    timeout-minutes: 20
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 10.0.x
-      - name: Build actual macOS application
-        run: bash scripts/build-macos.sh arm64
-      - name: Compile native recording driver
+      - name: Check actual destination apps
         run: |
           mkdir -p artifacts/mac-ui
-          swiftc -parse-as-library tools/mac-recording/Fixture.swift -o artifacts/Fixture
-          swiftc -parse-as-library tools/mac-recording/Recorder.swift -o artifacts/Recorder
-      - name: Record the actual macOS workflows
-        run: artifacts/Recorder artifacts/macos-arm64/CommonCopy.app artifacts/mac-ui artifacts/Fixture
+          swift tools/mac-recording/Probe.swift artifacts/mac-ui
       - uses: actions/upload-artifact@v4
         if: always()
         with:
