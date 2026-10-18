@@ -7,13 +7,22 @@ permissions:
 jobs:
   record:
     runs-on: macos-15
-    timeout-minutes: 8
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Check actual destination apps
+      - name: Open actual destination apps
         run: |
           mkdir -p artifacts/mac-ui
-          swift tools/mac-recording/Probe.swift artifacts/mac-ui
+          open -a Terminal
+          sleep 3
+          screencapture -x artifacts/mac-ui/terminal.png
+          printf 'From: Jordan <jordan@example.com>\nTo: Alex <alex@example.com>\nSubject: Sample project handoff\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\n\nHi Alex,\n\nThanks for the thoughtful feedback. I have updated the project brief and the revised timeline is ready for your review.\n\nPlease send any final notes by Thursday so we can confirm the next steps.\n\nBest,\nJordan\n' > artifacts/mac-ui/sample.eml
+          open -a Mail artifacts/mac-ui/sample.eml
+          sleep 5
+          screencapture -x artifacts/mac-ui/mail.png
+          open -a Safari https://chatgpt.com/
+          sleep 20
+          screencapture -x artifacts/mac-ui/chatgpt.png
       - uses: actions/upload-artifact@v4
         if: always()
         with:
