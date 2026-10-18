@@ -61,10 +61,12 @@ enum Failure:Error {case message(String)}
   await pause(1.0)
  }
  func choose(_ group:String,_ title:String)async throws{
-  guard let g=find(ax,role:kAXMenuItemRole,title:group)else{throw Failure.message("Missing native menu group "+group)}
-  try press(g);await pause(0.8)
-  guard let p=find(ax,role:kAXMenuItemRole,title:title)else{throw Failure.message("Missing native menu phrase "+title)}
-  try press(p)
+  let downCount=group=="Code" ? 4 : 3
+  for _ in 0..<downCount{await key(125)}
+  await key(124);await pause(0.8)
+  await key(125)
+  if group=="GPT"{await key(124);await pause(0.8)}
+  mark(group+" native submenu visible");await pause(0.8);await key(36)
  }
  var screenFrames:ScreenFrames?
  func beginCapture(){start=Date();let f=ScreenFrames(dir:dir);screenFrames=f;f.start()}
@@ -93,8 +95,6 @@ enum Failure:Error {case message(String)}
   mark("Mac shell snippet pasted");await pause(1.5)
   try command("text:GPT prompt · ready to paste\n\n");await pause(1)
   mark("GPT example ready");await menu()
-  guard let prompts=find(ax,role:kAXMenuItemRole,title:"Prompts")else{throw Failure.message("Missing Prompts menu")}
-  try press(prompts);await pause(0.7)
   try await choose("GPT","Draft a project brief");await pause(1.5)
   let promptPasted=try String(contentsOf:dir.appendingPathComponent("editor.txt"),encoding:.utf8)
   try check(promptPasted.contains(prompt),"GPT prompt was not pasted")
@@ -102,8 +102,7 @@ enum Failure:Error {case message(String)}
   try command("web");await pause(3);mark("webpage visible")
   try command("select-web");await pause(1);mark("webpage text highlighted")
   await menu()
-  guard let save=find(ax,role:kAXMenuItemRole,title:"Save highlighted text…")else{throw Failure.message("Missing capture command")}
-  try press(save);await pause(2)
+  await key(36);await pause(2)
   if let sheet=find(ax,role:kAXSheetRole),let title=find(sheet,role:kAXTextFieldRole){AXUIElementSetAttributeValue(title,kAXValueAttribute as CFString,"Project brief checklist"as CFString)}
   mark("native macOS capture sheet");await pause(1.3)
   guard let saveButton=find(ax,role:kAXButtonRole,title:"Save")else{throw Failure.message("Missing Save button")}
