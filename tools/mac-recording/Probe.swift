@@ -2,7 +2,7 @@ import AppKit
 let output=CommandLine.arguments[1]
 func run(_ source:String)->String{
  var error:NSDictionary?
- let result=NSAppleScript(source:source)?.executeAndReturnError(&error)
+ let result=NSAppleScript(source:"with timeout of 10 seconds\n"+source+"\nend timeout")?.executeAndReturnError(&error)
  return error.map{String(describing:$0)} ?? result?.stringValue ?? "ok"
 }
 func shot(_ name:String){
