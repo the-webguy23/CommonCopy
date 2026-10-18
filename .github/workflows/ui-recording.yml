@@ -1,0 +1,25 @@
+name: Record real CommonCopy UI
+on:
+  push:
+    branches: ["media/commoncopy-hero-ui"]
+permissions:
+  contents: read
+jobs:
+  record:
+    runs-on: windows-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Publish actual application
+        run: dotnet publish src/CommonCopy.Windows/CommonCopy.Windows.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o artifacts/app
+      - name: Record real native capture save and paste
+        run: dotnet run --project tools/CommonCopy.Recording/CommonCopy.Recording.csproj -c Release -- artifacts/app/CommonCopy.exe artifacts/ui-recording
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: CommonCopy-real-UI-recording
+          path: artifacts/ui-recording/
+          if-no-files-found: error
