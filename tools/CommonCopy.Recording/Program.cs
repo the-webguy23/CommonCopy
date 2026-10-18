@@ -37,7 +37,7 @@ internal static class Program
         var root = new DockPanel();
         var heading = new TextBlock { Text = "Project notes", FontSize = 16, Padding = new Thickness(24,16,24,16), Background = new SolidColorBrush(Color.FromRgb(245,245,245)) };
         DockPanel.SetDock(heading,Dock.Top);root.Children.Add(heading);root.Children.Add(editor);
-        source = new Window { Title="Project notes — recording fixture", Width=980, Height=620, Left=20, Top=20, Content=root, Background=Brushes.White };
+        source = new Window { Title="Project notes — recording fixture", Width=980, Height=620, Left=20, Top=20, Content=root, WindowState=WindowState.Maximized, Background=Brushes.White };
         source.Loaded += async (_,_) => {
             try { await Record(args[0]); result=0; }
             catch(Exception error) { File.WriteAllText(Path.Combine(output,"failure.txt"),error.ToString()); }
@@ -83,7 +83,7 @@ internal static class Program
         Forms.SendKeys.SendWait("{ENTER}");await Task.Delay(1200);
         if(editor.Text!=Phrase)throw new Exception("Real paste failed: "+editor.Text);
         Mark("real saved phrase pasted into editor");await Task.Delay(1200);
-        OpenMenu();await Task.Delay(600);Forms.SendKeys.SendWait("{END}{ENTER}");await Task.Delay(1400);
+        OpenMenu();await Task.Delay(600);Forms.SendKeys.SendWait("{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}{ENTER}");await Task.Delay(1400);
         Mark("manager shows saved phrase");await Task.Delay(1000);
         var libraryWindow=FindWindow(commonCopy.Id,"CommonCopy");
         ((ValuePattern)Child(libraryWindow,"SearchBox").GetCurrentPattern(ValuePattern.Pattern)).SetValue("Quick");
@@ -102,7 +102,7 @@ internal static class Program
         source.Activate();editor.Focus();editor.Clear();await Task.Delay(400);
         OpenMenu();await Task.Delay(700);Forms.SendKeys.SendWait("{DOWN}{DOWN}{DOWN}{DOWN}{RIGHT}");await Task.Delay(700);
         Forms.SendKeys.SendWait("{RIGHT}");await Task.Delay(1100);Mark("nested Prompts GPT submenu visible");
-        Forms.SendKeys.SendWait("{END}{ENTER}");await Task.Delay(1200);
+        Forms.SendKeys.SendWait("{DOWN}{ENTER}");await Task.Delay(1200);
         if(editor.Text!=promptText)throw new Exception("Nested prompt paste failed: "+editor.Text);
         Mark("different saved GPT prompt pasted correctly");await Task.Delay(1000);
         capture=false;await recording;if(captureError is not null)throw captureError;
