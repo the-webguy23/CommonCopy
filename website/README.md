@@ -111,3 +111,10 @@ Browser visual QA is unavailable without the required browser-control capability
 Help is linked from the header, footer, and download guidance. The guide covers both platforms, capture/paste, nested Prompts examples, troubleshooting and backups. Public downloads remain disabled; private-build security repairs are explicitly separated. Identical help sections ship offline with each utility and open from Settings.
 
 Validated local asset/fragment links, headings, navigation, offline content parity and JavaScript syntax. Existing private audience is preserved. Native utility builds and on-device Help launch review are tracked on their respective draft branches.
+
+
+## Homepage help tabs — 2026-10-17
+
+All six Help topics now appear directly beneath the homepage download cards. The responsive module shows one panel at a time, with black selected tabs, thin borders, arrow/Home/End/Enter/Space controls, ARIA relationships and direct topic links. Header/footer Help links target the homepage module. Existing help.html remains available; all original guide content and disabled public download buttons are preserved. Without JavaScript, anchor links and full content remain accessible.
+
+Validation: HTML asset/fragment links and unique IDs, exact guide-content parity, tab selection and keyboard/focus/hash behavior, JavaScript syntax and whitespace checks passed. Browser visual QA was unavailable. Private preview source: 72847b11254ceb72cf61382cfce07e9602301586.

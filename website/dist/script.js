@@ -24,6 +24,59 @@
   document.querySelectorAll('[data-current-year]').forEach(element => {
     element.textContent = String(new Date().getFullYear());
   });
+  const helpModule = document.querySelector('[data-help-module]');
+  if (helpModule) {
+    const tabs = Array.from(helpModule.querySelectorAll('[data-help-tab]'));
+    const panels = Array.from(helpModule.querySelectorAll('[data-help-panel]'));
+    const tabList = helpModule.querySelector('[data-help-tabs]');
+    const topicFromHash = () => {
+      const value = location.hash.slice(1);
+      return tabs.findIndex(tab => tab.dataset.helpTab === value);
+    };
+    const selectTopic = (index, focus = false, updateUrl = false) => {
+      tabs.forEach((tab, position) => {
+        const selected = position === index;
+        tab.setAttribute('aria-selected', String(selected));
+        tab.tabIndex = selected ? 0 : -1;
+        panels[position].hidden = !selected;
+      });
+      if (focus) tabs[index].focus();
+      if (updateUrl) history.replaceState(null, '', '#' + tabs[index].dataset.helpTab);
+    };
+    tabList.setAttribute('role', 'tablist');
+    tabs.forEach((tab, index) => {
+      tab.setAttribute('role', 'tab');
+      tab.setAttribute('aria-controls', panels[index].id);
+      panels[index].setAttribute('role', 'tabpanel');
+      panels[index].setAttribute('aria-labelledby', tab.id);
+      panels[index].tabIndex = 0;
+      tab.addEventListener('click', event => {
+        event.preventDefault();
+        selectTopic(index, false, true);
+      });
+      tab.addEventListener('keydown', event => {
+        if (event.key === ' ' || event.key === 'Enter') {
+          event.preventDefault();
+          selectTopic(index, false, true);
+          return;
+        }
+        let next;
+        if (event.key === 'ArrowRight') next = (index + 1) % tabs.length;
+        else if (event.key === 'ArrowLeft') next = (index - 1 + tabs.length) % tabs.length;
+        else if (event.key === 'Home') next = 0;
+        else if (event.key === 'End') next = tabs.length - 1;
+        else return;
+        event.preventDefault();
+        selectTopic(next, true, true);
+      });
+    });
+    helpModule.dataset.tabsReady = 'true';
+    selectTopic(Math.max(0, topicFromHash()));
+    window.addEventListener('hashchange', () => {
+      const index = topicFromHash();
+      if (index >= 0) selectTopic(index);
+    });
+  }
   const message = document.querySelector('#demo-message');
   if (!message) return;
   const menu = document.querySelector('#example-menu');

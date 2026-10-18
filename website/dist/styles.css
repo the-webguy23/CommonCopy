@@ -1663,3 +1663,29 @@ kbd {
 }
 
 .help-topics{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:28px}.help-topics a{border:1px solid var(--ink);padding:9px 15px;font-size:13px}.help-topics a:hover{background:var(--ink);color:var(--paper)}.help-note{padding:22px;background:var(--soft);border:1px solid var(--line);margin:0 0 42px}.help-section{border-top:1px solid var(--ink);padding:40px 0;scroll-margin-top:100px}.help-section h2{font-size:clamp(28px,4vw,40px);line-height:1.15;letter-spacing:-1.2px;font-weight:450}.help-section h3{font-size:20px;font-weight:500}.help-section li{margin:10px 0}.help-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px}.help-grid article{border:1px solid var(--line);padding:26px;min-width:0}.help-section pre{white-space:pre-wrap;overflow-wrap:anywhere;background:var(--soft);padding:18px;font:14px/1.7 ui-monospace,SFMono-Regular,Consolas,monospace}.help-section code{overflow-wrap:anywhere}.help-section details{border-bottom:1px solid var(--line);padding:20px 0}.help-section summary{cursor:pointer;font-size:17px;font-weight:500}.help-section details p:first-of-type{margin-top:18px}.help-section a{text-decoration:underline}.help-section ol,.help-section ul{padding-left:24px}@media(max-width:700px){.help-grid{grid-template-columns:1fr}.help-grid article{padding:20px}.help-section{padding:30px 0}.help-section pre{font-size:13px}}@media print{.site-header,.site-footer,.help-topics,.skip-link{display:none}.container{width:100%}.help-section{break-inside:avoid}.help-section details>*{display:block!important}}
+
+/* Help lives beside the download: native anchors remain useful without JavaScript. */
+.download-help{margin-top:42px;border:1px solid var(--ink)}
+.help-module-heading{display:flex;align-items:end;justify-content:space-between;gap:28px;padding:30px}
+.help-module-heading .eyebrow{margin-bottom:10px;font-size:10px}
+.help-module-heading h2{font-size:30px;font-weight:450;letter-spacing:-1px;line-height:1.2;margin:0}
+.help-module-heading>p{font-size:12px;color:var(--muted);margin:0}
+.download-help-tabs{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));border-top:1px solid var(--ink);border-bottom:1px solid var(--ink)}
+.download-help-tabs a{display:flex;align-items:center;justify-content:center;text-align:center;min-height:58px;padding:12px 10px;border-right:1px solid var(--ink);font-size:12px;line-height:1.45}
+.download-help-tabs a:last-child{border-right:0}
+.download-help-tabs a:hover{background:var(--soft)}
+.download-help-tabs a[aria-selected="true"]{background:var(--ink);color:var(--paper)}
+.download-help-tabs a:focus-visible{outline:2px solid var(--ink);outline-offset:-5px;position:relative;z-index:1}
+.download-help-tabs a[aria-selected="true"]:focus-visible{outline-color:var(--paper)}
+.download-help-body{padding:30px}
+.download-help .help-section{padding:0;border-top:0}
+.download-help .help-section+ .help-section{padding-top:32px;margin-top:32px;border-top:1px solid var(--line)}
+.download-help[data-tabs-ready] .help-section{padding:0;margin:0;border:0}
+.download-help [hidden]{display:none!important}
+.download-help .help-section:focus-visible{outline:2px solid var(--ink);outline-offset:8px}
+.download-help .help-section>h2{font-size:28px}
+.download-help .help-section>.eyebrow{font-size:10px;margin-bottom:12px}
+.download-help .help-section p,.download-help .help-section li{font-size:14px}
+@media(max-width:800px){.download-help-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}.download-help-tabs a:nth-child(3){border-right:0}.download-help-tabs a:nth-child(-n+3){border-bottom:1px solid var(--ink)}.help-module-heading{align-items:start;flex-direction:column;gap:14px}}
+@media(max-width:600px){.download-help{margin-top:30px}.help-module-heading,.download-help-body{padding:22px 18px}.help-module-heading h2{font-size:27px}.download-help-tabs a{font-size:11px;padding:10px 6px;min-height:58px}.download-help .help-section>h2{font-size:25px}}
+@media print{.download-help-tabs{display:none}.download-help [hidden]{display:block!important}.download-help[data-tabs-ready] .help-section{margin:20px 0}.download-help{border:0}}
