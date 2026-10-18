@@ -15,8 +15,27 @@ enum Failure:Error {case message(String)}
 @MainActor final class Runner {
  let dir=URL(fileURLWithPath:CommandLine.arguments[2])
  let appURL=URL(fileURLWithPath:CommandLine.arguments[1])
- var target:Process!;var common:Process!;var start=Date();var events:[[String:Any]]=[]
- let code="pwd\nls -la\nprintf 'Ready to build\\n'"
+ var targetPID:pid_t=0;var common:Process!;var start=Date();var events:[[String:Any]]=[]
+ let code="""
+# Build a dated checksum report for this project
+project_dir="$HOME/Projects/commoncopy-demo"
+report_dir="$project_dir/reports/$(date +%Y-%m-%d)"
+mkdir -p "$report_dir"
+
+find "$project_dir" -type f \\
+  ! -path '*/.git/*' ! -path '*/reports/*' \\
+  -print0 |
+while IFS= read -r -d '' file; do
+  shasum -a 256 "$file"
+done > "$report_dir/checksums.sha256"
+
+{
+  printf 'Project: %s\\n' "$project_dir"
+  printf 'Generated: %s\\n' "$(date)"
+  printf 'Files indexed: %s\\n' \\
+    "$(wc -l < "$report_dir/checksums.sha256" | tr -d ' ')"
+} > "$report_dir/summary.txt"
+"""
  let prompt="Turn the notes below into a clear project brief. Include the goal, intended audience, deliverables, and three practical next steps.\n\nNotes: [paste your notes here]"
  let webText="A clear project brief sets out the goal, audience, deliverables, and next steps."
  var recording=false
@@ -41,7 +60,7 @@ enum Failure:Error {case message(String)}
  }
  func attr(_ element:AXUIElement,_ name:String)->CFTypeRef?{var out:CFTypeRef?;AXUIElementCopyAttributeValue(element,name as CFString,&out);return out}
  func find(_ el:AXUIElement,role:String?=nil,title:String?=nil,depth:Int=0)->AXUIElement?{
-  if depth>16{return nil}
+  if depth>35{return nil}
   let r=attr(el,kAXRoleAttribute)as? String
   let t=(attr(el,kAXTitleAttribute)as? String) ?? (attr(el,kAXDescriptionAttribute)as? String)
   if (role==nil || r==role) && (title==nil || t==title){return el}
@@ -52,7 +71,7 @@ enum Failure:Error {case message(String)}
  var ax:AXUIElement{AXUIElementCreateApplication(common.processIdentifier)}
  func check(_ ok:Bool,_ message:String)throws{if !ok{throw Failure.message(message)}}
  func menu() async {
-  NSRunningApplication(processIdentifier:target.processIdentifier)?.activate(options:.activateIgnoringOtherApps)
+  NSRunningApplication(processIdentifier:targetPID)?.activate(options:.activateIgnoringOtherApps)
   await pause(0.4);CGWarpMouseCursorPosition(CGPoint(x:350,y:240))
   let p=CGPoint(x:350,y:240)
   let d=CGEvent(mouseEventSource:nil,mouseType:.rightMouseDown,mouseCursorPosition:p,mouseButton:.right)!
@@ -70,49 +89,104 @@ enum Failure:Error {case message(String)}
  }
  var screenFrames:ScreenFrames?
  func beginCapture(){start=Date();let f=ScreenFrames(dir:dir);screenFrames=f;f.start()}
+
+ func click(_ p:CGPoint,count:Int64=1) async{
+  CGWarpMouseCursorPosition(p)
+  let down=CGEvent(mouseEventSource:nil,mouseType:.leftMouseDown,mouseCursorPosition:p,mouseButton:.left)!
+  let up=CGEvent(mouseEventSource:nil,mouseType:.leftMouseUp,mouseCursorPosition:p,mouseButton:.left)!
+  down.setIntegerValueField(.mouseEventClickState,value:count);up.setIntegerValueField(.mouseEventClickState,value:count)
+  down.post(tap:.cghidEventTap);up.post(tap:.cghidEventTap);await pause(0.4)
+ }
+ func openApp(_ name:String,_ document:String?=nil)async throws{
+  var args=["-a",name];if let document{args.append(document)}
+  let p=try process(URL(fileURLWithPath:"/usr/bin/open"),args);p.waitUntilExit();await pause(1.5)
+  let bundle=name=="Terminal" ? "com.apple.Terminal":"com.apple.Safari"
+  guard let app=NSRunningApplication.runningApplications(withBundleIdentifier:bundle).first else{throw Failure.message("Destination app did not open")}
+  targetPID=app.processIdentifier;app.activate(options:.activateIgnoringOtherApps);await pause(0.5)
+ }
+ func fitWindow()throws{
+  let targetAX=AXUIElementCreateApplication(targetPID)
+  guard let window=(attr(targetAX,kAXWindowsAttribute)as? [AXUIElement])?.first else{throw Failure.message("Missing destination window")}
+  var point=CGPoint(x:0,y:25),size=CGSize(width:1024,height:680)
+  AXUIElementSetAttributeValue(window,kAXPositionAttribute as CFString,AXValueCreate(.cgPoint,&point)!)
+  AXUIElementSetAttributeValue(window,kAXSizeAttribute as CFString,AXValueCreate(.cgSize,&size)!)
+ }
+ func type(_ value:String)async{
+  NSPasteboard.general.clearContents();NSPasteboard.general.setString(value,forType:.string);await key(9,.maskCommand);await pause(0.3)
+ }
+ func findText(_ el:AXUIElement,_ text:String,depth:Int=0)->AXUIElement?{
+  if depth>35{return nil}
+  if let s=(attr(el,kAXValueAttribute)as? String) ?? (attr(el,kAXTitleAttribute)as? String),s.contains(text){return el}
+  for c in (attr(el,kAXChildrenAttribute)as? [AXUIElement] ?? []){if let found=findText(c,text,depth:depth+1){return found}};return nil
+ }
+ func point(_ el:AXUIElement)throws->CGPoint{
+  var p=CGPoint.zero
+  guard let v=attr(el,kAXPositionAttribute),CFGetTypeID(v)==AXValueGetTypeID(),AXValueGetValue(unsafeBitCast(v,to:AXValue.self),.cgPoint,&p)else{throw Failure.message("No accessible text position")};return p
+ }
  func run()async throws{
   try FileManager.default.createDirectory(at:dir,withIntermediateDirectories:true)
   try check(ProcessInfo.processInfo.environment["GITHUB_ACTIONS"]=="true","Disposable CI only")
   try check(AXIsProcessTrusted() && CGPreflightScreenCaptureAccess(),"Native capture permission unavailable")
-  let state=try bridge("snapshot");let doc=state["document"]as! [String:Any];let cats=doc["categories"]as! [[String:Any]]
+  let state=try bridge("snapshot");let cats=(state["document"]as! [String:Any])["categories"]as! [[String:Any]]
   let codeID=cats.first{$0["name"]as? String=="Code"}!["id"]as! String
+  let dayID=cats.first{$0["name"]as? String=="Day-to-Day"}!["id"]as! String
   let promptsID=cats.first{$0["name"]as? String=="Prompts"}!["id"]as! String
   _=try bridge("saveCategory",["name":"GPT","parentId":promptsID])
   let next=try bridge("snapshot");let list=(next["document"]as! [String:Any])["categories"]as! [[String:Any]]
   let gptID=list.first{$0["name"]as? String=="GPT"}!["id"]as! String
-  _=try bridge("savePhrase",["categoryId":codeID,"title":"Inspect project files","text":code,"isEnabled":true,"isFavorite":true])
+  _=try bridge("savePhrase",["categoryId":codeID,"title":"Project checksum report","text":code,"isEnabled":true,"isFavorite":true])
   _=try bridge("savePhrase",["categoryId":gptID,"title":"Draft a project brief","text":prompt,"isEnabled":true,"isFavorite":false])
   common=try process(appURL.appendingPathComponent("Contents/MacOS/CommonCopyMac"))
-  defer {common.terminate();target?.terminate()}
+  defer{common.terminate()}
   await pause(3)
-  target=try process(URL(fileURLWithPath:CommandLine.arguments[3]),[dir.path]);await pause(2)
-  try command("text:Terminal snippet · ready to paste\n\n");await pause(0.8)
-  beginCapture();mark("Mac shell example ready");await pause(0.8)
-  await menu();mark("native macOS phrase menu")
-  try await choose("Code","Inspect project files");await pause(1.5)
-  let pasted=try String(contentsOf:dir.appendingPathComponent("editor.txt"),encoding:.utf8)
-  try check(pasted.contains(code),"Mac shell snippet was not pasted")
-  mark("Mac shell snippet pasted");await pause(1.5)
-  try command("text:GPT prompt · ready to paste\n\n");await pause(1)
-  mark("GPT example ready");await menu()
-  try await choose("GPT","Draft a project brief");await pause(1.5)
-  let promptPasted=try String(contentsOf:dir.appendingPathComponent("editor.txt"),encoding:.utf8)
-  try check(promptPasted.contains(prompt),"GPT prompt was not pasted")
-  mark("GPT prompt pasted");await pause(1.5)
-  try command("web");await pause(3);mark("webpage visible")
-  try command("select-web");await pause(1);mark("webpage text highlighted")
-  await menu()
-  await key(36);await pause(2)
-  if let sheet=find(ax,role:kAXSheetRole),let title=find(sheet,role:kAXTextFieldRole){AXUIElementSetAttributeValue(title,kAXValueAttribute as CFString,"Project brief checklist"as CFString)}
-  mark("native macOS capture sheet");await pause(1.3)
-  guard let saveButton=find(ax,role:kAXButtonRole,title:"Save")else{throw Failure.message("Missing Save button")}
-  try press(saveButton);await pause(1.5)
+  try await openApp("Terminal");try fitWindow()
+  await type("exec /bin/zsh -l");await key(36);await pause(0.8)
+  await type("PS1='project % '; clear");await key(36);await pause(0.7)
+  for _ in 0..<3{await key(24,[.maskCommand,.maskShift])}
+  try fitWindow();await pause(0.5)
+  beginCapture();mark("actual Terminal ready");await pause(1)
+  await menu();mark("Terminal CommonCopy menu")
+  try await choose("Code","Project checksum report");await pause(1.5)
+  await key(124);await pause(0.3)
+  let terminalAX=AXUIElementCreateApplication(targetPID)
+  try check(findText(terminalAX,"Build a dated checksum report") != nil,"Code was not visible in actual Terminal")
+  try check(!FileManager.default.fileExists(atPath:NSHomeDirectory()+"/Projects/commoncopy-demo/reports"),"Demo script unexpectedly executed")
+  mark("actual Terminal code pasted without execution");await pause(2.5)
+  try await openApp("Safari","https://chatgpt.com/");try fitWindow();await pause(18)
+  await click(CGPoint(x:972,y:165));await pause(0.5)
+  let safariAX=AXUIElementCreateApplication(targetPID)
+  guard let composer=find(safariAX,role:kAXTextAreaRole)else{throw Failure.message("Actual ChatGPT composer unavailable")}
+  AXUIElementSetAttributeValue(composer,kAXFocusedAttribute as CFString,kCFBooleanTrue)
+  await pause(0.5);mark("actual ChatGPT composer ready");await pause(0.7)
+  await menu();try await choose("GPT","Draft a project brief");await pause(1.7)
+  await key(0,.maskCommand);await key(8,.maskCommand);await pause(0.3)
+  try check(NSPasteboard.general.string(forType:.string)?.contains(prompt)==true,"Prompt was not pasted into actual ChatGPT composer")
+  await key(124);mark("actual ChatGPT prompt pasted unsent");await pause(2)
+  let emailPath=URL(fileURLWithPath:CommandLine.arguments[3]).path
+  try await openApp("Safari",emailPath);try fitWindow();await pause(2)
+  let emailText="Thanks for the thoughtful feedback. I have updated the project brief and the revised timeline is ready for your review."
+  guard let paragraph=findText(safariAX,emailText)else{throw Failure.message("Sample email paragraph unavailable")}
+  let pos=try point(paragraph)
+  mark("sample email in actual Safari window");await pause(1)
+  await click(CGPoint(x:pos.x+40,y:pos.y+12),count:3);await pause(0.6)
+  await key(8,.maskCommand);await pause(0.3)
+  try check(NSPasteboard.general.string(forType:.string)?.trimmingCharacters(in:.whitespacesAndNewlines)==emailText,"Email paragraph selection differs")
+  mark("email paragraph highlighted");await pause(0.6)
+  await menu();await key(36);await pause(2)
+  guard let sheet=find(ax,role:kAXSheetRole)else{throw Failure.message("Native capture sheet unavailable")}
+  if let title=find(sheet,role:kAXTextFieldRole){AXUIElementSetAttributeValue(title,kAXValueAttribute as CFString,"Project handoff reply"as CFString)}
+  guard let picker=find(sheet,role:kAXPopUpButtonRole)else{throw Failure.message("Category picker unavailable")}
+  try press(picker);await pause(0.3);await key(119);await key(36);await pause(0.6)
+  mark("email capture categorized Day-to-Day");await pause(1.5)
+  guard let save=find(ax,role:kAXButtonRole,title:"Save")else{throw Failure.message("Save unavailable")}
+  try press(save);await pause(1.5)
   let final=try bridge("snapshot");let phrases=(final["document"]as! [String:Any])["phrases"]as! [[String:Any]]
-  try check(phrases.contains{($0["text"]as? String)?.trimmingCharacters(in:.whitespacesAndNewlines)==webText},"Webpage text was not saved")
-  mark("webpage saved and editor dismissed");await pause(1.5)
-  screenFrames?.running=false;await pause(0.5)
-  writeJSON(["platform":"macOS","realCodePasteVerified":true,"realPromptPasteVerified":true,"realWebCaptureVerified":true,"events":events],"workflow.json")
+  try check(phrases.contains{($0["text"]as? String)?.trimmingCharacters(in:.whitespacesAndNewlines)==emailText && $0["categoryId"]as? String==dayID},"Email was not saved under Day-to-Day")
+  mark("email saved to Day-to-Day and editor dismissed");await pause(1.8)
+  screenFrames?.running=false;await pause(0.6)
+  writeJSON(["platform":"macOS","realTerminalPasteVerified":true,"terminalScriptUnexecuted":true,"realChatGPTComposerPasteVerified":true,"promptUnsent":true,"simulatedEmailInSafari":true,"emailCategoryVerified":"Day-to-Day","events":events],"workflow.json")
  }
+
 }
 
 final class ScreenFrames: @unchecked Sendable {
