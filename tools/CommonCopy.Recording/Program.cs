@@ -83,7 +83,7 @@ internal static class Program
         Forms.SendKeys.SendWait("{ENTER}");await Task.Delay(1200);
         if(editor.Text!=Phrase)throw new Exception("Real paste failed: "+editor.Text);
         Mark("real saved phrase pasted into editor");await Task.Delay(1200);
-        OpenMenu();await Task.Delay(600);Forms.SendKeys.SendWait("{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}{ENTER}");await Task.Delay(1400);
+        ShowWindow(managerHandle,9);SetForegroundWindow(managerHandle);await Task.Delay(1400);
         Mark("manager shows saved phrase");await Task.Delay(1000);
         var libraryWindow=FindWindow(commonCopy.Id,"CommonCopy");
         ((ValuePattern)Child(libraryWindow,"SearchBox").GetCurrentPattern(ValuePattern.Pattern)).SetValue("Quick");
@@ -161,6 +161,8 @@ internal static class Program
     [DllImport("user32.dll",CharSet=CharSet.Unicode)] static extern int GetWindowText(IntPtr window,System.Text.StringBuilder text,int count);
     [DllImport("user32.dll")] static extern bool GetCursorInfo(ref CURSORINFO ci);
     [DllImport("user32.dll")] static extern bool DrawIconEx(IntPtr dc,int x,int y,IntPtr icon,int cx,int cy,int step,IntPtr brush,int flags);
+    [DllImport("user32.dll")] static extern bool ShowWindow(IntPtr window,int state);
+    [DllImport("user32.dll")] static extern bool SetForegroundWindow(IntPtr window);
     [DllImport("user32.dll")] static extern bool SetCursorPos(int x,int y);
     [DllImport("user32.dll")] static extern void keybd_event(byte key,byte scan,uint flags,UIntPtr extra);
     [DllImport("user32.dll")] static extern void mouse_event(uint flags,uint x,uint y,uint data,UIntPtr extra);
