@@ -85,6 +85,10 @@ internal static class Program
         Mark("real saved phrase pasted into editor");await Task.Delay(1200);
         OpenMenu();await Task.Delay(600);Forms.SendKeys.SendWait("{END}{ENTER}");await Task.Delay(1400);
         Mark("manager shows saved phrase");await Task.Delay(1000);
+        var libraryWindow=FindWindow(commonCopy.Id,"CommonCopy");
+        ((ValuePattern)Child(libraryWindow,"SearchBox").GetCurrentPattern(ValuePattern.Pattern)).SetValue("Quick");
+        Mark("real manager search finds saved phrase");await Task.Delay(1400);
+        ((ValuePattern)Child(libraryWindow,"SearchBox").GetCurrentPattern(ValuePattern.Pattern)).SetValue("");await Task.Delay(1000);
         capture=false;await recording;if(captureError is not null)throw captureError;
         File.WriteAllText(Path.Combine(output,"workflow.json"),JsonSerializer.Serialize(new { platform="Windows", source="Actual CommonCopy native application on disposable CI desktop; external editor is a plain WPF recording fixture", realCaptureVerified=true, realPersistedSaveVerified=true, realPasteVerified=true, events },new JsonSerializerOptions{WriteIndented=true}));
     }
@@ -92,9 +96,15 @@ internal static class Program
     static AutomationElement Child(AutomationElement window,string id)=>window.FindFirst(TreeScope.Descendants,new PropertyCondition(AutomationElement.AutomationIdProperty,id)) ?? throw new Exception("Missing control "+id);
     static AutomationElement FindWindow(int pid,string? name)
     {
-        var windows=AutomationElement.RootElement.FindAll(TreeScope.Children,new PropertyCondition(AutomationElement.ProcessIdProperty,pid));
-        foreach(AutomationElement w in windows)if(w.Current.IsOffscreen==false && (name is null || w.Current.Name.Contains(name)))return w;
-        throw new Exception("No visible window: "+name);
+        IntPtr found=IntPtr.Zero;
+        EnumWindows((handle,_)=> {
+            GetWindowThreadProcessId(handle,out var owner);
+            if(owner!=(uint)pid || !IsWindowVisible(handle))return true;
+            var title=new System.Text.StringBuilder(512);GetWindowText(handle,title,title.Capacity);
+            if(name is null || title.ToString().Contains(name)){found=handle;return false;}
+            return true;
+        },IntPtr.Zero);
+        return found!=IntPtr.Zero ? AutomationElement.FromHandle(found) : throw new Exception("No visible window: "+name);
     }
     static async Task<AutomationElement> WaitWindow(string name)
     {
@@ -128,6 +138,11 @@ internal static class Program
     }
     [StructLayout(LayoutKind.Sequential)] struct POINT{public int X,Y;}
     [StructLayout(LayoutKind.Sequential)] struct CURSORINFO{public int cbSize;public int flags;public IntPtr hCursor;public POINT ptScreenPos;}
+    delegate bool EnumCallback(IntPtr window,IntPtr parameter);
+    [DllImport("user32.dll")] static extern bool EnumWindows(EnumCallback callback,IntPtr parameter);
+    [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr window,out uint pid);
+    [DllImport("user32.dll")] static extern bool IsWindowVisible(IntPtr window);
+    [DllImport("user32.dll",CharSet=CharSet.Unicode)] static extern int GetWindowText(IntPtr window,System.Text.StringBuilder text,int count);
     [DllImport("user32.dll")] static extern bool GetCursorInfo(ref CURSORINFO ci);
     [DllImport("user32.dll")] static extern bool DrawIconEx(IntPtr dc,int x,int y,IntPtr icon,int cx,int cy,int step,IntPtr brush,int flags);
     [DllImport("user32.dll")] static extern bool SetCursorPos(int x,int y);
