@@ -83,7 +83,10 @@ internal static class Program
         Forms.SendKeys.SendWait("{ENTER}");await Task.Delay(1200);
         if(editor.Text!=Phrase)throw new Exception("Real paste failed: "+editor.Text);
         Mark("real saved phrase pasted into editor");await Task.Delay(1200);
-        ShowWindow(managerHandle,9);SetForegroundWindow(managerHandle);await Task.Delay(1400);
+        // Start a separate real application session for the manager/context recording.
+        commonCopy.Kill(true);commonCopy.WaitForExit();await Task.Delay(250);
+        commonCopy=Process.Start(new ProcessStartInfo(Path.GetFullPath(exe)) { WorkingDirectory=Path.GetDirectoryName(Path.GetFullPath(exe))! })!;
+        await WaitWindow("CommonCopy");await Task.Delay(900);
         Mark("manager shows saved phrase");await Task.Delay(1000);
         var libraryWindow=FindWindow(commonCopy.Id,"CommonCopy");
         ((ValuePattern)Child(libraryWindow,"SearchBox").GetCurrentPattern(ValuePattern.Pattern)).SetValue("Quick");
@@ -108,7 +111,10 @@ internal static class Program
         capture=false;await recording;if(captureError is not null)throw captureError;
         File.WriteAllText(Path.Combine(output,"workflow.json"),JsonSerializer.Serialize(new { platform="Windows", source="Actual CommonCopy native application on disposable CI desktop; external editor is a plain WPF recording fixture", realCaptureVerified=true, realPersistedSaveVerified=true, realPasteVerified=true, events },new JsonSerializerOptions{WriteIndented=true}));
     }
-    static void Mark(string name)=>events.Add(new { seconds=clock.Elapsed.TotalSeconds, action=name });
+    static void Mark(string name) {
+        events.Add(new { seconds=clock.Elapsed.TotalSeconds, action=name });
+        File.WriteAllText(Path.Combine(output,"events.json"),JsonSerializer.Serialize(events));
+    }
     static AutomationElement Child(AutomationElement window,string id)=>window.FindFirst(TreeScope.Descendants,new PropertyCondition(AutomationElement.AutomationIdProperty,id)) ?? throw new Exception("Missing control "+id);
     static AutomationElement FindWindow(int pid,string? name)
     {
