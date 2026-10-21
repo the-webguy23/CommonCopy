@@ -71,6 +71,7 @@ var
   LicenseLink: TNewButton;
   Progress: TNewProgressBar;
   InstallerCard: TPanel;
+  CardBackground: TBitmapImage;
   OriginalResize: TNotifyEvent;
   Rounding: Boolean;
 
@@ -95,6 +96,7 @@ begin
   if Rounding then Exit;
   if OriginalResize <> nil then OriginalResize(Sender);
   InstallerCard.SetBounds(ScaleX(12), ScaleY(12), WizardForm.ClientWidth - ScaleX(24), WizardForm.ClientHeight - ScaleY(24));
+  CardBackground.SetBounds(0, 0, InstallerCard.Width, InstallerCard.Height);
   RoundInstallerCard(Sender);
 end;
 
@@ -168,6 +170,14 @@ begin
   InstallerCard.BevelOuter := bvNone;
   InstallerCard.Color := clWhite;
   InstallerCard.SetBounds(ScaleX(12), ScaleY(12), ScaleX(476), ScaleY(376));
+  { TPanel inherits the themed parent background; paint an opaque white surface. }
+  CardBackground := TBitmapImage.Create(WizardForm);
+  CardBackground.Parent := InstallerCard;
+  CardBackground.SetBounds(0, 0, InstallerCard.Width, InstallerCard.Height);
+  CardBackground.Bitmap.Width := 1;
+  CardBackground.Bitmap.Height := 1;
+  CardBackground.Bitmap.Canvas.Pixels[0, 0] := clWhite;
+  CardBackground.Stretch := True;
   WizardForm.NextButton.SetBounds(ScaleX(316), ScaleY(346), ScaleX(156), ScaleY(34));
   WizardForm.CancelButton.SetBounds(ScaleX(204), ScaleY(346), ScaleX(100), ScaleY(34));
   BrandImage := TBitmapImage.Create(WizardForm);
