@@ -36,9 +36,10 @@ struct MonochromeButton: ButtonStyle {
 
 struct BrandMark: View {
     @Environment(\.colorScheme) private var colorScheme
+    var resourceDirectory = Bundle.main.bundleURL.appendingPathComponent("Contents/Resources")
     var body: some View {
-        if let image = NSImage(contentsOf: Bundle.main.bundleURL
-            .appendingPathComponent("Contents/Resources/" + (colorScheme == .dark ? "CommonCopyLogoReverse.svg" : "CommonCopyLogo.svg"))) {
+        if let image = NSImage(contentsOf: resourceDirectory
+            .appendingPathComponent(colorScheme == .dark ? "CommonCopyLogoReverse.svg" : "CommonCopyLogo.svg")) {
             Image(nsImage: image).resizable().scaledToFit()
                 .frame(width: 38, height: 38).accessibilityHidden(true)
         }
@@ -516,4 +517,3 @@ struct CategoryEditor: View {
             .buttonStyle(MonochromeButton(palette: Palette(dark: store.dark)))
     }
 }
-

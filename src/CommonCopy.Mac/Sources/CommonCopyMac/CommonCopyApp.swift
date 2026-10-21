@@ -18,12 +18,22 @@ enum CommonCopyApp {
 final class AppDelegate: NSObject, NSApplicationDelegate {
     let store = Store()
     let pasteService = PasteService()
+    let setup: AccessibilitySetupController
     private let commandClick = CommandRightClickService()
     private var statusItem: NSStatusItem?
-    private var window: NSWindow?
+    private(set) var window: NSWindow?
+    private(set) var setupWindow: NSWindow?
+    private var permissionMonitor: Task<Void, Never>?
     private var hotkey: EventHotKeyRef?
     private var eventHandler: EventHandlerRef?
     private var showingPhraseMenu = false
+
+    override convenience init() { self.init(setup: AccessibilitySetupController()) }
+    init(setup: AccessibilitySetupController) {
+        self.setup = setup
+        super.init()
+        setup.onPhaseChanged = { [weak self] phase in self?.setupChanged(phase) }
+    }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -33,14 +43,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         item.button?.target = self
         item.button?.action = #selector(showManager)
         statusItem = item
-        registerShortcut()
         commandClick.onActivate = { [weak self] in self?.showPhraseMenu() }
-        configureCommandClick()
-        showManager()
+        setup.refresh()
+        permissionMonitor = Task { @MainActor [weak self] in
+            while !Task.isCancelled {
+                do { try await Task.sleep(nanoseconds: 750_000_000) } catch { return }
+                self?.setup.refresh()
+            }
+        }
         Task { await store.perform("snapshot") }
     }
 
     @objc func showManager() {
+        guard ensureSetup() else { return }
         configureCommandClick()
         pasteService.rememberTarget()
         if window == nil {
@@ -67,6 +82,53 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         window?.makeKeyAndOrderFront(nil)
     }
 
+    // Both the status item and all utility entry points return here while access
+    // is missing. Closing this window never completes or skips setup.
+    @discardableResult
+    private func ensureSetup() -> Bool {
+        setup.refresh()
+        guard setup.phase == .ready else {
+            showSetup()
+            return false
+        }
+        return true
+    }
+
+    private func showSetup() {
+        if setupWindow == nil {
+            let view = AccessibilitySetupView(setup: setup, store: store)
+            let hosting = NSHostingView(rootView: view)
+            let created = NSWindow(contentRect: NSRect(origin: .zero, size: hosting.fittingSize),
+                styleMask: [.titled, .closable], backing: .buffered, defer: false)
+            created.title = "Set up CommonCopy"
+            created.contentView = hosting
+            created.isReleasedWhenClosed = false
+            created.center()
+            setupWindow = created
+        }
+        if let content = setupWindow?.contentView {
+            content.layoutSubtreeIfNeeded()
+            setupWindow?.setContentSize(content.fittingSize)
+        }
+        window?.orderOut(nil)
+        NSApp.unhide(nil)
+        NSApp.activate(ignoringOtherApps: true)
+        setupWindow?.makeKeyAndOrderFront(nil)
+    }
+
+    private func setupChanged(_ phase: AccessibilitySetupPhase) {
+        if phase == .ready {
+            setupWindow?.orderOut(nil)
+            registerShortcut()
+            showManager()
+        } else {
+            commandClick.stop()
+            stopShortcut()
+            store.commandRightClickAvailable = false
+            showSetup()
+        }
+    }
+
     // Wait for the editor sheet to dismiss before hiding its parent window.
     // Keep the menu-bar utility alive and return the user to the source app.
     func finishPhraseSave() {
@@ -77,23 +139,37 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    func applicationDidBecomeActive(_ notification: Notification) { configureCommandClick() }
+    func applicationDidBecomeActive(_ notification: Notification) {
+        setup.refresh()
+        configureCommandClick()
+    }
+
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        showManager()
+        return true
+    }
 
     func configureCommandClick(requestPermission: Bool = false) {
+        guard setup.phase == .ready else {
+            commandClick.stop()
+            store.commandRightClickAvailable = false
+            return
+        }
         guard store.commandRightClickEnabled else {
             commandClick.stop()
             store.commandRightClickAvailable = false
             return
         }
         if requestPermission && !AXIsProcessTrusted() {
-            _ = AXIsProcessTrustedWithOptions(
-                [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary)
-            store.error = "Enable CommonCopy in System Settings → Privacy & Security → Accessibility, then return here. Command–Shift–Space remains available."
+            setup.refresh()
+            showSetup()
+            return
         }
         store.commandRightClickAvailable = commandClick.start()
     }
 
     func showPhraseMenu() {
+        guard ensureSetup() else { return }
         guard !store.busy, !store.capturing, !showingPhraseMenu else { return }
         guard store.phraseEditor == nil, let state = store.state else {
             showManager()
@@ -165,6 +241,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func paste(_ phrase: Phrase) {
+        guard ensureSetup() else { return }
         guard phrase.isEnabled, !store.busy, !store.capturing, let settings = store.state?.document.settings else { return }
         Task {
             do {
@@ -178,6 +255,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func captureSelection() {
+        guard ensureSetup() else { return }
         guard !store.busy, !store.capturing, store.phraseEditor == nil,
               let settings = store.state?.document.settings else { return }
         guard let categoryId = store.categories.first(where: { $0.id == store.selectedCategory })?.id
@@ -209,6 +287,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func registerShortcut() {
+        guard hotkey == nil, eventHandler == nil else { return }
         var spec = EventTypeSpec(eventClass: OSType(kEventClassKeyboard), eventKind: UInt32(kEventHotKeyPressed))
         let callback: EventHandlerUPP = { _, event, context in
             guard let context, let event else { return OSStatus(eventNotHandledErr) }
@@ -255,9 +334,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        permissionMonitor?.cancel()
         commandClick.stop()
+        stopShortcut()
+    }
+
+    private func stopShortcut() {
         if let hotkey { UnregisterEventHotKey(hotkey) }
         if let eventHandler { RemoveEventHandler(eventHandler) }
+        hotkey = nil
+        eventHandler = nil
     }
 }
-
