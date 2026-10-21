@@ -1,42 +1,182 @@
 #define MyAppName "CommonCopy"
-#define MyAppVersion "0.2.0-dev"
-#define MyAppPublisher "CommonCopy contributors"
+#define MyAppVersion "0.4.1"
 #define MyAppExeName "CommonCopy.exe"
 
 [Setup]
 AppId={{D40544E3-0E8D-4DF8-90E3-D7EAB1D77892}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
-AppPublisher={#MyAppPublisher}
-DefaultDirName={autopf}\{#MyAppName}
-DefaultGroupName={#MyAppName}
+AppPublisher=CommonCopy contributors
+DefaultDirName={localappdata}\Programs\CommonCopy
+DisableDirPage=yes
 DisableProgramGroupPage=yes
+DisableWelcomePage=yes
+DisableReadyMemo=yes
+DisableFinishedPage=no
 OutputDir=output
 OutputBaseFilename=CommonCopy-Setup-x64
+SetupIconFile=..\artifacts\branding\CommonCopy.ico
+UninstallDisplayIcon={app}\{#MyAppExeName}
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
+WizardResizable=no
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 PrivilegesRequired=lowest
-UninstallDisplayIcon={app}\{#MyAppExeName}
-
-[Tasks]
-Name: "startup"; Description: "Start CommonCopy when I sign in"; GroupDescription: "Additional options:"; Flags: unchecked
+CloseApplications=yes
+CloseApplicationsFilter=CommonCopy.exe
+RestartApplications=no
+SetupLogging=yes
 
 [Files]
-Source: "..\artifacts\publish\win-x64\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\artifacts\publish\win-x64\CommonCopy.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\artifacts\publish\win-x64\Help\help.html"; DestDir: "{app}\Help"; Flags: ignoreversion
+Source: "..\LICENSE"; DestDir: "{app}"; DestName: "LICENSE.txt"; Flags: ignoreversion
+Source: "..\artifacts\branding\CommonCopy.bmp"; Flags: dontcopy
+Source: "..\LICENSE"; DestName: "CommonCopy-LICENSE.txt"; Flags: dontcopy
 
 [Icons]
-Name: "{userprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
-
-[InstallDelete]
-Type: files; Name: "{userprograms}\PhraseMenu.lnk"
+Name: "{userprograms}\CommonCopy"; Filename: "{app}\{#MyAppExeName}"
 
 [Registry]
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueName: "PhraseMenu"; Flags: deletevalue
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "CommonCopy"; ValueData: """{app}\{#MyAppExeName}"" --startup --enable-startup"; Tasks: startup; Flags: uninsdeletevalue
+; Uninstall removes startup registration, never the user's phrase library.
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueName: "CommonCopy"; Flags: uninsdeletevalue
 
-[Run]
-Filename: "{app}\{#MyAppExeName}"; Parameters: "--enable-startup"; Description: "Launch CommonCopy"; Flags: nowait postinstall skipifsilent; Tasks: startup
-Filename: "{app}\{#MyAppExeName}"; Description: "Launch CommonCopy"; Flags: nowait postinstall skipifsilent; Tasks: not startup
+[Code]
+function GetCurrentProcessId: LongWord;
+  external 'GetCurrentProcessId@kernel32.dll stdcall';
+function ProcessIdToSessionId(ProcessId: LongWord; var SessionId: LongWord): Boolean;
+  external 'ProcessIdToSessionId@kernel32.dll stdcall';
+
+var
+  BrandImage: TBitmapImage;
+  BrandName, Tagline, Heading, Detail, ProgressText, LicenseLink: TNewStaticText;
+  Progress: TNewProgressBar;
+
+function AppIsRunning: Boolean;
+var Locator, Services, Processes: Variant; SessionId: LongWord;
+begin
+  Result := False;
+  if not ProcessIdToSessionId(GetCurrentProcessId, SessionId) then Exit;
+  Locator := CreateOleObject('WbemScripting.SWbemLocator');
+  Services := Locator.ConnectServer('', 'root\CIMV2');
+  Processes := Services.ExecQuery('SELECT ProcessId FROM Win32_Process WHERE (Name="CommonCopy.exe" OR Name="PhraseMenu.exe") AND SessionId=' + IntToStr(SessionId));
+  Result := Processes.Count > 0;
+end;
+
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+begin
+  Result := '';
+  if AppIsRunning then
+    Result := 'CommonCopy is still running. Right-click its icon beside the clock (check the hidden-icons arrow), choose Exit, then click Retry. Closing the manager only hides it.';
+end;
+
+function InitializeUninstall: Boolean;
+begin
+  Result := not AppIsRunning;
+  if not Result and not UninstallSilent then
+    MsgBox('Exit CommonCopy from its icon beside the clock, then start uninstall again. Your saved phrases will be kept.', mbInformation, MB_OK);
+end;
+
+function LabelAt(Text: String; X, Y, W, H, Size: Integer): TNewStaticText;
+begin
+  Result := TNewStaticText.Create(WizardForm);
+  Result.Parent := WizardForm;
+  Result.SetBounds(ScaleX(X), ScaleY(Y), ScaleX(W), ScaleY(H));
+  Result.Caption := Text;
+  Result.Font.Name := 'Segoe UI';
+  Result.Font.Size := Size;
+  Result.Font.Color := clBlack;
+  Result.WordWrap := True;
+end;
+
+procedure ShowLicense(Sender: TObject);
+var ResultCode: Integer;
+begin
+  ExtractTemporaryFile('CommonCopy-LICENSE.txt');
+  ShellExec('open', ExpandConstant('{tmp}\CommonCopy-LICENSE.txt'), '', '', SW_SHOWNORMAL, ewNoWait, ResultCode);
+end;
+
+procedure InitializeWizard;
+begin
+  WizardForm.Caption := 'CommonCopy Setup';
+  WizardForm.ClientWidth := ScaleX(500);
+  WizardForm.ClientHeight := ScaleY(400);
+  WizardForm.Color := clWhite;
+  WizardForm.NextButton.SetBounds(ScaleX(316), ScaleY(346), ScaleX(156), ScaleY(34));
+  WizardForm.CancelButton.SetBounds(ScaleX(204), ScaleY(346), ScaleX(100), ScaleY(34));
+  BrandImage := TBitmapImage.Create(WizardForm);
+  BrandImage.Parent := WizardForm;
+  BrandImage.SetBounds(ScaleX(36), ScaleY(40), ScaleX(62), ScaleY(76));
+  BrandImage.Stretch := True;
+  ExtractTemporaryFile('CommonCopy.bmp');
+  BrandImage.Bitmap.LoadFromFile(ExpandConstant('{tmp}\CommonCopy.bmp'));
+  BrandName := LabelAt('CommonCopy', 112, 48, 340, 44, 28);
+  BrandName.Font.Style := [fsBold];
+  Tagline := LabelAt('Save it once. Paste it forever.', 114, 94, 340, 28, 11);
+  Heading := LabelAt('', 36, 164, 428, 34, 20);
+  Heading.Font.Style := [fsBold];
+  Detail := LabelAt('', 36, 210, 428, 64, 11);
+  ProgressText := LabelAt('', 36, 284, 428, 22, 10);
+  Progress := TNewProgressBar.Create(WizardForm);
+  Progress.Parent := WizardForm;
+  Progress.SetBounds(ScaleX(36), ScaleY(310), ScaleX(428), ScaleY(6));
+  Progress.Max := 1000;
+  LicenseLink := LabelAt('MIT License', 28, 354, 156, 24, 10);
+  LicenseLink.Font.Style := [fsUnderline];
+  LicenseLink.Cursor := crHand;
+  LicenseLink.OnClick := @ShowLicense;
+end;
+
+procedure CurPageChanged(CurPageID: Integer);
+var Card: Boolean;
+begin
+  Card := (CurPageID = wpReady) or (CurPageID = wpInstalling) or (CurPageID = wpFinished);
+  WizardForm.OuterNotebook.Visible := not Card;
+  WizardForm.Bevel.Visible := not Card;
+  BrandImage.Visible := Card;
+  BrandName.Visible := Card;
+  Tagline.Visible := Card;
+  Heading.Visible := Card;
+  Detail.Visible := Card;
+  LicenseLink.Visible := Card;
+  Progress.Visible := CurPageID = wpInstalling;
+  ProgressText.Visible := CurPageID = wpInstalling;
+  if Card then WizardForm.BackButton.Visible := False;
+  if CurPageID = wpReady then begin
+    Heading.Caption := 'Ready when you are.';
+    Detail.Caption := 'Install CommonCopy for your Windows account.' + #13#10 + 'Your saved phrases stay with you when you update.';
+    WizardForm.NextButton.Caption := 'Install CommonCopy';
+  end;
+  if CurPageID = wpInstalling then begin
+    Heading.Caption := 'Installing CommonCopy';
+    Detail.Caption := 'Making your words a right-click away.';
+    ProgressText.Caption := 'Installing files...';
+  end;
+  if CurPageID = wpFinished then begin
+    Heading.Caption := 'You''re all set.';
+    Detail.Caption := 'Open CommonCopy to manage your phrases.' + #13#10 + 'Use Ctrl + right-click when you need them.';
+    WizardForm.NextButton.Caption := 'Open CommonCopy';
+  end;
+end;
+
+procedure CurInstallProgressChanged(CurProgress, MaxProgress: Integer);
+begin
+  if MaxProgress > 0 then begin
+    Progress.Position := Round((CurProgress / MaxProgress) * 1000);
+    ProgressText.Caption := 'Installing files... ' + IntToStr(Round((CurProgress / MaxProgress) * 100)) + '%';
+  end;
+end;
+
+function NextButtonClick(CurPageID: Integer): Boolean;
+var ResultCode: Integer;
+begin
+  Result := True;
+  if (CurPageID = wpFinished) and not WizardSilent then begin
+    if not ShellExec('open', ExpandConstant('{app}\{#MyAppExeName}'), '', ExpandConstant('{app}'), SW_SHOWNORMAL, ewNoWait, ResultCode) then begin
+      MsgBox('CommonCopy is installed, but Windows could not open it. Try the CommonCopy shortcut in Start.', mbError, MB_OK);
+      Result := False;
+    end;
+  end;
+end;

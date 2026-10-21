@@ -7,10 +7,11 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <AssemblyName>CommonCopy</AssemblyName>
     <RootNamespace>CommonCopy.Windows</RootNamespace>
-    <Version>0.4.0</Version>
+    <Version>0.4.1</Version>
     <AssemblyTitle>CommonCopy</AssemblyTitle>
     <Description>Save it once. Paste it forever. Available on Windows; macOS planned.</Description>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon Condition="Exists('../../artifacts/branding/CommonCopy.ico')">../../artifacts/branding/CommonCopy.ico</ApplicationIcon>
     <!-- This is a WPF application that uses WinForms only for NotifyIcon. -->
     <NoWarn>$(NoWarn);WFO0003</NoWarn>
   </PropertyGroup>

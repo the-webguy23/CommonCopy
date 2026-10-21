@@ -4,6 +4,12 @@ Record the CommonCopy commit, Windows version, application version, privilege le
 
 ## Installation and lifecycle
 
+- [ ] Setup 0.4.1: one EXE opens the branded ready card; logo and native text stay sharp at 100/125/150/200% scaling. Install progress reflects file extraction and Open CommonCopy launches the installed copy.
+- [ ] Install as an ordinary Windows user without elevation; Start menu shortcut and Settings uninstall entry appear. Offline help and MIT notice open.
+- [ ] While a portable or installed copy runs, setup asks for Exit from the tray; Retry succeeds after Exit. Uninstall also asks for Exit. Cancelling changes no phrase data.
+- [ ] Upgrade and uninstall keep `%LOCALAPPDATA%\CommonCopy` unchanged. Uninstall removes installed binaries, shortcut, and current-user startup registration. Reinstall loads the existing library.
+- [ ] Check clean Windows 10/11 and mixed-DPI devices; hosted CI screenshots are supplemental evidence.
+
 - [ ] Launch on a clean Windows 10 x64 profile.
 - [ ] Launch on a clean Windows 11 x64 profile.
 - [ ] Confirm one tray icon appears and no manager window opens unexpectedly.

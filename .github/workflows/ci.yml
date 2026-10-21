@@ -27,20 +27,37 @@ jobs:
       - name: Restore
         run: dotnet restore CommonCopy.sln
 
+      - name: Render approved installer and application branding
+        shell: powershell
+        run: ./scripts/build-windows-branding.ps1
+
       - name: Build
         run: dotnet build CommonCopy.sln --configuration Release --no-restore
 
       - name: Test
         run: dotnet test CommonCopy.sln --configuration Release --no-build --logger "trx;LogFileName=tests.trx" --collect "XPlat Code Coverage"
 
-      - name: Publish Windows x64 prototype
-        run: >-
-          dotnet publish src/CommonCopy.Windows/CommonCopy.Windows.csproj
-          --configuration Release
-          --runtime win-x64
-          --self-contained true
-          -p:PublishSingleFile=true
-          --output artifacts/publish/win-x64
+      - name: Build Windows setup and optional portable package
+        shell: powershell
+        run: ./scripts/package-windows.ps1
+
+      - name: Check installer lifecycle and capture install card
+        shell: powershell
+        run: ./scripts/test-windows-installer.ps1
+
+      - name: Upload Windows setup
+        uses: actions/upload-artifact@v4
+        with:
+          name: CommonCopy-Windows-Setup
+          path: artifacts/release/
+
+      - name: Upload installer checks
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-installer-check
+          path: artifacts/installer-check/
+          if-no-files-found: ignore
 
       - name: Verify offline help in published package
         shell: pwsh
