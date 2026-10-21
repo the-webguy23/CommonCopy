@@ -19,7 +19,7 @@ $downloads = @($assets.project.frameworks.PSObject.Properties.Value | ForEach-Ob
 foreach ($name in @('Microsoft.NETCore.App.Runtime.win-x64','Microsoft.WindowsDesktop.App.Runtime.win-x64')) {
     $dependency = $downloads | Where-Object { $_.name -eq $name } | Select-Object -First 1
     if (!$dependency) { throw "Runtime pack version not found in restored assets: $name" }
-    $version = $dependency.version.Trim('[',']',' ')
+    $version = $dependency.version.Trim('[',']',' ').Split(',')[0].Trim()
     $pack = $assets.packageFolders.PSObject.Properties.Name | ForEach-Object { Join-Path $_ ($name.ToLowerInvariant() + '\' + $version) } | Where-Object { Test-Path $_ } | Select-Object -First 1
     if (!$pack) { throw "Restored runtime pack missing: $name $version" }
     $notices = @(Get-ChildItem $pack -File | Where-Object { $_.Name -match '^(LICENSE|THIRD.?PARTY.?NOTICES)(\..*)?$' })
