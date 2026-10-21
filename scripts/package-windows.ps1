@@ -23,7 +23,8 @@ foreach ($name in @('Microsoft.NETCore.App.Runtime.win-x64','Microsoft.WindowsDe
     $pack = $assets.packageFolders.PSObject.Properties.Name | ForEach-Object { Join-Path $_ ($name.ToLowerInvariant() + '\' + $version) } | Where-Object { Test-Path $_ } | Select-Object -First 1
     if (!$pack) { throw "Restored runtime pack missing: $name $version" }
     $notices = @(Get-ChildItem $pack -File | Where-Object { $_.Name -match '^(LICENSE|THIRD.?PARTY.?NOTICES)(\..*)?$' })
-    if ($notices.Count -lt 2) { throw "Runtime license or third-party notices missing: $name" }
+    # Windows Desktop supplies its MIT LICENSE; Core also supplies third-party notices.
+    if (!$notices -or ($name -eq 'Microsoft.NETCore.App.Runtime.win-x64' -and $notices.Count -lt 2)) { throw "Runtime notices missing: $name. Available files: $((Get-ChildItem $pack -File).Name -join ', ')" }
     $destination = Join-Path $publish "Notices\$name"
     New-Item -ItemType Directory -Force $destination | Out-Null
     $notices | Copy-Item -Destination $destination

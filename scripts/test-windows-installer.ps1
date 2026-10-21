@@ -74,7 +74,7 @@ try {
     $openButton = Wait-Button 'Open CommonCopy'
     Screenshot '03-finished'
     if (!(Test-Path "$installed\CommonCopy.exe") -or !(Test-Path "$installed\Help\help.html") -or !(Test-Path "$installed\LICENSE.txt")) { throw 'Installed files missing.' }
-    if (@(Get-ChildItem "$installed\Notices" -Recurse -File).Count -lt 4) { throw 'Runtime notices missing from installation.' }
+    if (@(Get-ChildItem "$installed\Notices" -Recurse -File).Count -lt 3) { throw 'Runtime notices missing from installation.' }
     if (!(Test-Path $shortcut) -or !(Test-Path $uninstallKey)) { throw 'Shortcut or uninstall registration missing.' }
     Click $openButton
     $deadline = [DateTime]::UtcNow.AddSeconds(60)
