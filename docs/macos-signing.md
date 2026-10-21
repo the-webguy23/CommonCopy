@@ -6,11 +6,23 @@ confirms Apple acceptance, restored native code hashes matching the approved
 ticket, successful ticket validation, runtime smoke test, DMG integrity, and
 Gatekeeper acceptance of the app, DMG, and app mounted from the finished DMG.
 
-The finished signed DMG is on the maintainer's Mac and has not yet been uploaded
-back for release storage. Browser-download installation/launch and Accessibility
-acceptance remain pending. The original device-review DMG remains ad-hoc signed
-and must not be confused with the notarized file. No public release, main merge,
-or website download publication has occurred.
+The maintainer reported successful installed-app launch after replacing the old
+ad-hoc copy with the notarized application. The finished notarized DMG was then
+uploaded back to the project on October 21, 2026. Its SHA-256 was calculated from
+the received file:
+
+```text
+49c8dbbe43ffaff9f03cdc21e3c6b66f8047f0380fdf6430c7d70523218b4de8  CommonCopy-0.4.2-macos-arm64-notarized.dmg
+```
+
+This identifies the retained website download candidate. The received image has
+a UDIF trailer. Apple signature/ticket validation was performed on the Mac as
+recorded above; it has not been rerun in the Linux workspace. A browser-download
+round trip and explicit confirmation of post-signing Command-right-click,
+paste, highlighted-text capture, and Accessibility acceptance remain pending.
+The original device-review DMG remains ad-hoc signed and must not be confused
+with the notarized file. No public release, main merge, or website download
+publication has occurred.
 
 ## One-time setup on the maintainer's Mac
 
