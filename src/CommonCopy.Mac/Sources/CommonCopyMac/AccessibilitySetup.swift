@@ -105,7 +105,7 @@ struct AccessibilitySetupView: View {
             VStack(alignment: .leading, spacing: 17) {
                 if needsInstall {
                     step("1", "Drag to Applications", "Use the Applications folder in the installer window.")
-                    step("2", "Open CommonCopy", "Launch the installed app from Applications.")
+                    step("2", "Open CommonCopy", "Quit this copy, then launch the installed app from Applications.")
                 } else {
                     step("1", "Open Accessibility settings", "We’ll take you to the right place in System Settings.")
                     step("2", "Enable CommonCopy", "Turn on the switch beside CommonCopy. Your Mac may ask you to unlock settings.")
@@ -129,8 +129,12 @@ struct AccessibilitySetupView: View {
                 }
             }.frame(height: 34, alignment: .leading)
             if needsInstall {
-                Button("Show CommonCopy in Finder") { setup.revealApplication() }
-                    .buttonStyle(MonochromeButton(palette: palette, filled: true))
+                HStack(spacing: 10) {
+                    Button("Show CommonCopy in Finder") { setup.revealApplication() }
+                        .buttonStyle(MonochromeButton(palette: palette, filled: true))
+                    Button("Quit CommonCopy") { NSApplication.shared.terminate(nil) }
+                        .buttonStyle(MonochromeButton(palette: palette, filled: false))
+                }
             } else {
                 Button(setup.settingsOpened ? "Open Accessibility Settings Again" : "Open Accessibility Settings") {
                     setup.openSettings()
