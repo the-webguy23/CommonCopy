@@ -57,7 +57,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
             created.title = "CommonCopy — Save it once. Paste it forever."
             created.contentView = NSHostingView(rootView: content)
-            created.minSize = NSSize(width: 820, height: 540)
+            created.minSize = NSSize(width: 900, height: 620)
             created.isReleasedWhenClosed = false
             created.center()
             window = created
@@ -260,3 +260,4 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if let eventHandler { RemoveEventHandler(eventHandler) }
     }
 }
+

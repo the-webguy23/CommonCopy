@@ -28,7 +28,7 @@ jobs:
       - name: Build the branded drag-to-Applications disk image
         run: bash scripts/build-macos-dmg.sh artifacts/macos-arm64/CommonCopy.app
       - name: Verify the disk image and launch a copied application
-        run: bash scripts/test-macos-dmg.sh artifacts/CommonCopy-0.3.0-macos-arm64.dmg artifacts/macos-arm64/CommonCopy.app
+        run: bash scripts/test-macos-dmg.sh artifacts/CommonCopy-0.4.2-macos-arm64.dmg artifacts/macos-arm64/CommonCopy.app
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -53,3 +53,4 @@ jobs:
             artifacts/CommonCopy-macos-arm64.zip
             artifacts/macos-arm64/READ-ME-FIRST.md
           if-no-files-found: error
+

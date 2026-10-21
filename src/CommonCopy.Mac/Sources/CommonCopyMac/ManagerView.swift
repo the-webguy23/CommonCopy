@@ -69,7 +69,7 @@ struct ManagerView: View {
         HStack(spacing: 0) {
             sidebar
             Rectangle().fill(palette.border).frame(width: 0.7)
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 14) {
                 HStack(alignment: .center) {
                     VStack(alignment: .leading, spacing: 7) {
                         Text("Your phrases").font(.system(size: 28, weight: .medium))
@@ -92,21 +92,11 @@ struct ManagerView: View {
                 HStack {
                     Text(sectionTitle).font(.system(size: 13, weight: .medium))
                     Spacer()
-                    Text("\(store.phrases.count) \(store.phrases.count == 1 ? "phrase" : "phrases")")
+                    Text("\(store.phrases.count) shown · \(store.state?.document.phrases.count ?? 0) total")
                         .font(.system(size: 11)).foregroundColor(palette.muted)
                 }
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 12) {
-                        if store.state == nil {
-                            emptyState(store.busy ? "Loading your library…" : "Your library couldn’t be loaded.",
-                                detail: "Open Settings to reload your library.")
-                        } else if store.phrases.isEmpty {
-                            emptyState(store.search.isEmpty ? "A place for your next useful phrase." : "No matching phrases.",
-                                detail: store.search.isEmpty ? "Add a phrase, or save highlighted text from another app." : "Try another word or choose a different category.")
-                        }
-                        ForEach(store.phrases) { phrase in phraseCard(phrase) }
-                    }.padding(1)
-                }
+                phraseList
+                selectedPhraseCard
                 HStack {
                     Image(systemName: store.commandRightClickAvailable ? "checkmark.circle" : "info.circle")
                     Text(store.commandRightClickAvailable ? "⌘ + right-click opens your menu.  ⌘⇧Space also works."
@@ -114,7 +104,7 @@ struct ManagerView: View {
                     Spacer()
                     if store.busy || store.capturing { ProgressView().controlSize(.small) }
                 }.font(.system(size: 10)).foregroundColor(palette.muted)
-            }.padding(28)
+            }.padding(24)
         }
         .foregroundColor(palette.text).background(palette.background)
         .buttonStyle(MonochromeButton(palette: palette))
@@ -236,42 +226,95 @@ struct ManagerView: View {
         }.padding(24).frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private func phraseCard(_ phrase: Phrase) -> some View {
-        VStack(alignment: .leading, spacing: 13) {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(phrase.title).font(.system(size: 14, weight: .semibold)).lineLimit(2)
-                    Text(store.categories.first { $0.id == phrase.categoryId }?.displayName ?? "Phrase")
-                        .font(.system(size: 10)).foregroundColor(palette.muted)
+    private var phraseList: some View {
+        Group {
+            if store.state == nil {
+                emptyState(store.busy ? "Loading your library…" : "Your library couldn’t be loaded.",
+                    detail: "Open Settings to reload your library.")
+            } else if store.phrases.isEmpty {
+                emptyState(store.search.isEmpty ? "A place for your next useful phrase." : "No matching phrases.",
+                    detail: store.search.isEmpty ? "Add a phrase, or save highlighted text from another app." : "Try another word or choose a different category.")
+            } else {
+                Table(store.phrases, selection: $store.selectedPhraseId) {
+                    TableColumn("★") { phrase in
+                        Image(systemName: phrase.isFavorite ? "star.fill" : "star")
+                            .font(.system(size: 10)).opacity(phrase.isFavorite ? 1 : 0.25)
+                            .accessibilityLabel(phrase.isFavorite ? "Favourite" : "Not a favourite")
+                    }.width(26)
+                    TableColumn("Title") { phrase in
+                        HStack(spacing: 5) {
+                            Text(phrase.title).lineLimit(1)
+                            if !phrase.isEnabled { Image(systemName: "pause.circle").help("Disabled") }
+                        }
+                        .contextMenu { phraseOptions(phrase) }
+                    }.width(min: 120, ideal: 180, max: 260)
+                    TableColumn("Text preview") { phrase in
+                        Text(phrase.text.replacingOccurrences(of: "\n", with: " "))
+                            .lineLimit(1)
+                    }.width(min: 100, ideal: 280)
+                    TableColumn("Uses") { phrase in
+                        Text("\(phrase.useCount)").monospacedDigit()
+                    }.width(44)
                 }
-                Spacer()
-                if phrase.isFavorite { Image(systemName: "star.fill").font(.system(size: 11)) }
-                if !phrase.isEnabled { Text("Disabled").font(.system(size: 10)).foregroundColor(palette.muted) }
+                .tableStyle(.inset)
+                .accessibilityLabel("Your phrases")
             }
-            Text(phrase.text).font(.system(size: 12)).lineLimit(2).foregroundColor(palette.muted).textSelection(.enabled)
-            HStack(spacing: 8) {
-                Button("Paste") { paste(phrase) }.disabled(!phrase.isEnabled)
-                    .buttonStyle(MonochromeButton(palette: palette, filled: true))
-                Button("Copy") {
-                    NSPasteboard.general.clearContents()
-                    NSPasteboard.general.setString(phrase.text, forType: .string)
-                    Task { await store.perform("recordUse", ["id": phrase.id]) }
-                }.disabled(!phrase.isEnabled)
+        }
+        .frame(maxWidth: .infinity, minHeight: 120, maxHeight: .infinity, alignment: .topLeading)
+        .background(palette.background)
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .overlay(RoundedRectangle(cornerRadius: 10).stroke(palette.border, lineWidth: 0.7))
+    }
+
+    private var selectedPhraseCard: some View {
+        VStack(alignment: .leading, spacing: 9) {
+            Text("Selected Phrase").font(.system(size: 10)).foregroundColor(palette.muted)
+            if let phrase = store.selectedPhrase {
+                HStack {
+                    Text(phrase.title).font(.system(size: 14, weight: .semibold)).lineLimit(1)
+                    Spacer()
+                    if !phrase.isEnabled { Text("Disabled").font(.caption).foregroundColor(palette.muted) }
+                }
+                ScrollView {
+                    Text(phrase.text).font(.system(size: 12)).textSelection(.enabled)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }.frame(maxWidth: .infinity, maxHeight: .infinity)
+                HStack(spacing: 8) {
+                    Button("Copy") { copyPhrase(phrase) }.disabled(!phrase.isEnabled)
+                        .buttonStyle(MonochromeButton(palette: palette, filled: true))
+                    Button("Edit") { store.phraseEditor = PhraseDraft(phrase: phrase) }
+                    Spacer()
+                    Menu { phraseOptions(phrase) } label: { Image(systemName: "ellipsis") }
+                        .menuStyle(.borderlessButton).fixedSize()
+                        .help("Phrase options").accessibilityLabel("Options for selected phrase")
+                }
+            } else {
+                Text("Select a phrase to preview its full text.")
+                    .font(.system(size: 12)).foregroundColor(palette.muted)
                 Spacer()
-                Text("\(phrase.useCount) \(phrase.useCount == 1 ? "use" : "uses")")
-                    .font(.system(size: 10)).foregroundColor(palette.muted)
-                Menu {
-                    Button("Edit phrase") { store.phraseEditor = PhraseDraft(phrase: phrase) }
-                    Button(phrase.isFavorite ? "Remove from Favourites" : "Add to Favourites") { saveFlags(phrase, favourite: !phrase.isFavorite) }
-                    Button(phrase.isEnabled ? "Disable phrase" : "Enable phrase") { saveFlags(phrase, enabled: !phrase.isEnabled) }
-                    Button("Duplicate phrase") { Task { await store.perform("duplicatePhrase", ["id": phrase.id]) } }
-                    Divider()
-                    Button("Delete phrase", role: .destructive) { deletion = Deletion(id: phrase.id, category: false) }
-                } label: { Image(systemName: "ellipsis") }
-                .menuStyle(.borderlessButton).fixedSize().help("Phrase options").accessibilityLabel("Options for \(phrase.title)")
             }
-        }.padding(18).frame(maxWidth: .infinity, alignment: .leading).background(palette.background)
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(palette.border, lineWidth: 0.7))
+        }
+        .padding(16).frame(maxWidth: .infinity).frame(height: 178)
+        .background(palette.background)
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .overlay(RoundedRectangle(cornerRadius: 10).stroke(palette.border, lineWidth: 0.7))
+        .accessibilityIdentifier("selected-phrase-preview")
+    }
+
+    private func copyPhrase(_ phrase: Phrase) {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(phrase.text, forType: .string)
+        Task { await store.perform("recordUse", ["id": phrase.id]) }
+    }
+
+    @ViewBuilder private func phraseOptions(_ phrase: Phrase) -> some View {
+        Button("Paste") { paste(phrase) }.disabled(!phrase.isEnabled)
+        Button("Edit phrase") { store.phraseEditor = PhraseDraft(phrase: phrase) }
+        Button(phrase.isFavorite ? "Remove from Favourites" : "Add to Favourites") { saveFlags(phrase, favourite: !phrase.isFavorite) }
+        Button(phrase.isEnabled ? "Disable phrase" : "Enable phrase") { saveFlags(phrase, enabled: !phrase.isEnabled) }
+        Button("Duplicate phrase") { Task { await store.perform("duplicatePhrase", ["id": phrase.id]) } }
+        Divider()
+        Button("Delete phrase", role: .destructive) { deletion = Deletion(id: phrase.id, category: false) }
     }
 
     private func saveFlags(_ phrase: Phrase, favourite: Bool? = nil, enabled: Bool? = nil) {
@@ -473,3 +516,4 @@ struct CategoryEditor: View {
             .buttonStyle(MonochromeButton(palette: Palette(dark: store.dark)))
     }
 }
+

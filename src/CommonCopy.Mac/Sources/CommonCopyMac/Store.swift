@@ -4,9 +4,10 @@ import UniformTypeIdentifiers
 
 @MainActor
 final class Store: ObservableObject {
-    @Published var state: CoreState?
-    @Published var selectedCategory = "all"
-    @Published var search = ""
+    @Published var selectedPhraseId: String?
+    @Published var state: CoreState? { didSet { reconcilePhraseSelection() } }
+    @Published var selectedCategory = "all" { didSet { reconcilePhraseSelection() } }
+    @Published var search = "" { didSet { reconcilePhraseSelection() } }
     @Published var error: String?
     @Published var busy = false
     @Published var capturing = false
@@ -19,6 +20,15 @@ final class Store: ObservableObject {
 
     var dark: Bool { state?.document.settings.appearance == "Dark" }
     var categories: [CategoryOption] { state?.categoryList ?? [] }
+    var selectedPhrase: Phrase? { phrases.first { $0.id == selectedPhraseId } }
+
+    // Selection belongs to the visible list and never changes the stored library.
+    private func reconcilePhraseSelection() {
+        let visible = phrases
+        if !visible.contains(where: { $0.id == selectedPhraseId }) {
+            selectedPhraseId = visible.first?.id
+        }
+    }
     var phrases: [Phrase] {
         guard let state else { return [] }
         let ids: [String]?
@@ -77,3 +87,4 @@ final class Store: ObservableObject {
         Task { await perform("export", ["path": url.path]) }
     }
 }
+

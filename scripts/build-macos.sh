@@ -24,6 +24,7 @@ rm -rf "$app"
 mkdir -p "$app/Contents/MacOS" "$app/Contents/Helpers/Core" "$app/Contents/Resources"
 cp "$binary_dir/CommonCopyMac" "$app/Contents/MacOS/"
 cp docs/help/help.html "$app/Contents/Resources/help.html"
+cp LICENSE "$app/Contents/Resources/LICENSE.txt"
 cp src/CommonCopy.Mac/Info.plist "$app/Contents/Info.plist"
 cp src/CommonCopy.Mac/Assets/CommonCopyLogo.svg "$app/Contents/Resources/CommonCopyLogo.svg"
 # Preserve all vector geometry; use the brand reverse colors on dark surfaces.
@@ -84,3 +85,4 @@ PY
 cp docs/macos-testing.md "$root/artifacts/macos-$architecture/READ-ME-FIRST.md"
 ditto -c -k --sequesterRsrc --keepParent "$app" "$root/artifacts/CommonCopy-macos-$architecture.zip"
 echo "Built $app"
+

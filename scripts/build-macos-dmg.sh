@@ -36,14 +36,14 @@ on run argv
       set current view of container window to icon view
       set toolbar visible of container window to false
       set statusbar visible of container window to false
-      set bounds of container window to {100, 100, 820, 580}
+      set bounds of container window to {100, 100, 820, 640}
       set theViewOptions to the icon view options of the container window
       set arrangement of theViewOptions to not arranged
       set icon size of theViewOptions to 110
       set text size of theViewOptions to 12
       set background picture of theViewOptions to file ".background:installer.tiff"
-      set position of item "CommonCopy.app" to {210, 220}
-      set position of item "Applications" to {510, 220}
+      set position of item "CommonCopy.app" to {210, 330}
+      set position of item "Applications" to {510, 330}
       close container window
       open
       update without registering applications
@@ -58,3 +58,4 @@ mount=""
 hdiutil convert -quiet "$work/writable.dmg" -format UDZO -imagekey zlib-level=9 -o "$output"
 hdiutil verify "$output"
 echo "Built $output"
+
