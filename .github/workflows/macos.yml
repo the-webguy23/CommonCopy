@@ -16,6 +16,8 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+      - name: Check release signing script syntax
+        run: bash -n scripts/sign-macos-app.sh scripts/notarize-macos-dmg.sh
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
