@@ -1,10 +1,16 @@
 # CommonCopy Developer ID release
 
-Status: Developer ID certificate is installed on the maintainer's Mac. Apple
-accepted the application submission `20af6e54-a287-4401-8676-7f872bed3152`, confirmed
-by the maintainer's notarytool info output on October 21, 2026. The original
-0.4.2 device-review DMG is still ad-hoc signed. Ticket attachment, final DMG
-notarization, and downloaded-app acceptance remain pending.
+Status: CommonCopy 0.4.2 application and final DMG are Developer ID signed,
+notarized, and stapled. The maintainer's Terminal output on October 21, 2026
+confirms Apple acceptance, restored native code hashes matching the approved
+ticket, successful ticket validation, runtime smoke test, DMG integrity, and
+Gatekeeper acceptance of the app, DMG, and app mounted from the finished DMG.
+
+The finished signed DMG is on the maintainer's Mac and has not yet been uploaded
+back for release storage. Browser-download installation/launch and Accessibility
+acceptance remain pending. The original device-review DMG remains ad-hoc signed
+and must not be confused with the notarized file. No public release, main merge,
+or website download publication has occurred.
 
 ## One-time setup on the maintainer's Mac
 
