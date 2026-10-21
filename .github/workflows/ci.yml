@@ -1,0 +1,88 @@
+name: Windows CI
+
+on:
+  push:
+    branches: [main, "codex/**"]
+  pull_request:
+    branches: [main, "codex/editorial-themes"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-test-publish:
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install .NET 10 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore CommonCopy.sln
+
+      - name: Render approved installer and application branding
+        shell: powershell
+        run: ./scripts/build-windows-branding.ps1
+
+      - name: Build
+        run: dotnet build CommonCopy.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test CommonCopy.sln --configuration Release --no-build --logger "trx;LogFileName=tests.trx" --collect "XPlat Code Coverage"
+
+      - name: Build Windows setup and optional portable package
+        shell: powershell
+        run: ./scripts/package-windows.ps1
+
+      - name: Check installer lifecycle and capture install card
+        shell: powershell
+        run: ./scripts/test-windows-installer.ps1
+
+      - name: Upload Windows setup
+        uses: actions/upload-artifact@v4
+        with:
+          name: CommonCopy-Windows-Setup
+          path: artifacts/release/
+
+      - name: Upload installer checks
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-installer-check
+          path: artifacts/installer-check/
+          if-no-files-found: ignore
+
+      - name: Verify offline help in published package
+        shell: pwsh
+        run: |
+          if (!(Test-Path artifacts/publish/win-x64/Help/help.html)) { throw "Offline help was not published" }
+          if ((Get-FileHash docs/help/help.html).Hash -ne (Get-FileHash artifacts/publish/win-x64/Help/help.html).Hash) { throw "Published help differs from source" }
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: "**/TestResults/**"
+          if-no-files-found: ignore
+
+      - name: Upload portable prototype
+        uses: actions/upload-artifact@v4
+        with:
+          name: CommonCopy-Portable-win-x64
+          path: artifacts/publish/win-x64/
+
+      - name: Upload native menu visual check
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-native-menu-check
+          path: artifacts/menu-check/
+          if-no-files-found: ignore
