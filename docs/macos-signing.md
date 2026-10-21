@@ -1,8 +1,10 @@
 # CommonCopy Developer ID release
 
-Status: release tooling prepared; no Developer ID certificate or notarization
-approval has been supplied yet. The 0.4.2 device-review DMG is still ad-hoc signed.
-Public distribution must wait for Apple acceptance and the downloaded-app test.
+Status: Developer ID certificate is installed on the maintainer's Mac. Apple
+accepted the application submission `20af6e54-a287-4401-8676-7f872bed3152`, confirmed
+by the maintainer's notarytool info output on October 21, 2026. The original
+0.4.2 device-review DMG is still ad-hoc signed. Ticket attachment, final DMG
+notarization, and downloaded-app acceptance remain pending.
 
 ## One-time setup on the maintainer's Mac
 
@@ -55,9 +57,21 @@ copied to `artifacts/notarized/`, alongside its checksum and submission records.
 If Apple rejects a submission, the log in the printed records directory explains
 the issue; do not distribute it. A first submission can take longer. If waiting
 times out, use the recorded submission ID with `xcrun notarytool info ID
---keychain-profile CommonCopy-notary` to check status before resubmitting. The
-script does not automatically resume; report the status so we can recover the
-submission deliberately. Never mark a file approved based only on successful upload.
+--keychain-profile CommonCopy-notary` to check status. Signed files and submission
+IDs are now preserved under the printed signing workspace. Set
+`COMMONCOPY_RESUME_WORK` to that exact workspace and rerun with the same input
+and output arguments. Saved IDs are checked and reused; do not upload again.
+The timeout response can have JSON on stderr and empty stdout; waiting and
+status retrieval are separate operations, so this no longer causes a traceback.
+Never mark a file approved based only on successful upload.
+
+To recover the original accepted app after the older script removed its staging
+copy, set `COMMONCOPY_ACCEPTED_APP_SUBMISSION` to the accepted ID and run against
+the original reviewed DMG with the same signing identity. This restores signed
+code and compares every native architecture and code-directory hash with Apple's
+accepted ticket log. A mismatch stops packaging; there is no automatic fallback
+upload. When all hashes match, attach Apple's ticket and continue to final DMG
+submission. Only the final installer is newly submitted in this recovery mode.
 
 ## Final acceptance
 
