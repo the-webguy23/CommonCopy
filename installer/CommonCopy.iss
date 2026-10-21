@@ -58,8 +58,6 @@ function QueryFullProcessImageName(ProcessHandle: THandle; Flags: LongWord; File
   external 'QueryFullProcessImageNameW@kernel32.dll stdcall';
 function CloseHandle(Handle: THandle): Boolean;
   external 'CloseHandle@kernel32.dll stdcall';
-function GetWindowRect(Window: HWND; var Rect: TRect): Boolean;
-  external 'GetWindowRect@user32.dll stdcall';
 function CreateRoundRectRgn(Left, Top, Right, Bottom, EllipseWidth, EllipseHeight: Integer): THandle;
   external 'CreateRoundRectRgn@gdi32.dll stdcall';
 function SetWindowRgn(Window: HWND; Region: THandle; Redraw: Boolean): Integer;
@@ -72,32 +70,23 @@ var
   BrandName, Tagline, Heading, Detail, ProgressText: TNewStaticText;
   LicenseLink: TNewButton;
   Progress: TNewProgressBar;
-  OriginalResize: TNotifyEvent;
+  InstallerCard: TPanel;
   Rounding: Boolean;
 
-procedure RoundWizard;
-var Rect: TRect; Region: THandle;
+procedure RoundInstallerCard(Sender: TObject);
+var Region: THandle;
 begin
-  if Rounding then Exit;
+  if Rounding or (InstallerCard.Width < 2) or (InstallerCard.Height < 2) then Exit;
   Rounding := True;
   try
-    if GetWindowRect(WizardForm.Handle, Rect) then begin
-      Region := CreateRoundRectRgn(0, 0, Rect.Right - Rect.Left, Rect.Bottom - Rect.Top, ScaleX(28), ScaleY(28));
-      if Region <> 0 then begin
-        { Windows owns the region after success; retain no unmanaged handles. }
-        if SetWindowRgn(WizardForm.Handle, Region, True) = 0 then DeleteObject(Region);
-      end;
+    Region := CreateRoundRectRgn(0, 0, InstallerCard.Width, InstallerCard.Height, ScaleX(28), ScaleY(28));
+    if Region <> 0 then begin
+      { Round only the content card; preserve the native DWM title bar and shadow. }
+      if SetWindowRgn(InstallerCard.Handle, Region, True) = 0 then DeleteObject(Region);
     end;
   finally
     Rounding := False;
   end;
-end;
-
-procedure WizardResized(Sender: TObject);
-begin
-  if Rounding then Exit;
-  if OriginalResize <> nil then OriginalResize(Sender);
-  RoundWizard;
 end;
 
 function AppIsRunning: Boolean;
@@ -142,9 +131,9 @@ end;
 function LabelAt(Text: String; X, Y, W, H, Size: Integer): TNewStaticText;
 begin
   Result := TNewStaticText.Create(WizardForm);
-  Result.Parent := WizardForm;
+  Result.Parent := InstallerCard;
   Result.AutoSize := False;
-  Result.SetBounds(ScaleX(X), ScaleY(Y), ScaleX(W), ScaleY(H));
+  Result.SetBounds(ScaleX(X - 12), ScaleY(Y - 12), ScaleX(W), ScaleY(H));
   Result.Caption := Text;
   Result.Font.Name := 'Segoe UI';
   Result.Font.Size := Size;
@@ -164,12 +153,18 @@ begin
   WizardForm.Caption := 'CommonCopy Setup';
   WizardForm.ClientWidth := ScaleX(500);
   WizardForm.ClientHeight := ScaleY(400);
-  WizardForm.Color := clWhite;
+  WizardForm.Color := $00F0F0F0;
+  InstallerCard := TPanel.Create(WizardForm);
+  InstallerCard.Parent := WizardForm;
+  InstallerCard.BevelOuter := bvNone;
+  InstallerCard.Color := clWhite;
+  InstallerCard.SetBounds(ScaleX(12), ScaleY(12), ScaleX(476), ScaleY(376));
+  InstallerCard.OnResize := @RoundInstallerCard;
   WizardForm.NextButton.SetBounds(ScaleX(316), ScaleY(346), ScaleX(156), ScaleY(34));
   WizardForm.CancelButton.SetBounds(ScaleX(204), ScaleY(346), ScaleX(100), ScaleY(34));
   BrandImage := TBitmapImage.Create(WizardForm);
-  BrandImage.Parent := WizardForm;
-  BrandImage.SetBounds(ScaleX(36), ScaleY(40), ScaleX(62), ScaleY(76));
+  BrandImage.Parent := InstallerCard;
+  BrandImage.SetBounds(ScaleX(24), ScaleY(28), ScaleX(62), ScaleY(76));
   BrandImage.Stretch := True;
   ExtractTemporaryFile('CommonCopy.bmp');
   BrandImage.Bitmap.LoadFromFile(ExpandConstant('{tmp}\CommonCopy.bmp'));
@@ -181,24 +176,25 @@ begin
   Detail := LabelAt('', 36, 210, 428, 64, 11);
   ProgressText := LabelAt('', 36, 284, 428, 22, 10);
   Progress := TNewProgressBar.Create(WizardForm);
-  Progress.Parent := WizardForm;
-  Progress.SetBounds(ScaleX(36), ScaleY(310), ScaleX(428), ScaleY(6));
+  Progress.Parent := InstallerCard;
+  Progress.SetBounds(ScaleX(24), ScaleY(298), ScaleX(428), ScaleY(6));
   Progress.Max := 1000;
   LicenseLink := TNewButton.Create(WizardForm);
-  LicenseLink.Parent := WizardForm;
-  LicenseLink.SetBounds(ScaleX(28), ScaleY(346), ScaleX(132), ScaleY(34));
+  LicenseLink.Parent := InstallerCard;
+  LicenseLink.SetBounds(ScaleX(16), ScaleY(334), ScaleX(132), ScaleY(34));
   LicenseLink.Caption := 'MIT License';
   LicenseLink.OnClick := @ShowLicense;
-  OriginalResize := WizardForm.OnResize;
-  WizardForm.OnResize := @WizardResized;
-  RoundWizard;
+  RoundInstallerCard(nil);
 end;
 
 procedure CurPageChanged(CurPageID: Integer);
 var Card: Boolean;
 begin
   Card := (CurPageID = wpReady) or (CurPageID = wpInstalling) or (CurPageID = wpFinished);
-  RoundWizard;
+  InstallerCard.Visible := Card;
+  RoundInstallerCard(nil);
+  WizardForm.NextButton.BringToFront;
+  WizardForm.CancelButton.BringToFront;
   WizardForm.OuterNotebook.Visible := not Card;
   WizardForm.Bevel.Visible := not Card;
   BrandImage.Visible := Card;

@@ -71,8 +71,17 @@ try {
     try {
         $condition = [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::NameProperty,'CommonCopy Setup')
         $wizard = [Windows.Automation.AutomationElement]::RootElement.FindFirst([Windows.Automation.TreeScope]::Children,$condition)
-        if ([InstallerClick]::GetWindowRgn([IntPtr]$wizard.Current.NativeWindowHandle,$region) -le 0) { throw 'Installer has no rounded window region.' }
-        if ([InstallerClick]::PtInRegion($region,0,0) -or ![InstallerClick]::PtInRegion($region,40,40)) { throw 'Installer corner geometry is incorrect.' }
+        $roundedCardFound = $false
+        foreach ($element in $wizard.FindAll([Windows.Automation.TreeScope]::Descendants,[Windows.Automation.Condition]::TrueCondition)) {
+            $bounds = $element.Current.BoundingRectangle
+            if ($element.Current.NativeWindowHandle -ne 0 -and $bounds.Width -gt 400 -and $bounds.Height -gt 300) {
+                if ([InstallerClick]::GetWindowRgn([IntPtr]$element.Current.NativeWindowHandle,$region) -gt 0 -and ![InstallerClick]::PtInRegion($region,0,0) -and [InstallerClick]::PtInRegion($region,40,40)) {
+                    $roundedCardFound = $true
+                    break
+                }
+            }
+        }
+        if (!$roundedCardFound) { throw 'Rounded installer content card was not found.' }
     } finally { [void][InstallerClick]::DeleteObject($region) }
     Screenshot '01-ready'
     Click $installButton
@@ -97,6 +106,7 @@ try {
         Start-Sleep -Milliseconds 250
     } while ([DateTime]::UtcNow -lt $deadline)
     if (!$app -or !(Test-Path "$data\phrases.json")) { throw 'Installed application did not open and create its library.' }
+    Start-Sleep -Milliseconds 700
     Screenshot '04-manager-favicon' ([Windows.Automation.AutomationElement]::FromHandle([IntPtr]$app.MainWindowHandle))
     $beforeBlockedUpgrade = (Get-FileHash "$data\phrases.json").Hash
     $blocked = Start-Process $setup -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',('/LOG="{0}\running-app.log"' -f $evidence)) -PassThru
