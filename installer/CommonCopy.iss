@@ -71,6 +71,7 @@ var
   LicenseLink: TNewButton;
   Progress: TNewProgressBar;
   InstallerCard: TPanel;
+  OriginalResize: TNotifyEvent;
   Rounding: Boolean;
 
 procedure RoundInstallerCard(Sender: TObject);
@@ -87,6 +88,14 @@ begin
   finally
     Rounding := False;
   end;
+end;
+
+procedure WizardResized(Sender: TObject);
+begin
+  if Rounding then Exit;
+  if OriginalResize <> nil then OriginalResize(Sender);
+  InstallerCard.SetBounds(ScaleX(12), ScaleY(12), WizardForm.ClientWidth - ScaleX(24), WizardForm.ClientHeight - ScaleY(24));
+  RoundInstallerCard(Sender);
 end;
 
 function AppIsRunning: Boolean;
@@ -159,7 +168,6 @@ begin
   InstallerCard.BevelOuter := bvNone;
   InstallerCard.Color := clWhite;
   InstallerCard.SetBounds(ScaleX(12), ScaleY(12), ScaleX(476), ScaleY(376));
-  InstallerCard.OnResize := @RoundInstallerCard;
   WizardForm.NextButton.SetBounds(ScaleX(316), ScaleY(346), ScaleX(156), ScaleY(34));
   WizardForm.CancelButton.SetBounds(ScaleX(204), ScaleY(346), ScaleX(100), ScaleY(34));
   BrandImage := TBitmapImage.Create(WizardForm);
@@ -184,6 +192,8 @@ begin
   LicenseLink.SetBounds(ScaleX(16), ScaleY(334), ScaleX(132), ScaleY(34));
   LicenseLink.Caption := 'MIT License';
   LicenseLink.OnClick := @ShowLicense;
+  OriginalResize := WizardForm.OnResize;
+  WizardForm.OnResize := @WizardResized;
   RoundInstallerCard(nil);
 end;
 
