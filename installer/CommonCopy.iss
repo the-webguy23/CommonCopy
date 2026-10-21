@@ -96,7 +96,7 @@ end;
 procedure WizardResized(Sender: TObject);
 begin
   if Rounding then Exit;
-  if Assigned(OriginalResize) then OriginalResize(Sender);
+  if OriginalResize <> nil then OriginalResize(Sender);
   RoundWizard;
 end;
 
