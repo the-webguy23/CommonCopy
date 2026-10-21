@@ -10,6 +10,10 @@ using System.Runtime.InteropServices;
 public static class InstallerClick {
     [DllImport("user32.dll", SetLastError=true)]
     public static extern bool PostMessage(IntPtr window, uint message, IntPtr wParam, IntPtr lParam);
+    [DllImport("gdi32.dll")] public static extern IntPtr CreateRectRgn(int left, int top, int right, int bottom);
+    [DllImport("user32.dll")] public static extern int GetWindowRgn(IntPtr window, IntPtr region);
+    [DllImport("gdi32.dll")] public static extern bool PtInRegion(IntPtr region, int x, int y);
+    [DllImport("gdi32.dll")] public static extern bool DeleteObject(IntPtr region);
 }
 '@
 $root = Split-Path -Parent $PSScriptRoot
@@ -41,10 +45,12 @@ function Click($button) {
     # Queue a normal native button click so the test can observe live extraction.
     if (![InstallerClick]::PostMessage([IntPtr]$button.Current.NativeWindowHandle,0x00F5,[IntPtr]::Zero,[IntPtr]::Zero)) { throw 'Could not click installer button.' }
 }
-function Screenshot([string]$name) {
+function Screenshot([string]$name, $window = $null) {
+    if (!$window) {
     $condition = [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::NameProperty,'CommonCopy Setup')
     $window = [Windows.Automation.AutomationElement]::RootElement.FindFirst([Windows.Automation.TreeScope]::Children,$condition)
     if (!$window) { throw 'Setup window not found for screenshot.' }
+    }
     $r = $window.Current.BoundingRectangle
     $image = [Drawing.Bitmap]::new([int]$r.Width,[int]$r.Height)
     $graphics = [Drawing.Graphics]::FromImage($image)
@@ -61,6 +67,13 @@ function Run-Silent([string]$exe,[string[]]$arguments) {
 try {
     Start-Process $setup -ArgumentList @('/NORESTART',('/LOG="{0}\interactive.log"' -f $evidence)) | Out-Null
     $installButton = Wait-Button 'Install CommonCopy'
+    $region = [InstallerClick]::CreateRectRgn(0,0,0,0)
+    try {
+        $condition = [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::NameProperty,'CommonCopy Setup')
+        $wizard = [Windows.Automation.AutomationElement]::RootElement.FindFirst([Windows.Automation.TreeScope]::Children,$condition)
+        if ([InstallerClick]::GetWindowRgn([IntPtr]$wizard.Current.NativeWindowHandle,$region) -le 0) { throw 'Installer has no rounded window region.' }
+        if ([InstallerClick]::PtInRegion($region,0,0) -or ![InstallerClick]::PtInRegion($region,40,40)) { throw 'Installer corner geometry is incorrect.' }
+    } finally { [void][InstallerClick]::DeleteObject($region) }
     Screenshot '01-ready'
     Click $installButton
     # Capture real extraction, without slowing or inventing progress for the product.
@@ -84,6 +97,7 @@ try {
         Start-Sleep -Milliseconds 250
     } while ([DateTime]::UtcNow -lt $deadline)
     if (!$app -or !(Test-Path "$data\phrases.json")) { throw 'Installed application did not open and create its library.' }
+    Screenshot '04-manager-favicon' ([Windows.Automation.AutomationElement]::FromHandle([IntPtr]$app.MainWindowHandle))
     $beforeBlockedUpgrade = (Get-FileHash "$data\phrases.json").Hash
     $blocked = Start-Process $setup -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',('/LOG="{0}\running-app.log"' -f $evidence)) -PassThru
     if (!$blocked.WaitForExit(30000) -or $blocked.ExitCode -eq 0) { throw 'Setup did not safely refuse to replace the running application.' }

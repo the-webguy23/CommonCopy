@@ -1,5 +1,5 @@
 #define MyAppName "CommonCopy"
-#define MyAppVersion "0.4.1"
+#define MyAppVersion "0.4.2"
 #define MyAppExeName "CommonCopy.exe"
 
 [Setup]
@@ -58,12 +58,47 @@ function QueryFullProcessImageName(ProcessHandle: THandle; Flags: LongWord; File
   external 'QueryFullProcessImageNameW@kernel32.dll stdcall';
 function CloseHandle(Handle: THandle): Boolean;
   external 'CloseHandle@kernel32.dll stdcall';
+function GetWindowRect(Window: HWND; var Rect: TRect): Boolean;
+  external 'GetWindowRect@user32.dll stdcall';
+function CreateRoundRectRgn(Left, Top, Right, Bottom, EllipseWidth, EllipseHeight: Integer): THandle;
+  external 'CreateRoundRectRgn@gdi32.dll stdcall';
+function SetWindowRgn(Window: HWND; Region: THandle; Redraw: Boolean): Integer;
+  external 'SetWindowRgn@user32.dll stdcall';
+function DeleteObject(Handle: THandle): Boolean;
+  external 'DeleteObject@gdi32.dll stdcall';
 
 var
   BrandImage: TBitmapImage;
   BrandName, Tagline, Heading, Detail, ProgressText: TNewStaticText;
   LicenseLink: TNewButton;
   Progress: TNewProgressBar;
+  OriginalResize: TNotifyEvent;
+  Rounding: Boolean;
+
+procedure RoundWizard;
+var Rect: TRect; Region: THandle;
+begin
+  if Rounding then Exit;
+  Rounding := True;
+  try
+    if GetWindowRect(WizardForm.Handle, Rect) then begin
+      Region := CreateRoundRectRgn(0, 0, Rect.Right - Rect.Left, Rect.Bottom - Rect.Top, ScaleX(28), ScaleY(28));
+      if Region <> 0 then begin
+        { Windows owns the region after success; retain no unmanaged handles. }
+        if SetWindowRgn(WizardForm.Handle, Region, True) = 0 then DeleteObject(Region);
+      end;
+    end;
+  finally
+    Rounding := False;
+  end;
+end;
+
+procedure WizardResized(Sender: TObject);
+begin
+  if Rounding then Exit;
+  if Assigned(OriginalResize) then OriginalResize(Sender);
+  RoundWizard;
+end;
 
 function AppIsRunning: Boolean;
 var Ids: TProcessIds; BytesNeeded, SessionId, OtherSession, Size: LongWord;
@@ -154,12 +189,16 @@ begin
   LicenseLink.SetBounds(ScaleX(28), ScaleY(346), ScaleX(132), ScaleY(34));
   LicenseLink.Caption := 'MIT License';
   LicenseLink.OnClick := @ShowLicense;
+  OriginalResize := WizardForm.OnResize;
+  WizardForm.OnResize := @WizardResized;
+  RoundWizard;
 end;
 
 procedure CurPageChanged(CurPageID: Integer);
 var Card: Boolean;
 begin
   Card := (CurPageID = wpReady) or (CurPageID = wpInstalling) or (CurPageID = wpFinished);
+  RoundWizard;
   WizardForm.OuterNotebook.Visible := not Card;
   WizardForm.Bevel.Visible := not Card;
   BrandImage.Visible := Card;
