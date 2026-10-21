@@ -48,19 +48,8 @@ final="$output/CommonCopy-$version-macos-arm64-notarized.dmg"
 [[ ! -e "$final" && ! -e "$final.sha256" ]] || { echo 'Output already exists; choose another output directory.' >&2; exit 1; }
 record="$(mktemp -d "$output/notarization-$version.XXXXXX")"
 bash "$root/scripts/sign-macos-app.sh" "$app"
-# Verify that hardening still permits the packaged .NET runtime to start, using
-# disposable data rather than the maintainer's saved phrases.
+# Inspect architecture without launching downloaded, not-yet-notarized code.
 lipo -verify_arch arm64 "$app/Contents/MacOS/CommonCopyMac"
-mkdir "$work/test-library"
-printf '%s\n' '{"operation":"snapshot"}' | \
-  "$app/Contents/Helpers/Core/CommonCopy.DesktopBridge" "$work/test-library" > "$work/bridge.json"
-python3 - "$work/bridge.json" <<'PY'
-import json, sys
-with open(sys.argv[1]) as stream:
-    result = json.load(stream)
-if not result.get('ok'):
-    raise SystemExit('The signed runtime smoke test failed; nothing was submitted to Apple.')
-PY
 
 submit() {
   local file="$1" label="$2" rc=0
@@ -99,6 +88,21 @@ xcrun stapler staple "$app"
 xcrun stapler validate "$app"
 codesign --verify --deep --strict "$app"
 spctl --assess --type execute --verbose=2 "$app"
+
+# Launch only after Apple acceptance, stapling, and Gatekeeper assessment.
+# The browser-downloaded DMG can carry quarantine onto this staging copy;
+# exercising it earlier causes Gatekeeper to kill the helper before submission.
+# Keep quarantine intact and test with disposable data, never the user library.
+mkdir "$work/test-library"
+printf '%s\n' '{"operation":"snapshot"}' | \
+  "$app/Contents/Helpers/Core/CommonCopy.DesktopBridge" "$work/test-library" > "$work/bridge.json"
+python3 - "$work/bridge.json" <<'PY'
+import json, sys
+with open(sys.argv[1]) as stream:
+    result = json.load(stream)
+if not result.get('ok'):
+    raise SystemExit('The notarized runtime smoke test failed; no release will be produced.')
+PY
 
 # Retain the approved Finder layout, background, and Applications alias.
 hdiutil create -quiet -volname 'CommonCopy Installer' -srcfolder "$work/staging" \
