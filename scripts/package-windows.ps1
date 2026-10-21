@@ -13,6 +13,21 @@ $unexpected = Get-ChildItem $publish -Recurse -File | Where-Object { $_.Name -no
 if ($unexpected) { throw "Unexpected publish payload: $($unexpected.Name -join ', ')" }
 if (!(Test-Path "$publish\Help\help.html")) { throw 'Offline help is missing.' }
 if ((Get-FileHash "$root\docs\help\help.html").Hash -ne (Get-FileHash "$publish\Help\help.html").Hash) { throw 'Offline help differs from source.' }
+# Preserve the notices from the exact runtime packs restored for this publish.
+$assets = Get-Content "$root\src\CommonCopy.Windows\obj\project.assets.json" -Raw | ConvertFrom-Json
+$downloads = @($assets.project.frameworks.PSObject.Properties.Value | ForEach-Object { $_.downloadDependencies })
+foreach ($name in @('Microsoft.NETCore.App.Runtime.win-x64','Microsoft.WindowsDesktop.App.Runtime.win-x64')) {
+    $dependency = $downloads | Where-Object { $_.name -eq $name } | Select-Object -First 1
+    if (!$dependency) { throw "Runtime pack version not found in restored assets: $name" }
+    $version = $dependency.version.Trim('[',']',' ')
+    $pack = $assets.packageFolders.PSObject.Properties.Name | ForEach-Object { Join-Path $_ ($name.ToLowerInvariant() + '\' + $version) } | Where-Object { Test-Path $_ } | Select-Object -First 1
+    if (!$pack) { throw "Restored runtime pack missing: $name $version" }
+    $notices = @(Get-ChildItem $pack -File | Where-Object { $_.Name -match '^(LICENSE|THIRD.?PARTY.?NOTICES)(\..*)?$' })
+    if ($notices.Count -lt 2) { throw "Runtime license or third-party notices missing: $name" }
+    $destination = Join-Path $publish "Notices\$name"
+    New-Item -ItemType Directory -Force $destination | Out-Null
+    $notices | Copy-Item -Destination $destination
+}
 $compiler = @("$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe", "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe", "$env:ProgramFiles\Inno Setup 6\ISCC.exe") | Where-Object { Test-Path $_ } | Select-Object -First 1
 if (!$compiler) { throw 'Install Inno Setup 6 before packaging CommonCopy.' }
 & $compiler "$root\installer\CommonCopy.iss"

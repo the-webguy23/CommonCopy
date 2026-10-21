@@ -4,6 +4,14 @@ param()
 $ErrorActionPreference = 'Stop'
 if ($env:GITHUB_ACTIONS -ne 'true') { throw 'Installer lifecycle checks require a disposable GitHub Actions runner.' }
 Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes, System.Drawing
+Add-Type @'
+using System;
+using System.Runtime.InteropServices;
+public static class InstallerClick {
+    [DllImport("user32.dll", SetLastError=true)]
+    public static extern bool PostMessage(IntPtr window, uint message, IntPtr wParam, IntPtr lParam);
+}
+'@
 $root = Split-Path -Parent $PSScriptRoot
 $evidence = Join-Path $root 'artifacts\installer-check'
 $setup = Join-Path $root 'artifacts\release\CommonCopy-Setup-x64.exe'
@@ -29,7 +37,10 @@ function Wait-Button([string]$name) {
     } while ([DateTime]::UtcNow -lt $deadline)
     throw "Installer button did not appear: $name"
 }
-function Click($button) { $button.GetCurrentPattern([Windows.Automation.InvokePattern]::Pattern).Invoke() }
+function Click($button) {
+    # Queue a normal native button click so the test can observe live extraction.
+    if (![InstallerClick]::PostMessage([IntPtr]$button.Current.NativeWindowHandle,0x00F5,[IntPtr]::Zero,[IntPtr]::Zero)) { throw 'Could not click installer button.' }
+}
 function Screenshot([string]$name) {
     $condition = [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::NameProperty,'CommonCopy Setup')
     $window = [Windows.Automation.AutomationElement]::RootElement.FindFirst([Windows.Automation.TreeScope]::Children,$condition)
@@ -53,11 +64,17 @@ try {
     Screenshot '01-ready'
     Click $installButton
     # Capture real extraction, without slowing or inventing progress for the product.
-    Start-Sleep -Milliseconds 250
+    $deadline = [DateTime]::UtcNow.AddSeconds(30)
+    do {
+        if (Find-Button 'Installing CommonCopy') { break }
+        Start-Sleep -Milliseconds 50
+    } while ([DateTime]::UtcNow -lt $deadline)
+    if (!(Find-Button 'Installing CommonCopy')) { throw 'Live installation progress was not observed.' }
     Screenshot '02-installing'
     $openButton = Wait-Button 'Open CommonCopy'
     Screenshot '03-finished'
     if (!(Test-Path "$installed\CommonCopy.exe") -or !(Test-Path "$installed\Help\help.html") -or !(Test-Path "$installed\LICENSE.txt")) { throw 'Installed files missing.' }
+    if (@(Get-ChildItem "$installed\Notices" -Recurse -File).Count -lt 4) { throw 'Runtime notices missing from installation.' }
     if (!(Test-Path $shortcut) -or !(Test-Path $uninstallKey)) { throw 'Shortcut or uninstall registration missing.' }
     Click $openButton
     $deadline = [DateTime]::UtcNow.AddSeconds(60)

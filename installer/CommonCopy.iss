@@ -31,6 +31,7 @@ SetupLogging=yes
 [Files]
 Source: "..\artifacts\publish\win-x64\CommonCopy.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\artifacts\publish\win-x64\Help\help.html"; DestDir: "{app}\Help"; Flags: ignoreversion
+Source: "..\artifacts\publish\win-x64\Notices\*"; DestDir: "{app}\Notices"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\LICENSE"; DestDir: "{app}"; DestName: "LICENSE.txt"; Flags: ignoreversion
 Source: "..\artifacts\branding\CommonCopy.bmp"; Flags: dontcopy
 Source: "..\LICENSE"; DestName: "CommonCopy-LICENSE.txt"; Flags: dontcopy
