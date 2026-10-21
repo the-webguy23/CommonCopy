@@ -20,7 +20,6 @@ UninstallDisplayIcon={app}\{#MyAppExeName}
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
-WizardResizable=no
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 PrivilegesRequired=lowest
@@ -44,25 +43,49 @@ Name: "{userprograms}\CommonCopy"; Filename: "{app}\{#MyAppExeName}"
 Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueName: "CommonCopy"; Flags: uninsdeletevalue
 
 [Code]
+type TProcessIds = array[0..4095] of LongWord;
 function GetCurrentProcessId: LongWord;
   external 'GetCurrentProcessId@kernel32.dll stdcall';
 function ProcessIdToSessionId(ProcessId: LongWord; var SessionId: LongWord): Boolean;
   external 'ProcessIdToSessionId@kernel32.dll stdcall';
+function EnumProcesses(var Ids: TProcessIds; BufferSize: LongWord; var BytesNeeded: LongWord): Boolean;
+  external 'EnumProcesses@psapi.dll stdcall';
+function OpenProcess(Access: LongWord; InheritHandle: Boolean; ProcessId: LongWord): THandle;
+  external 'OpenProcess@kernel32.dll stdcall';
+function QueryFullProcessImageName(ProcessHandle: THandle; Flags: LongWord; FileName: String; var Size: LongWord): Boolean;
+  external 'QueryFullProcessImageNameW@kernel32.dll stdcall';
+function CloseHandle(Handle: THandle): Boolean;
+  external 'CloseHandle@kernel32.dll stdcall';
 
 var
   BrandImage: TBitmapImage;
-  BrandName, Tagline, Heading, Detail, ProgressText, LicenseLink: TNewStaticText;
+  BrandName, Tagline, Heading, Detail, ProgressText: TNewStaticText;
+  LicenseLink: TNewButton;
   Progress: TNewProgressBar;
 
 function AppIsRunning: Boolean;
-var Locator, Services, Processes: Variant; SessionId: LongWord;
+var Ids: TProcessIds; BytesNeeded, SessionId, OtherSession, Size: LongWord;
+    I: Integer; Handle: THandle; FileName, BaseName: String;
 begin
   Result := False;
   if not ProcessIdToSessionId(GetCurrentProcessId, SessionId) then Exit;
-  Locator := CreateOleObject('WbemScripting.SWbemLocator');
-  Services := Locator.ConnectServer('', 'root\CIMV2');
-  Processes := Services.ExecQuery('SELECT ProcessId FROM Win32_Process WHERE (Name="CommonCopy.exe" OR Name="PhraseMenu.exe") AND SessionId=' + IntToStr(SessionId));
-  Result := Processes.Count > 0;
+  if not EnumProcesses(Ids, SizeOf(Ids), BytesNeeded) then Exit;
+  for I := 0 to (BytesNeeded div 4) - 1 do begin
+    if ProcessIdToSessionId(Ids[I], OtherSession) and (OtherSession = SessionId) then begin
+      Handle := OpenProcess($1000, False, Ids[I]);
+      if Handle <> 0 then begin
+        Size := 32768;
+        SetLength(FileName, Size);
+        if QueryFullProcessImageName(Handle, 0, FileName, Size) then begin
+          SetLength(FileName, Size);
+          BaseName := ExtractFileName(FileName);
+          Result := (CompareText(BaseName, 'CommonCopy.exe') = 0) or (CompareText(BaseName, 'PhraseMenu.exe') = 0);
+        end;
+        CloseHandle(Handle);
+        if Result then Exit;
+      end;
+    end;
+  end;
 end;
 
 function PrepareToInstall(var NeedsRestart: Boolean): String;
@@ -83,6 +106,7 @@ function LabelAt(Text: String; X, Y, W, H, Size: Integer): TNewStaticText;
 begin
   Result := TNewStaticText.Create(WizardForm);
   Result.Parent := WizardForm;
+  Result.AutoSize := False;
   Result.SetBounds(ScaleX(X), ScaleY(Y), ScaleX(W), ScaleY(H));
   Result.Caption := Text;
   Result.Font.Name := 'Segoe UI';
@@ -123,9 +147,10 @@ begin
   Progress.Parent := WizardForm;
   Progress.SetBounds(ScaleX(36), ScaleY(310), ScaleX(428), ScaleY(6));
   Progress.Max := 1000;
-  LicenseLink := LabelAt('MIT License', 28, 354, 156, 24, 10);
-  LicenseLink.Font.Style := [fsUnderline];
-  LicenseLink.Cursor := crHand;
+  LicenseLink := TNewButton.Create(WizardForm);
+  LicenseLink.Parent := WizardForm;
+  LicenseLink.SetBounds(ScaleX(28), ScaleY(346), ScaleX(132), ScaleY(34));
+  LicenseLink.Caption := 'MIT License';
   LicenseLink.OnClick := @ShowLicense;
 end;
 

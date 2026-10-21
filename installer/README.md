@@ -1,12 +1,11 @@
-# Installer
+# Windows setup
 
-`CommonCopy.iss` is an initial Inno Setup definition for an x64 self-contained publish.
+The normal download is `CommonCopy-Setup-x64.exe`: one offline installer for the current Windows user, with the approved vector logo, native text, extraction progress, MIT notice, and an Open CommonCopy finish action. No administrator access or separate .NET download is required.
 
-1. Publish the app to `artifacts/publish/win-x64` using the command in the root README.
-2. Install Inno Setup 6.
-3. Compile `installer/CommonCopy.iss`.
-4. Test install, upgrade, optional startup, and uninstall on clean Windows 10 and Windows 11 virtual machines.
+Program files go in `%LOCALAPPDATA%\Programs\CommonCopy`. The Start menu shortcut and Windows Settings uninstall entry are installed automatically. Start-with-Windows remains an application setting, preserving the user's existing choice.
 
-Code signing is intentionally not configured. Never commit a signing certificate or password.
+Phrase data stays in `%LOCALAPPDATA%\CommonCopy`. Setup never installs into, deletes, or rewrites this directory. Exit the tray application before updating or uninstalling; closing its manager only hides it. Uninstall removes the program, shortcut, and CommonCopy startup entry, keeping the library and backups for reinstall.
 
-The repository-level `scripts/build-local-release.ps1` script performs these steps automatically and copies the finished installer, portable ZIP, and checksums into `artifacts/release` and the local website.
+On Windows, install .NET SDK 10 and Inno Setup 6, then run `powershell -File scripts/build-local-release.ps1` from the repository root. This checks the application, renders branding from the approved WPF vector, publishes a self-contained .NET bundle with its native runtime, and packages setup plus an optional portable ZIP. WPF is not trimmed. Developer symbols and loose runtime DLLs are excluded from the clean publish output. Packaging never changes or publishes the website.
+
+GitHub Windows CI also checks interactive install, real installed-app launch, upgrade/uninstall/reinstall preservation, startup cleanup, and captures the install cards. The lifecycle script is restricted to disposable CI profiles. Device review on Windows 10/11 and at 100–200% scaling remains necessary before release. This review build is unsigned; Windows publisher reputation/signing is separate work before public launch.

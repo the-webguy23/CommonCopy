@@ -6,7 +6,7 @@ $root = Split-Path -Parent $PSScriptRoot
 $output = Join-Path $root 'artifacts\branding'
 New-Item -ItemType Directory -Force $output | Out-Null
 # Render the approved vector, not a resized screenshot or substitute logo.
-$xaml = (Get-Content (Join-Path $root 'src\CommonCopy.Windows\Assets\CommonCopyLogo.xaml') -Raw).Replace('{DynamicResource LogoInkBrush}', 'Black')
+$xaml = (Get-Content (Join-Path $root 'src\CommonCopy.Windows\Assets\CommonCopyLogo.xaml') -Raw).Replace('{DynamicResource LogoInkBrush}', 'Black').Replace('{DynamicResource LogoCopyBrush}', '#585858')
 $dictionary = [Windows.Markup.XamlReader]::Parse($xaml)
 $logo = $dictionary['ApprovedLogo']
 function Render-Logo([int]$width, [int]$height, [bool]$white) {

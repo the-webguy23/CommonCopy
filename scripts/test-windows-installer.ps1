@@ -14,8 +14,11 @@ $uninstallKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\{D405
 if (Test-Path $data) { throw 'Refusing to run over an existing library.' }
 New-Item -ItemType Directory -Force $evidence | Out-Null
 function Find-Button([string]$name) {
+    $windowCondition = [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::NameProperty,'CommonCopy Setup')
+    $window = [Windows.Automation.AutomationElement]::RootElement.FindFirst([Windows.Automation.TreeScope]::Children,$windowCondition)
+    if (!$window) { return $null }
     $condition = [Windows.Automation.PropertyCondition]::new([Windows.Automation.AutomationElement]::NameProperty,$name)
-    return [Windows.Automation.AutomationElement]::RootElement.FindFirst([Windows.Automation.TreeScope]::Descendants,$condition)
+    return $window.FindFirst([Windows.Automation.TreeScope]::Descendants,$condition)
 }
 function Wait-Button([string]$name) {
     $deadline = [DateTime]::UtcNow.AddSeconds(90)
@@ -64,13 +67,18 @@ try {
         Start-Sleep -Milliseconds 250
     } while ([DateTime]::UtcNow -lt $deadline)
     if (!$app -or !(Test-Path "$data\phrases.json")) { throw 'Installed application did not open and create its library.' }
+    $beforeBlockedUpgrade = (Get-FileHash "$data\phrases.json").Hash
+    $blocked = Start-Process $setup -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',('/LOG="{0}\running-app.log"' -f $evidence)) -PassThru
+    if (!$blocked.WaitForExit(30000) -or $blocked.ExitCode -eq 0) { throw 'Setup did not safely refuse to replace the running application.' }
+    if ((Get-FileHash "$data\phrases.json").Hash -ne $beforeBlockedUpgrade) { throw 'Blocked upgrade modified the library.' }
     # Dispose this CI-only process before upgrade; never force-close a user's app.
     Stop-Process -Id $app.Id -Force
     $document = Get-Content "$data\phrases.json" -Raw | ConvertFrom-Json
-    $fixture = [pscustomobject]@{ Id=[Guid]::NewGuid().ToString(); Title='Installer preservation check'; Text='Fictional installer test phrase'; CategoryId=$document.Categories[0].Id; IsEnabled=$true; IsFavourite=$false; UseCount=7 }
+    $fixture = [pscustomobject]@{ Id=[Guid]::NewGuid().ToString(); Title='Installer preservation check'; Text='Fictional installer test phrase'; CategoryId=$document.Categories[0].Id; IsEnabled=$true; IsFavorite=$false; UseCount=7 }
     $document.Phrases = @($document.Phrases) + @($fixture)
     $document | ConvertTo-Json -Depth 30 | Set-Content "$data\phrases.json" -Encoding UTF8
     $hash = (Get-FileHash "$data\phrases.json").Hash
+    Copy-Item "$data\phrases.json" "$data\phrases.backup.json"
     Run-Silent $setup @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',('/LOG="{0}\upgrade.log"' -f $evidence))
     if ((Get-FileHash "$data\phrases.json").Hash -ne $hash) { throw 'Upgrade modified saved phrases.' }
     # Exercise startup cleanup without enabling startup on the user's behalf.
@@ -82,7 +90,21 @@ try {
     if (Test-Path $uninstallKey) { throw 'Uninstall registration was not removed.' }
     if (Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Name CommonCopy -ErrorAction SilentlyContinue) { throw 'Uninstall left startup registration.' }
     if ((Get-FileHash "$data\phrases.json").Hash -ne $hash) { throw 'Uninstall removed or modified saved phrases.' }
-    Set-Content "$evidence\result.txt" 'PASS: interactive install, installed application launch, offline help, shortcut, upgrade preservation, uninstall, startup cleanup, and library preservation. Physical Windows 10/11 and DPI review remain required.'
+    if ((Get-FileHash "$data\phrases.backup.json").Hash -ne $hash) { throw 'Uninstall removed or modified the backup.' }
+    Run-Silent $setup @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',('/LOG="{0}\reinstall.log"' -f $evidence))
+    $reopened = Start-Process "$installed\CommonCopy.exe" -PassThru
+    $deadline = [DateTime]::UtcNow.AddSeconds(60)
+    do {
+        $reopened.Refresh()
+        if ($reopened.HasExited) { throw 'Reinstalled application failed to reopen.' }
+        if ($reopened.MainWindowHandle -ne 0) { break }
+        Start-Sleep -Milliseconds 250
+    } while ([DateTime]::UtcNow -lt $deadline)
+    if ($reopened.MainWindowHandle -eq 0) { throw 'Reinstalled manager did not appear.' }
+    if ((Get-FileHash "$data\phrases.json").Hash -ne $hash) { throw 'Reinstalled application replaced the existing library.' }
+    Stop-Process -Id $reopened.Id -Force
+    Run-Silent "$installed\unins000.exe" @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART')
+    Set-Content "$evidence\result.txt" 'PASS: interactive install, application launch, offline help, shortcut, running-app guard, upgrade preservation, uninstall, startup cleanup, library and backup preservation, and reopening after reinstall. Physical Windows 10/11 and DPI review remain required.'
 } catch {
     $_ | Out-String | Set-Content "$evidence\failure.txt"
     throw
