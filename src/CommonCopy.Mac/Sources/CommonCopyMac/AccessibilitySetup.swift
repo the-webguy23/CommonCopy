@@ -55,6 +55,8 @@ final class AccessibilitySetupController: ObservableObject {
             : environment.accessibilityGranted ? .ready : .permissionRequired
         guard next != phase else { return }
         phase = next
+        settingsOpened = false
+        settingsError = nil
         if next == .permissionRequired { requestedPermission = false }
         onPhaseChanged?(next)
     }

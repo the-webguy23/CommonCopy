@@ -132,10 +132,18 @@ final class AccessibilitySetupTests: XCTestCase {
         let setup = AccessibilitySetupController(environment: environment)
         let store = Store()
         setup.refresh()
-        for name in ["permission", "waiting", "manual-fallback", "install"] {
+        for name in ["permission", "waiting", "manual-fallback", "install", "dark-permission"] {
             if name == "waiting" { setup.openSettings() }
             if name == "manual-fallback" { environment.settingsAvailable = false; setup.openSettings() }
             if name == "install" { environment.installedInApplications = false; setup.refresh() }
+            if name == "dark-permission" {
+                environment.installedInApplications = true
+                setup.refresh()
+                store.state = CoreState(document: Library(phrases: [], categories: [], settings:
+                    Settings(appearance: "Dark", restoreTextClipboardAfterPaste: true,
+                             clipboardRestoreDelayMilliseconds: 350, pasteDelayMilliseconds: 120)),
+                    categoryList: [], favourites: [], commonlyUsed: [], categoryPhrases: [:], captureTitle: nil)
+            }
             let view = NSHostingView(rootView: AccessibilitySetupView(setup: setup, store: store, brandResources: resources))
             let window = NSWindow(contentRect: NSRect(origin: .zero, size: view.fittingSize),
                                   styleMask: [.titled], backing: .buffered, defer: false)
