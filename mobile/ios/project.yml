@@ -1,0 +1,91 @@
+name: CommonCopyMobile
+options:
+  bundleIdPrefix: app.commoncopy
+  deploymentTarget:
+    iOS: '16.0'
+settings:
+  base:
+    SWIFT_VERSION: '5.0'
+    MARKETING_VERSION: '0.1.0'
+    CURRENT_PROJECT_VERSION: 1
+    TARGETED_DEVICE_FAMILY: '1,2'
+    COMMONCOPY_APP_GROUP: group.app.commoncopy.mobile
+    CODE_SIGN_STYLE: Automatic
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+targets:
+  CommonCopy:
+    type: application
+    platform: iOS
+    sources: [App, Core, Shared]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.commoncopy.mobile
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    info:
+      path: Generated/App-Info.plist
+      properties:
+        CFBundleDisplayName: CommonCopy
+        CommonCopyAppGroup: $(COMMONCOPY_APP_GROUP)
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight]
+    entitlements:
+      path: Generated/App.entitlements
+      properties:
+        com.apple.security.application-groups: [$(COMMONCOPY_APP_GROUP)]
+    dependencies:
+      - target: CommonCopyKeyboard
+        embed: true
+      - target: CommonCopyShare
+        embed: true
+  CommonCopyKeyboard:
+    type: app-extension
+    platform: iOS
+    sources: [Keyboard, Core, {path: Shared/LibraryStore.swift}]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.commoncopy.mobile.keyboard
+        APPLICATION_EXTENSION_API_ONLY: YES
+    info:
+      path: Generated/Keyboard-Info.plist
+      properties:
+        CFBundleDisplayName: CommonCopy
+        CommonCopyAppGroup: $(COMMONCOPY_APP_GROUP)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.keyboard-service
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).KeyboardController
+          NSExtensionAttributes:
+            PrimaryLanguage: en-CA
+            IsASCIICapable: false
+            RequestsOpenAccess: false
+    entitlements:
+      path: Generated/Keyboard.entitlements
+      properties:
+        com.apple.security.application-groups: [$(COMMONCOPY_APP_GROUP)]
+  CommonCopyShare:
+    type: app-extension
+    platform: iOS
+    sources: [Share, Core, Shared]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.commoncopy.mobile.share
+        APPLICATION_EXTENSION_API_ONLY: YES
+    info:
+      path: Generated/Share-Info.plist
+      properties:
+        CFBundleDisplayName: CommonCopy
+        CommonCopyAppGroup: $(COMMONCOPY_APP_GROUP)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.share-services
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShareController
+          NSExtensionAttributes:
+            NSExtensionActivationRule:
+              NSExtensionActivationSupportsText: true
+    entitlements:
+      path: Generated/Share.entitlements
+      properties:
+        com.apple.security.application-groups: [$(COMMONCOPY_APP_GROUP)]
+schemes:
+  CommonCopy:
+    build:
+      targets:
+        CommonCopy: all

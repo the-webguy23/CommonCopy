@@ -1,0 +1,21 @@
+Test Suite 'All tests' started at 2026-11-03 14:07:56.898
+Test Suite 'mobile-toolchain.xctest' started at 2026-11-03 14:07:56.899
+Test Suite 'LibraryTests' started at 2026-11-03 14:07:56.900
+Test Case 'LibraryTests.testDesktopRoundTrip' started at 2026-11-03 14:07:56.900
+Test Case 'LibraryTests.testDesktopRoundTrip' passed (0.103 seconds)
+Test Case 'LibraryTests.testDisabledPhrasesAndCategoriesAreHidden' started at 2026-11-03 14:07:57.003
+Test Case 'LibraryTests.testDisabledPhrasesAndCategoriesAreHidden' passed (0.001 seconds)
+Test Case 'LibraryTests.testNestedCategoriesAndSearch' started at 2026-11-03 14:07:57.003
+Test Case 'LibraryTests.testNestedCategoriesAndSearch' passed (0.001 seconds)
+Test Case 'LibraryTests.testEditingPreservesUsageAndCreation' started at 2026-11-03 14:07:57.004
+Test Case 'LibraryTests.testEditingPreservesUsageAndCreation' passed (0.002 seconds)
+Test Case 'LibraryTests.testInvalidSchemaMissingParentsAndCyclesRejected' started at 2026-11-03 14:07:57.005
+Test Case 'LibraryTests.testInvalidSchemaMissingParentsAndCyclesRejected' passed (0.001 seconds)
+Test Case 'LibraryTests.testNewLibraryAndSaveDelete' started at 2026-11-03 14:07:57.007
+Test Case 'LibraryTests.testNewLibraryAndSaveDelete' passed (0.001 seconds)
+Test Suite 'LibraryTests' passed at 2026-11-03 14:07:57.008
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.108 (0.108) seconds
+Test Suite 'mobile-toolchain.xctest' passed at 2026-11-03 14:07:57.008
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.108 (0.108) seconds
+Test Suite 'All tests' passed at 2026-11-03 14:07:57.008
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.108 (0.108) seconds
