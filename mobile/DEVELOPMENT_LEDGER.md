@@ -28,3 +28,7 @@ Local validation completed:
 - Desktop .NET commands could not run here because dotnet/Windows are unavailable. No desktop sources changed.
 
 Public branch push was blocked by automatic approval review pending explicit maintainer permission to publish mobile source. The local development commit and downloadable source package are the reviewable checkpoint. No mobile release, website edit, store upload or deployment occurred.
+
+## Publication authorized
+
+The maintainer explicitly approved publishing the development branch and opening a draft PR. The mobile source is now on `codex/mobile-commoncopy` with draft PR #5. Initial remote Android setup failed because its action attempted to install the retired SDK package `tools`; the workflow now requests only `platform-tools` and runs for PRs to avoid duplicate mobile jobs. Full build results follow in the PR.
