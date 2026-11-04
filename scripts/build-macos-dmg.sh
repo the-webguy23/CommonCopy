@@ -6,7 +6,14 @@ cd "$root"
 app="${1:-$root/artifacts/macos-arm64/CommonCopy.app}"
 [[ -d "$app" ]] || { echo "Build CommonCopy.app first." >&2; exit 1; }
 version=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app/Contents/Info.plist")
-output="$root/artifacts/CommonCopy-$version-macos-arm64.dmg"
+# Name the installer from its executable, not the build host's architecture.
+architecture="$(lipo -archs "$app/Contents/MacOS/CommonCopyMac")"
+case "$architecture" in
+  arm64|x86_64) ;;
+  *) echo "Expected a single arm64 or x86_64 application, got: $architecture" >&2; exit 1 ;;
+esac
+lipo -verify_arch "$architecture" "$app/Contents/Helpers/Core/CommonCopy.DesktopBridge"
+output="$root/artifacts/CommonCopy-$version-macos-$architecture.dmg"
 work="$(mktemp -d "$root/artifacts/dmg-build.XXXXXX")"
 mount=""
 cleanup() {

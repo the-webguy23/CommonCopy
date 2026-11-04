@@ -52,6 +52,20 @@ dotnet publish src/CommonCopy.DesktopBridge/CommonCopy.DesktopBridge.csproj \
   -p:DebugType=None -p:DebugSymbols=false \
   --output "$app/Contents/Helpers/Core"
 
+# Verify both executable layers before creating any installer or test archive.
+lipo -verify_arch "$architecture" "$app/Contents/MacOS/CommonCopyMac"
+lipo -verify_arch "$architecture" "$app/Contents/Helpers/Core/CommonCopy.DesktopBridge"
+# Keep deployment metadata with the test output. A configured minimum is not
+# evidence that the bundled runtime works on that version of macOS.
+{
+  echo "Build architecture: $architecture"
+  echo "Test host: $(sw_vers -productVersion) ($(uname -m))"
+  echo "Swift application:"
+  otool -l "$app/Contents/MacOS/CommonCopyMac"
+  echo "Bundled .NET helper:"
+  otool -l "$app/Contents/Helpers/Core/CommonCopy.DesktopBridge"
+} > "$root/artifacts/macos-$architecture/binary-compatibility.txt"
+
 # Ad-hoc signatures are for private testing only, not Developer ID notarization.
 # .NET requires JIT permission; the Swift shell itself does not.
 cat > "$root/artifacts/macos-$architecture/core-entitlements.plist" <<'PLIST'
