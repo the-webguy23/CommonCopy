@@ -55,7 +55,17 @@ fi
 app="$work/staging/CommonCopy.app"
 version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app/Contents/Info.plist")"
 [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
-final="$output/CommonCopy-$version-macos-arm64-notarized.dmg"
+source "$root/scripts/macos-architecture.sh"
+architecture="$(commoncopy_macos_architecture "$app")"
+# The post-notarization helper test must run natively or through Rosetta.
+# Check before signing/submitting so a missing translator cannot waste a submission.
+if [[ "$architecture" == x86_64 && "$(uname -m)" == arm64 ]]; then
+  arch -x86_64 /usr/bin/true >/dev/null 2>&1 || {
+    echo 'Intel runtime verification on this M-series Mac requires Rosetta. Set that up first, or sign on an Intel Mac.' >&2
+    exit 1
+  }
+fi
+final="$output/CommonCopy-$version-macos-$architecture-notarized.dmg"
 [[ ! -e "$final" && ! -e "$final.sha256" ]] || { echo 'Output already exists; choose another output directory.' >&2; exit 1; }
 if [[ ! -f "$work/signed.ok" ]]; then
 bash "$root/scripts/sign-macos-app.sh" "$app"
@@ -63,7 +73,7 @@ touch "$work/signed.ok"
 fi
 codesign --verify --deep --strict "$app"
 # Inspect architecture without launching downloaded, not-yet-notarized code.
-lipo -verify_arch arm64 "$app/Contents/MacOS/CommonCopyMac"
+commoncopy_macos_architecture "$app" >/dev/null
 
 submit() {
   python3 "$root/scripts/notary-request.py" "$1" "$2" "$record" "$profile"

@@ -1,4 +1,4 @@
-name: macOS prototype
+name: macOS development builds
 
 on:
   push:
@@ -16,54 +16,65 @@ concurrency:
 
 jobs:
   build-test-package:
-    runs-on: macos-15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - architecture: arm64
+            runner: macos-15
+          - architecture: x86_64
+            runner: macos-15-intel
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - name: Check release signing script syntax
         run: bash -n scripts/sign-macos-app.sh scripts/notarize-macos-dmg.sh
+      - name: Test Intel and Apple Silicon signing preflight
+        run: python3 scripts/test-macos-architecture.py
       - name: Test notarization timeout recovery and approved code matching
         run: python3 scripts/test-notary-recovery.py
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
-      - name: Build, test, package, and smoke-test the Apple Silicon app
-        run: bash scripts/build-macos.sh arm64
+      - name: Build, test, package, and smoke-test the native app
+        run: bash scripts/build-macos.sh "${{ matrix.architecture }}"
       - name: Test bridge protocol without modifying a user library
-        run: python3 scripts/test-desktop-bridge.py artifacts/macos-arm64/CommonCopy.app/Contents/Helpers/Core/CommonCopy.DesktopBridge
+        run: python3 scripts/test-desktop-bridge.py artifacts/macos-${{ matrix.architecture }}/CommonCopy.app/Contents/Helpers/Core/CommonCopy.DesktopBridge
       - name: Smoke-test the packaged native application
-        run: bash scripts/smoke-test-macos.sh artifacts/macos-arm64/CommonCopy.app
+        run: bash scripts/smoke-test-macos.sh artifacts/macos-${{ matrix.architecture }}/CommonCopy.app
       - name: Build the branded drag-to-Applications disk image
-        run: bash scripts/build-macos-dmg.sh artifacts/macos-arm64/CommonCopy.app
+        run: bash scripts/build-macos-dmg.sh artifacts/macos-${{ matrix.architecture }}/CommonCopy.app
       - name: Verify the disk image and launch a copied application
-        run: bash scripts/test-macos-dmg.sh artifacts/CommonCopy-0.4.3-macos-arm64.dmg artifacts/macos-arm64/CommonCopy.app
+        run: bash scripts/test-macos-dmg.sh artifacts/CommonCopy-0.4.3-macos-${{ matrix.architecture }}.dmg artifacts/macos-${{ matrix.architecture }}/CommonCopy.app
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: macOS-setup-check
+          name: macOS-setup-check-${{ matrix.architecture }}
           path: artifacts/macos-setup-check/
           if-no-files-found: ignore
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: macOS-installer-check
+          name: macOS-installer-check-${{ matrix.architecture }}
           path: artifacts/macos-installer-check/
           if-no-files-found: ignore
       - uses: actions/upload-artifact@v4
         with:
-          name: CommonCopy-DMG-macos-arm64
-          path: artifacts/CommonCopy-*-macos-arm64.dmg
+          name: CommonCopy-DMG-macos-${{ matrix.architecture }}
+          path: artifacts/CommonCopy-*-macos-${{ matrix.architecture }}.dmg
           if-no-files-found: error
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: macOS-launch-check
+          name: macOS-launch-check-${{ matrix.architecture }}
           path: artifacts/macos-launch-check/
           if-no-files-found: ignore
       - uses: actions/upload-artifact@v4
         with:
-          name: CommonCopy-macos-arm64
+          name: CommonCopy-macos-${{ matrix.architecture }}
           path: |
-            artifacts/CommonCopy-macos-arm64.zip
-            artifacts/macos-arm64/READ-ME-FIRST.md
+            artifacts/CommonCopy-macos-${{ matrix.architecture }}.zip
+            artifacts/macos-${{ matrix.architecture }}/READ-ME-FIRST.md
+            artifacts/macos-${{ matrix.architecture }}/binary-compatibility.txt
           if-no-files-found: error
