@@ -45,3 +45,41 @@ jobs:
         with:
           name: CommonCopy-iOS-simulator-development
           path: mobile/ios/build/Build/Products/Debug-iphonesimulator/CommonCopy.app
+      - name: Package ready-to-open Xcode project
+        run: |
+          python3 - <<'PY'
+          import os, pathlib, zipfile
+          root = pathlib.Path('mobile/ios')
+          output = pathlib.Path(os.environ['RUNNER_TEMP']) / 'CommonCopy_iPhone_Xcode_Project.zip'
+          included = ['App', 'Core', 'Shared', 'Keyboard', 'Share', 'Generated', 'CommonCopyMobile.xcodeproj', 'project.yml']
+          instructions = """CommonCopy for iPhone and iPad — development 0.1
+
+          1. Unzip this folder on your MacBook.
+          2. Double-click CommonCopyMobile.xcodeproj.
+          3. In Xcode, open Settings > Apple Accounts and sign in with your Apple Developer account.
+          4. For each target (CommonCopy, CommonCopyKeyboard, CommonCopyShare), choose your paid developer team under Signing & Capabilities and keep Automatically manage signing enabled.
+          5. All three targets must have the same App Group: group.app.commoncopy.mobile. Register/enable it for your team. If any bundle or group identifier is unavailable, update it consistently across the three targets; CommonCopyAppGroup in each Info.plist and each target's App Group entitlement must match.
+          6. Connect and trust your iPhone, choose it as the run destination, enable Developer Mode if prompted, and click Run.
+
+          No XcodeGen or Homebrew installation is required for this packaged project.
+          This is development source, not an installable iPhone app or App Store release.
+          The app, keyboard and Share extension passed an unsigned simulator build.
+          Signing and real-device acceptance checks are still needed.
+          """
+          with zipfile.ZipFile(output, 'w', zipfile.ZIP_DEFLATED) as archive:
+              archive.writestr('CommonCopy_iPhone/START_HERE.txt', instructions)
+              for item in included:
+                  path = root / item
+                  if not path.exists():
+                      raise FileNotFoundError(path)
+                  for file in ([path] if path.is_file() else path.rglob('*')):
+                      if file.is_file():
+                          archive.write(file, 'CommonCopy_iPhone/' + str(file.relative_to(root)))
+          with zipfile.ZipFile(output) as archive:
+              assert archive.testzip() is None
+          print(output)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CommonCopy-iPhone-Xcode-project
+          path: ${{ runner.temp }}/CommonCopy_iPhone_Xcode_Project.zip
