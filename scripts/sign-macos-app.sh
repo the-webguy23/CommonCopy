@@ -4,6 +4,9 @@ set -euo pipefail
 app="${1:?Usage: sign-macos-app.sh /path/to/CommonCopy.app}"
 [[ -d "$app" && ! -L "$app" ]] || { echo 'Expected an application bundle.' >&2; exit 1; }
 [[ "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app/Contents/Info.plist")" == com.commoncopy.desktop ]]
+root="$(cd "$(dirname "$0")/.." && pwd)"
+source "$root/scripts/macos-architecture.sh"
+commoncopy_macos_architecture "$app" >/dev/null
 identity="${COMMONCOPY_SIGNING_IDENTITY:-}"
 [[ "$identity" == 'Developer ID Application: '* ]] || {
   echo 'Set COMMONCOPY_SIGNING_IDENTITY to your Developer ID Application identity.' >&2; exit 1;

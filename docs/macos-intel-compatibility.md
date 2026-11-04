@@ -57,3 +57,28 @@ Publish the prepared development branch and run CI after maintainer approval,
 then inspect minimum binary requirements and test candidate older OS releases.
 Only add a downloadable Intel/Legacy option after compatible signed artifacts
 and acceptance results exist. This checkpoint does not authorize a release.
+
+## Native Intel build result
+
+Commit 4126bca passed on Intel macOS 15.7.9: 25 core tests, 23 Swift tests,
+packaged bridge protocol, installed-path/UI launch checks, DMG integrity,
+and copied-app launch checks. Run 41901648467, Intel job 126826020627.
+Swift executable load commands declare macOS 13.0; helper apphost declares
+12.0. Neither load-command value proves older OS/runtime compatibility.
+The Apple Silicon repeat was still queued when this result was recorded.
+
+## Signing preparation
+
+Signing/notarization now derives arm64 or x86_64 from the app executable,
+rejects mismatched shell/helper architectures before signing, and names the
+notarized installer accordingly. On M-series Macs, Intel runtime verification
+requires Rosetta; missing translation fails before any Apple submission.
+Keep credentials in the maintainer's Keychain. No certificate export is needed.
+Local signing-preflight tests cover both architectures, mixed-layer rejection,
+paths with spaces and unsupported/universal bundle rejection. Existing timeout
+recovery and accepted-ticket code-hash matching tests remain in place.
+Actual Developer ID signing and Apple notarization have not run for Intel.
+
+Older-OS testing cannot run in this Linux workspace. The current cloud Mac
+runners use Sequoia, so a Ventura/Sonoma VM or physical session is still needed.
+Do not upgrade or alter the maintainer's 2015 Catalina Air automatically.
