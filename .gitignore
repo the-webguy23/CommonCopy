@@ -26,3 +26,16 @@ Thumbs.db
 phrases.json
 phrases.backup.json
 *.corrupt-*.json
+
+# Native mobile build products and local signing configuration
+mobile/android/.gradle/
+mobile/android/**/build/
+mobile/android/local.properties
+mobile/ios/.build/
+mobile/ios/build/
+mobile/ios/Generated/
+mobile/ios/*.xcodeproj/
+mobile/ios/*.xcworkspace/
+*.xcuserstate
+*.mobileprovision
+*.p12

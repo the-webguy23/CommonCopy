@@ -1,0 +1,14 @@
+{
+  "SchemaVersion": 1,
+  "Settings": {"KeyboardShortcut": "Ctrl+Shift+Space", "RecentPhraseLimit": 10, "PopupWidth": 430, "FutureSetting": "preserve-me"},
+  "Categories": [
+    {"Id":"11111111-1111-4111-8111-111111111111","Name":"Prompts","ParentId":null,"SortOrder":0,"IsEnabled":true},
+    {"Id":"22222222-2222-4222-8222-222222222222","Name":"GPT","ParentId":"11111111-1111-4111-8111-111111111111","SortOrder":0,"IsEnabled":true},
+    {"Id":"33333333-3333-4333-8333-333333333333","Name":"Hidden","ParentId":null,"SortOrder":1,"IsEnabled":false}
+  ],
+  "Phrases": [
+    {"Id":"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa","CategoryId":"22222222-2222-4222-8222-222222222222","Title":"Clear reply","Text":"Hello,\n世界 👋","SortOrder":0,"IsFavorite":true,"IsEnabled":true,"UseCount":2,"CreatedAt":"2026-10-01T12:00:00+00:00","UpdatedAt":"2026-10-01T12:00:00+00:00"},
+    {"Id":"bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb","CategoryId":"33333333-3333-4333-8333-333333333333","Title":"Hidden phrase","Text":"Do not insert","SortOrder":1,"IsEnabled":true,"UseCount":10},
+    {"Id":"cccccccc-cccc-4ccc-8ccc-cccccccccccc","CategoryId":"11111111-1111-4111-8111-111111111111","Title":"Disabled phrase","Text":"Do not insert","SortOrder":2,"IsEnabled":false}
+  ]
+}

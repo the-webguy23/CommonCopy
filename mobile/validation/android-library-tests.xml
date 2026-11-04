@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.commoncopy.mobile.LibraryTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-11-03T22:06:27.774Z" hostname="1daf0637b147" time="0.027">
+  <properties/>
+  <testcase name="desktopRoundTripPreservesUnicodeAndSettings" classname="app.commoncopy.mobile.LibraryTest" time="0.012"/>
+  <testcase name="missingCategoryRejected" classname="app.commoncopy.mobile.LibraryTest" time="0.002"/>
+  <testcase name="cyclesRejected" classname="app.commoncopy.mobile.LibraryTest" time="0.001"/>
+  <testcase name="editPreservesMetadataAndUsage" classname="app.commoncopy.mobile.LibraryTest" time="0.003"/>
+  <testcase name="categoryPathsAndFavorites" classname="app.commoncopy.mobile.LibraryTest" time="0.003"/>
+  <testcase name="disabledItemsNeverReachKeyboard" classname="app.commoncopy.mobile.LibraryTest" time="0.0"/>
+  <testcase name="unsupportedSchemaRejected" classname="app.commoncopy.mobile.LibraryTest" time="0.0"/>
+  <testcase name="duplicateIDsRejected" classname="app.commoncopy.mobile.LibraryTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
