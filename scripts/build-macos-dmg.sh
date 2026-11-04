@@ -12,7 +12,7 @@ case "$architecture" in
   arm64|x86_64) ;;
   *) echo "Expected a single arm64 or x86_64 application, got: $architecture" >&2; exit 1 ;;
 esac
-lipo -verify_arch "$architecture" "$app/Contents/Helpers/Core/CommonCopy.DesktopBridge"
+lipo "$app/Contents/Helpers/Core/CommonCopy.DesktopBridge" -verify_arch "$architecture"
 output="$root/artifacts/CommonCopy-$version-macos-$architecture.dmg"
 work="$(mktemp -d "$root/artifacts/dmg-build.XXXXXX")"
 mount=""

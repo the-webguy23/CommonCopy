@@ -53,8 +53,8 @@ dotnet publish src/CommonCopy.DesktopBridge/CommonCopy.DesktopBridge.csproj \
   --output "$app/Contents/Helpers/Core"
 
 # Verify both executable layers before creating any installer or test archive.
-lipo -verify_arch "$architecture" "$app/Contents/MacOS/CommonCopyMac"
-lipo -verify_arch "$architecture" "$app/Contents/Helpers/Core/CommonCopy.DesktopBridge"
+lipo "$app/Contents/MacOS/CommonCopyMac" -verify_arch "$architecture"
+lipo "$app/Contents/Helpers/Core/CommonCopy.DesktopBridge" -verify_arch "$architecture"
 # Keep deployment metadata with the test output. A configured minimum is not
 # evidence that the bundled runtime works on that version of macOS.
 {
