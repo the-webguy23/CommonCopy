@@ -27,7 +27,7 @@ targets:
         CFBundleDisplayName: CommonCopy
         CommonCopyAppGroup: $(COMMONCOPY_APP_GROUP)
         UILaunchScreen: {}
-        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight]
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight, UIInterfaceOrientationPortraitUpsideDown]
     entitlements:
       path: Generated/App.entitlements
       properties:

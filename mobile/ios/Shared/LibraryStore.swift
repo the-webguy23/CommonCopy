@@ -1,6 +1,6 @@
 import Foundation
 
-/// Coordinated directory reads/writes serialize app and Share-extension changes.
+/// Coordinated directory writes serialize app and Share-extension changes.
 /// The keyboard only reads and does not require Full Access or network access.
 final class LibraryStore {
     private let groupID: String
@@ -10,11 +10,14 @@ final class LibraryStore {
         return url
     }
     func load() throws -> LibraryDocument {
-        let root = try container(); var result: Result<LibraryDocument, Error> = .failure(LibraryError.invalid("Couldn't read your library.")); var coordinationError: NSError?
-        NSFileCoordinator().coordinate(readingItemAt: root, options: [], error: &coordinationError) { url in
-            result = Result { let file = url.appendingPathComponent("phrases.json"); guard FileManager.default.fileExists(atPath: file.path) else { throw LibraryError.invalid("Open CommonCopy once to set up your library.") }; return try LibraryDocument(data: Data(contentsOf: file)) }
+        let file = try container().appendingPathComponent("phrases.json")
+        // The keyboard has read-only container access. Avoid coordinating the
+        // directory itself, which fails in its restricted sandbox. Writers
+        // replace this file atomically, so a reader sees one complete snapshot.
+        do { return try LibraryDocument(data: Data(contentsOf: file)) }
+        catch let error as CocoaError where error.code == .fileReadNoSuchFile {
+            throw LibraryError.invalid("Open CommonCopy once to set up your library.")
         }
-        if let error = coordinationError { throw error }; return try result.get()
     }
     func update(_ change: (inout LibraryDocument) throws -> Void) throws {
         let root = try container(); var result: Result<Void, Error> = .failure(LibraryError.invalid("Couldn't save your library.")); var coordinationError: NSError?

@@ -32,3 +32,13 @@ Public branch push was blocked by automatic approval review pending explicit mai
 ## Publication authorized
 
 The maintainer explicitly approved publishing the development branch and opening a draft PR. The mobile source is now on `codex/mobile-commoncopy` with draft PR #5. Initial remote Android setup failed because its action attempted to install the retired SDK package `tools`; the workflow now requests only `platform-tools` and runs for PRs to avoid duplicate mobile jobs. Full build results follow in the PR.
+
+## 2026-11-03 — First iPhone run and keyboard correction
+
+Maintainer installed and launched the signed development app on MiPhone, saved a phrase, and enabled the keyboard in Notes. Keyboard showed an unreadable shared-container UUID error and excessive button wrapping/unused height.
+
+- Reads now open phrases.json directly; writers remain serialized with NSFileCoordinator and use atomic replacement. This avoids coordinating the read-only container directory in the keyboard sandbox. Full Access remains disabled. Device confirmation of the access fix is still required.
+- Keyboard now has a compact 44-point icon toolbar, one category selector and a flexible scrollable phrase list in a 300-point panel. Hide duplicate globe when iOS supplies it. Default to All phrases so a new, non-favourite test phrase appears.
+- Replace raw file path/UUID errors with actionable text; keep category selection and Reload phrases available after errors.
+- Declare all four orientations to resolve the iPad orientation build warning.
+- Real-device insertion, Share capture, accessibility sizes, dark mode and landscape remain acceptance checks.
